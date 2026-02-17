@@ -141,8 +141,8 @@ sequenceDiagram
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
 
-    alt Data collection required
-        Wallet->>WebView: Load collectDataAction.url in WebView
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
         WebView->>User: Display data collection form
         User->>WebView: Fill form & accept T&C
         WebView-->>Wallet: IC_COMPLETE message
@@ -189,11 +189,10 @@ do {
         print("Pay with \(option.amount.display.assetSymbol) on \(option.amount.display.networkName ?? "Unknown")")
     }
     
-    // Check if user data collection is required (travel rule)
-    if let collectData = response.collectData {
-        // Show UI to collect required user information
-        for field in collectData.fields {
-            print("Required field: \(field.name) (type: \(field.fieldType))")
+    // Check which options require data collection
+    for option in response.options {
+        if option.collectData != nil {
+            print("Option \(option.id) requires info capture")
         }
     }
     
@@ -255,12 +254,13 @@ Signatures must be in the same order as the actions array.
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-If `response.collectData` is not nil, you must collect user information before confirming:
+If the selected option has `collectData` set, you must collect user information before confirming:
 
 <WebViewOverview />
 
 ```swift
-if let collectData = response.collectData, let url = collectData.url {
+// Check per-option data collection requirement after user selects an option
+if let collectData = selectedOption.collectData, let url = collectData.url {
     // Build prefill URL with known user data
     // Use the "required" list from collectData.schema to determine which fields to prefill
     let prefillData: [String: String] = [
@@ -276,7 +276,7 @@ if let collectData = response.collectData, let url = collectData.url {
     components.queryItems = queryItems
     let webViewUrl = components.string!
 
-    // Show WebView — see WebView Implementation section below
+    // Show WebView for this specific option — see WebView Implementation section below
     showWebView(url: webViewUrl)
 }
 ```
@@ -318,7 +318,7 @@ case .requiresAction:
 
 ## WebView Implementation
 
-When `collectDataAction.url` is present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+When a selected option has `collectData.url` present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
 
 ```swift
 import WebKit
@@ -464,8 +464,8 @@ class PaymentManager {
             signatures.append(signature)
         }
         
-        // 5. Collect data via WebView if required
-        if let collectData = optionsResponse.collectData, let url = collectData.url {
+        // 5. Collect data via WebView if required for selected option
+        if let collectData = selectedOption.collectData, let url = collectData.url {
             // Show WebView and wait for IC_COMPLETE message
             try await showDataCollectionWebView(url: url)
         }
@@ -630,6 +630,7 @@ struct PaymentOption {
     let amount: PayAmount              // Amount in this asset
     let etaS: Int64                    // Estimated time to complete (seconds)
     let actions: [Action]              // Required signing actions
+    let collectData: CollectDataAction? // Per-option data collection (nil if not required)
 }
 ```
 
@@ -706,6 +707,8 @@ enum PaymentStatus {
 
 6. **Expiration**: Check `paymentInfo.expiresAt` and warn users if time is running low
 
-7. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
+7. **User Data**: Only collect data when `collectData` is present on the selected payment option and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-8. **WebView Data Collection**: When `collectData.url` is present, display the URL in a WKWebView rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+8. **WebView Data Collection**: When `selectedOption.collectData?.url` is present, display the URL in a WKWebView rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+
+9. **Per-Option Data Collection**: When displaying payment options, check each option's `collectData` field. Show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present — use the option's `collectData.url` which is already scoped to that option's account.

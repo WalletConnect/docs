@@ -590,6 +590,11 @@ components:
           format: int64
           description: Estimated time to complete the option, in seconds
           minimum: 0
+        collectData:
+          allOf:
+            - $ref: "#/components/schemas/CollectData"
+          nullable: true
+          description: Per-option data collection requirements. When present, the user must complete data collection before confirming this option.
         id:
           type: string
           description: ID of the option to be used to refer to it in other requests. May be up to 2^16 characters.

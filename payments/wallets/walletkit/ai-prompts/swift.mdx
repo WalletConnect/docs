@@ -26,7 +26,7 @@ Integration guide for iOS/Swift wallets that already have WalletKit integrated.
 
 4. **Signature Order Critical** - Signatures array must match actions array order exactly.
 
-5. **Travel Rule Conditional** - Only collect user data when `response.collectData` is non-nil.
+5. **Travel Rule Conditional** - Only collect user data when `selectedOption.collectData` is non-nil. IC is per-option, not global.
 
 ### Code Adaptation Guidelines
 
@@ -127,12 +127,12 @@ dependencies: [
 ### State Machine
 
 ```
-[Intro] ──▶ [WebView Data Collection]* ──▶ [Confirmation] ──▶ [Confirming] ──▶ [Success]
-                                                   │
-                                                   ▼
-                                                [Error]
+[Options] ──▶ [WebView Data Collection]* ──▶ [Confirmation] ──▶ [Confirming] ──▶ [Success]
+                                                     │
+                                                     ▼
+                                                  [Error]
 
-* WebView step - skip if collectData.url is nil
+* WebView step - skip if selectedOption.collectData is nil
 ```
 
 ---
@@ -327,9 +327,11 @@ func loadPaymentOptions(paymentLink: String, walletAddress: String) async throws
         print("Amount: \(info.amount.display.assetSymbol) \(info.amount.value)")
     }
 
-    // Check if data collection is required (via WebView)
-    if let collectData = response.collectData, let url = collectData.url {
-        print("Data collection required via WebView: \(url)")
+    // Check which options require data collection
+    for option in response.options {
+        if option.collectData != nil {
+            print("Option \(option.id) requires info capture")
+        }
     }
 
     return response
@@ -377,8 +379,8 @@ func confirmPayment(
         signatures.append(signature)
     }
 
-    // 3. Collect data via WebView if required
-    if let collectData = response.collectData, let url = collectData.url {
+    // 3. Collect data via WebView if required for selected option
+    if let collectData = selectedOption.collectData, let url = collectData.url {
         // Show WebView and wait for IC_COMPLETE message
         try await showDataCollectionWebView(url: url)
     }
@@ -554,6 +556,7 @@ struct PaymentOption {
     let id: String
     let amount: PayAmount
     let etaS: Int64
+    let collectData: CollectDataAction?  // Per-option data collection (nil if not required)
 }
 
 struct PayAmount {
@@ -653,7 +656,7 @@ enum PaymentStatus {
 
 2. **Wrong signature order** - Signatures array must match actions array order exactly.
 
-3. **Skipping WebView data collection** - Always check `response.collectData?.url` and show the WebView before confirmation.
+3. **Skipping WebView data collection** - Always check `selectedOption.collectData?.url` after the user selects an option and show the WebView before confirmation.
 
 4. **Not handling cold start** - Deep links on app launch need delayed handling.
 

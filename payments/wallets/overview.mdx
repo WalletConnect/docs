@@ -75,7 +75,7 @@ Regardless of which integration approach you choose, the payment flow follows th
 2. **Get Payment Options**: Fetch available payment options based on user's accounts
 3. **Get Required Actions**: Retrieve the signing actions for the selected payment option
 4. **Sign Actions**: Sign the required permits/transactions using your wallet's signing infrastructure
-5. **Collect User Data** (if required): Display a WebView for the user to provide any required compliance information
+5. **Collect User Data** (if required for selected option): If the selected payment option requires compliance information, display a WebView for the user to provide it
 6. **Confirm Payment**: Submit signatures and complete the payment
 
 ## Supported Networks
@@ -107,10 +107,11 @@ Support for all EVM chains, Solana, and additional native and non-native assets 
 
   <Accordion title="How does this work technically?">
     When processing a payment:
-    1. Check if `response.collectData` is present and has a `url` field
-    2. If present, display the URL in a WebView — the hosted form handles rendering, validation, and T&C acceptance
-    3. The WebView communicates completion via JavaScript bridge messages (`IC_COMPLETE` / `IC_ERROR`)
-    4. When the WebView completes, proceed to confirm the payment — no `collectedData` needs to be passed since the WebView submits data directly
+    1. Call `getPaymentOptions` and display all available options to the user
+    2. When the user selects an option, check `selectedOption.collectData` — if it has a `url` field, data collection is required for that specific option
+    3. Display the URL in a WebView — the hosted form handles rendering, validation, and T&C acceptance
+    4. The WebView communicates completion via JavaScript bridge messages (`IC_COMPLETE` / `IC_ERROR`)
+    5. When the WebView completes, proceed to confirm the payment — no `collectedData` needs to be passed since the WebView submits data directly
   </Accordion>
 
   <Accordion title="Why is user information required?">
@@ -122,7 +123,7 @@ Support for all EVM chains, Solana, and additional native and non-native assets 
   </Accordion>
 
   <Accordion title="What is the WebView data collection approach?">
-    SDKs now support a WebView-based approach for collecting user information. When `collectData.url` is present in the payment options response, wallets display this URL in a WebView instead of building native forms. The hosted form handles:
+    SDKs support a WebView-based approach for collecting user information. When `selectedOption.collectData.url` is present on a payment option, wallets display this URL in a WebView instead of building native forms. The hosted form handles:
     - Form rendering and field validation
     - Terms & Conditions and Privacy Policy acceptance
     - Data submission directly to the backend
@@ -130,6 +131,12 @@ Support for all EVM chains, Solana, and additional native and non-native assets 
     The WebView communicates with the wallet via JavaScript bridge messages (`IC_COMPLETE` when done, `IC_ERROR` on failure). See the platform-specific documentation for implementation details.
 
     We strongly recommend using the WebView-based flow over building custom native UI. Data collection requirements are driven by regulation and can evolve. The hosted WebView form is maintained and updated centrally so that wallets can automatically pick up changes.
+  </Accordion>
+
+  <Accordion title="Do all payment options require information capture?">
+    No. Information capture (IC) is per-option — some payment options may require it while others don't. Each payment option has its own `collectData` field. When `option.collectData` is present, the user must complete data collection before confirming that option. When it's `null`, no IC is needed for that option.
+
+    Wallets should display all options upfront and show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present.
   </Accordion>
 
   <Accordion title="Can wallets implement custom UI instead of the WebView form?">

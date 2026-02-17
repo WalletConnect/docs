@@ -127,8 +127,8 @@ sequenceDiagram
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
 
-    alt Data collection required
-        Wallet->>WebView: Load collectDataAction.url in WebView
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
         WebView->>User: Display data collection form
         User->>WebView: Fill form & accept T&C
         WebView-->>Wallet: IC_COMPLETE message
@@ -166,9 +166,11 @@ if (options.info) {
   console.log("Amount:", options.info.amount.display.assetSymbol, options.info.amount.value);
 }
 
-// Check if user data collection is required
-if (options.collectData) {
-  console.log("Required fields:", options.collectData.fields);
+// Check which options require data collection
+for (const option of options.options) {
+  if (option.collectData) {
+    console.log(`Option ${option.id} requires info capture`);
+  }
 }
 ```
 
@@ -218,23 +220,24 @@ Signatures must be in the same order as the actions array.
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-Some payments may require additional user data. Check for `collectData` in the payment options response:
+Some payments may require additional user data. Check for `collectData` on the selected payment option:
 
 <WebViewOverview />
 
 ```typescript
-if (options.collectData?.url) {
-  // Use the "required" list from options.collectData.schema to determine which fields to prefill
+// Check per-option data collection requirement after user selects an option
+if (selectedOption.collectData?.url) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
   const prefillData = {
     fullName: "John Doe",
     dateOfBirth: "1990-01-15",
     pobAddress: "123 Main St, New York, NY 10001",
   };
   const prefillBase64 = btoa(JSON.stringify(prefillData));
-  const separator = options.collectData.url.includes("?") ? "&" : "?";
-  const webViewUrl = `${options.collectData.url}${separator}prefill=${prefillBase64}`;
+  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
+  const webViewUrl = `${selectedOption.collectData.url}${separator}prefill=${prefillBase64}`;
 
-  // Show WebView — see WebView Implementation section below
+  // Show WebView for this specific option — see WebView Implementation section below
   showDataCollectionWebView(webViewUrl);
 }
 ```
@@ -270,7 +273,7 @@ if (result.status === "succeeded") {
 
 ## WebView Implementation
 
-When `collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
+When a selected option has `collectData.url` present, display the URL in a WebView using `react-native-webview`. Install the dependency:
 
 ```bash
 npm install react-native-webview@13.16.0
@@ -400,10 +403,10 @@ class PaymentManager {
         )
       );
 
-      // Step 5: Collect data via WebView if required
-      if (options.collectData?.url) {
+      // Step 5: Collect data via WebView if required for selected option
+      if (selectedOption.collectData?.url) {
         // Show WebView and wait for IC_COMPLETE
-        await this.showDataCollectionWebView(options.collectData.url);
+        await this.showDataCollectionWebView(selectedOption.collectData.url);
       }
 
       // Step 6: Confirm payment
@@ -632,6 +635,8 @@ interface PaymentOption {
   etaS: number;
   /** Actions required to complete the option */
   actions: Action[];
+  /** Per-option data collection requirements */
+  collectData?: CollectDataAction;
 }
 ```
 
@@ -738,6 +743,8 @@ interface CollectDataAction {
 
 7. **Expiration**: Check `paymentInfo.expiresAt` and warn users if time is running low
 
-8. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
+8. **User Data**: Only collect data when `collectData` is present on the selected payment option and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-9. **WebView Data Collection**: When `collectData.url` is present, display the URL in a WebView using `react-native-webview` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+9. **WebView Data Collection**: When `selectedOption.collectData?.url` is present, display the URL in a WebView using `react-native-webview` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+
+10. **Per-Option Data Collection**: When displaying payment options, check each option's `collectData` field. Show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present — use the option's `collectData.url` which is already scoped to that option's account.

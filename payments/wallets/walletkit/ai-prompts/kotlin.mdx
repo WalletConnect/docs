@@ -44,9 +44,9 @@ dependencies {
 WalletConnect Pay enables crypto payments through payment links. The flow works as follows:
 
 ```
-Payment Link → Get Options → [WebView Data Collection] → Sign Actions → Confirm Payment
-       ↓             ↓              ↓                         ↓              ↓
-   Detection    API call      Optional KYC               Wallet signs    Backend confirms
+Payment Link → Get Options → Select Option → [WebView Data Collection]* → Sign Actions → Confirm Payment
+       ↓             ↓            ↓                    ↓                        ↓              ↓
+   Detection    API call    User picks       Per-option IC (if needed)     Wallet signs    Backend confirms
 ```
 
 ### WalletKit Integration
@@ -158,7 +158,8 @@ data class PaymentOption(
     val id: String,
     val amount: PaymentAmount,
     val account: String,
-    val estimatedTxs: Int?
+    val estimatedTxs: Int?,
+    val collectData: CollectDataAction?  // Per-option data collection (null if not required)
 )
 
 // Data collection action (for KYC/compliance via WebView)
@@ -212,23 +213,20 @@ suspend fun getPaymentOptions(
 
 #### 2.2 Handle Data Collection via WebView (if required)
 
-Some payments require user information (KYC/AML compliance). Check for `collectDataAction` in the response:
+Some payments require user information (KYC/AML compliance). Data collection requirements are specified per payment option via `collectData`. Show all options first, then handle data collection after the user selects an option:
 
 ```kotlin
 fun processPaymentOptionsResponse(response: Wallet.Model.PaymentOptionsResponse) {
-    val collectDataUrl = response.collectDataAction?.url
-
-    if (collectDataUrl != null) {
-        // Show WebView for data collection before payment options
-        showDataCollectionWebView(collectDataUrl)
-    } else {
-        // Show payment options directly
-        showPaymentOptions(response.options, response.info)
+    if (response.options.isEmpty()) {
+        showError("No payment options available")
+        return
     }
+    // Show all options — each option's collectData indicates if IC is needed
+    showPaymentOptions(response.options, response.info)
 }
 ```
 
-When `collectDataAction.url` is present, display the URL in a WebView. The hosted form handles rendering, validation, and Terms & Conditions acceptance. The WebView communicates completion via JavaScript bridge messages (`IC_COMPLETE` / `IC_ERROR`).
+When a selected option has `collectData?.url`, display the URL in a WebView before proceeding with signing. The hosted form handles rendering, validation, and Terms & Conditions acceptance. The WebView communicates completion via JavaScript bridge messages (`IC_COMPLETE` / `IC_ERROR`).
 
 > **Important:** When using the WebView approach, do **not** pass `collectedData` to `confirmPayment()`. The WebView submits data directly to the backend.
 
@@ -471,18 +469,13 @@ Implement a state machine to manage the payment flow:
 sealed class PaymentUiState {
     data object Loading : PaymentUiState()
 
-    data class Intro(
+    data class Options(
         val paymentInfo: Wallet.Model.PaymentInfo?,
-        val hasDataCollection: Boolean
+        val options: List<Wallet.Model.PaymentOption>
     ) : PaymentUiState()
 
     data class WebViewDataCollection(
         val url: String
-    ) : PaymentUiState()
-
-    data class Options(
-        val paymentInfo: Wallet.Model.PaymentInfo?,
-        val options: List<Wallet.Model.PaymentOption>
     ) : PaymentUiState()
 
     data class Processing(
@@ -519,7 +512,6 @@ class PaymentViewModel(
     private var currentPaymentId: String? = null
     private var selectedOptionId: String? = null
     private var pendingActions: List<Wallet.Model.RequiredAction.WalletRpc> = emptyList()
-    private var webViewUrl: String? = null
     private var storedPaymentInfo: Wallet.Model.PaymentInfo? = null
     private var storedOptions: List<Wallet.Model.PaymentOption> = emptyList()
 
@@ -534,15 +526,9 @@ class PaymentViewModel(
                     currentPaymentId = response.paymentId
                     storedPaymentInfo = response.info
                     storedOptions = response.options
-                    webViewUrl = response.collectDataAction?.url
 
                     if (response.options.isEmpty()) {
                         _uiState.value = PaymentUiState.Error("No payment options available")
-                    } else if (webViewUrl != null) {
-                        _uiState.value = PaymentUiState.Intro(
-                            paymentInfo = response.info,
-                            hasDataCollection = true
-                        )
                     } else {
                         _uiState.value = PaymentUiState.Options(
                             paymentInfo = response.info,
@@ -560,6 +546,19 @@ class PaymentViewModel(
         val paymentId = currentPaymentId ?: return
         selectedOptionId = optionId
 
+        // Check if the selected option requires data collection
+        val selectedOption = storedOptions.find { it.id == optionId }
+        selectedOption?.collectData?.url?.let { url ->
+            // Show WebView for data collection before proceeding
+            _uiState.value = PaymentUiState.WebViewDataCollection(url = url)
+            return
+        }
+
+        // No data collection needed — proceed directly to signing
+        proceedWithPaymentExecution(paymentId, optionId)
+    }
+
+    private fun proceedWithPaymentExecution(paymentId: String, optionId: String) {
         viewModelScope.launch {
             _uiState.value = PaymentUiState.Processing("Preparing payment...")
 
@@ -623,11 +622,10 @@ class PaymentViewModel(
     }
 
     fun onWebViewComplete() {
-        // WebView data collection completed, proceed to options
-        _uiState.value = PaymentUiState.Options(
-            paymentInfo = storedPaymentInfo,
-            options = storedOptions
-        )
+        // WebView data collection completed, proceed with payment execution for selected option
+        val paymentId = currentPaymentId ?: return
+        val optionId = selectedOptionId ?: return
+        proceedWithPaymentExecution(paymentId, optionId)
     }
 
     fun onWebViewError(error: String) {
@@ -638,7 +636,6 @@ class PaymentViewModel(
         currentPaymentId = null
         selectedOptionId = null
         pendingActions = emptyList()
-        webViewUrl = null
         _uiState.value = PaymentUiState.Loading
     }
 }
@@ -649,12 +646,11 @@ class PaymentViewModel(
 ### Required Screens
 
 1. **Loading Screen** - Show while fetching payment options
-2. **Intro Screen** - Display merchant info and explain data collection (if required)
-3. **Data Collection Screen** - Input fields for KYC/compliance data
-4. **Options Screen** - List of payment options (tokens/chains)
-5. **Processing Screen** - Show while signing and confirming
-6. **Success Screen** - Payment completed successfully
-7. **Error Screen** - Handle failures gracefully
+2. **Options Screen** - List of payment options (tokens/chains). Show an "Info required" badge on options that have `collectData != null`
+3. **Data Collection Screen** - WebView for KYC/compliance data (shown after selecting an option that requires IC)
+4. **Processing Screen** - Show while signing and confirming
+5. **Success Screen** - Payment completed successfully
+6. **Error Screen** - Handle failures gracefully
 
 ### Jetpack Compose Example
 
@@ -669,10 +665,10 @@ fun PaymentScreen(
     when (val state = uiState) {
         is PaymentUiState.Loading -> LoadingContent()
 
-        is PaymentUiState.Intro -> IntroContent(
+        is PaymentUiState.Options -> OptionsContent(
             paymentInfo = state.paymentInfo,
-            hasDataCollection = state.hasDataCollection,
-            onContinue = { viewModel.proceedFromIntro() },
+            options = state.options,
+            onSelectOption = { option -> viewModel.selectPaymentOption(option.id) },
             onCancel = { viewModel.cancel(); onDismiss() }
         )
 
@@ -680,13 +676,6 @@ fun PaymentScreen(
             url = state.url,
             onComplete = { viewModel.onWebViewComplete() },
             onError = { error -> viewModel.onWebViewError(error) }
-        )
-
-        is PaymentUiState.Options -> OptionsContent(
-            paymentInfo = state.paymentInfo,
-            options = state.options,
-            onSelectOption = { option -> viewModel.selectPaymentOption(option.id) },
-            onCancel = { viewModel.cancel(); onDismiss() }
         )
 
         is PaymentUiState.Processing -> ProcessingContent(
@@ -872,14 +861,14 @@ class PaymentFlowExample(
 
         val paymentId = optionsResponse.paymentId
 
-        // 3. Handle data collection via WebView if required
-        optionsResponse.collectDataAction?.url?.let { url ->
+        // 3. Let user select payment option
+        val selectedOption = showOptionsAndGetSelection(optionsResponse.options)
+
+        // 4. Handle data collection via WebView if required for selected option
+        selectedOption.collectData?.url?.let { url ->
             showDataCollectionWebView(url)
             // Wait for IC_COMPLETE before proceeding
         }
-
-        // 4. Let user select payment option
-        val selectedOption = showOptionsAndGetSelection(optionsResponse.options)
 
         // 5. Get required signing actions
         val actions = WalletKit.Pay.getRequiredPaymentActions(

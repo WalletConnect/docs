@@ -38,12 +38,12 @@ sequenceDiagram
     Gateway-->>Wallet: options[] (+ optional info/collectData)
     Wallet->>User: Display payment options
 
-    alt Data collection required
-        Wallet->>User: Request additional info (WebView)
-        User->>Wallet: Complete form
-    end
-
     User->>Wallet: Select payment option
+
+    alt Selected option requires data collection
+        Wallet->>User: Load selectedOption.collectData.url in WebView
+        User->>Wallet: Fill form & accept T&C (IC_COMPLETE)
+    end
 
     alt Option includes a build action
         Wallet->>Gateway: POST /v1/gateway/payment/{id}/fetch (optionId, data)
@@ -107,8 +107,9 @@ If you used the **WebView-based data collection** flow (i.e., displayed `collect
 If `isFinal` is `false`, the response may include `pollInMs`. Use it to decide when to check again (see the API Reference for status/polling behavior).
 </Note>
 
+
 <Info>
-The WalletConnect Pay SDKs support **WebView-based data collection**. When `collectData.url` is present in the payment options response, wallets can display this URL in a WebView instead of building native forms. The WebView handles form rendering, validation, and T&C acceptance, and submits data directly to the backend. See the [platform-specific SDK documentation](/payments/wallets/overview) for implementation details.
+The WalletConnect Pay SDKs support **WebView-based data collection**. Each payment option may have its own `collectData.url`. When present on a selected option, wallets can display this URL in a WebView instead of building native forms. The WebView handles form rendering, validation, and T&C acceptance, and submits data directly to the backend. See the [platform-specific SDK documentation](/payments/wallets/overview) for implementation details.
 </Info>
 
 ## Integration guidelines
@@ -196,7 +197,15 @@ Implement retries with **exponential backoff and jitter** for resilience:
 
 ### Data collection
 
-If the **Get payment options** response includes a `collectData` object with a `url` field, display it in a WebView before confirming. The WebView handles form rendering, validation, and T&C acceptance. When the WebView signals completion (`IC_COMPLETE` via JS bridge), proceed to confirm — no need to include `collectedData` in the request.
+Data collection is per-option — each payment option may independently have a `collectData` object. When the user selects an option, check `option.collectData`:
+
+| Response `collectData` | `option.collectData` | Behavior |
+|---|---|---|
+| present | present | Option requires IC — use `option.collectData.url` |
+| present | `null` | Option does NOT require IC (others might) — skip IC for this option |
+| `null` | `null` | No IC needed for any option |
+
+If the selected option's `collectData` has a `url` field, display it in a WebView before confirming. The URL is already scoped to that option's account. The WebView handles form rendering, validation, and T&C acceptance. When the WebView signals completion (`IC_COMPLETE` via JS bridge), proceed to confirm — no need to include `collectedData` in the request.
 
 If you choose not to use the WebView and instead build your own form, use the `collectData.schema` JSON schema to determine the required fields, collect the values, and pass them as `collectedData` in the confirm request.
 

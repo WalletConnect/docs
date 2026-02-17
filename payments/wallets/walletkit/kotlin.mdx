@@ -138,13 +138,13 @@ sequenceDiagram
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
     
-    alt Data collection required
-        Wallet->>WebView: Load collectDataAction.url in WebView
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
         WebView->>User: Display data collection form
         User->>WebView: Fill form & accept T&C
         WebView-->>Wallet: IC_COMPLETE message
     end
-    
+
     Wallet->>WalletKit: confirmPayment(params)
     WalletKit->>Backend: Submit payment
     Backend-->>WalletKit: Payment status
@@ -185,10 +185,8 @@ viewModelScope.launch {
             println("Option: ${option.id}")
             println("Amount: ${option.amount.value} ${option.amount.unit}")
             println("Account: ${option.account}")
+            println("Requires IC: ${option.collectData != null}")
         }
-        
-        // Check if data collection is required
-        val collectDataAction = response.collectDataAction
     }.onFailure { error ->
         handleError(error)
     }
@@ -289,7 +287,8 @@ Some payments require additional user information:
 <WebViewOverview />
 
 ```kotlin
-response.collectDataAction?.let { collectAction ->
+// Check per-option data collection requirement after user selects an option
+selectedOption.collectData?.let { collectAction ->
     val url = collectAction.url
     if (url != null) {
         // Build prefill URL with known user data
@@ -307,7 +306,7 @@ response.collectDataAction?.let { collectAction ->
             .appendQueryParameter("prefill", prefillBase64)
             .build().toString()
 
-        // Show WebView and wait for IC_COMPLETE message
+        // Show WebView for this specific option and wait for IC_COMPLETE message
         showWebView(webViewUrl)
     }
 }
@@ -360,7 +359,7 @@ confirmResult.onSuccess { response ->
 
 ## WebView Implementation
 
-When `collectDataAction.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+When a selected option has `collectData.url` present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
 
 ```kotlin
 import android.webkit.JavascriptInterface
@@ -472,8 +471,8 @@ class PaymentViewModel : ViewModel() {
                     // Step 3: Sign actions
                     val signatures = signActions(actions)
 
-                    // Step 4: Collect data via WebView if required
-                    response.collectDataAction?.url?.let { webViewUrl ->
+                    // Step 4: Collect data via WebView if required for selected option
+                    selectedOption.collectData?.url?.let { webViewUrl ->
                         showDataCollectionWebView(webViewUrl)
                         return@launch
                     }
@@ -603,7 +602,8 @@ data class PaymentOption(
     val id: String,
     val amount: PaymentAmount,
     val account: String,
-    val estimatedTxs: Int?
+    val estimatedTxs: Int?,
+    val collectData: CollectDataAction?  // Per-option data collection (null if not required)
 )
 ```
 
@@ -683,6 +683,8 @@ data class ConfirmPaymentResponse(
 
 8. **Expiration**: Check `paymentInfo.expiresAt` and warn users if time is running low
 
-9. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
+9. **User Data**: Only collect data when `collectData` is present on the selected payment option and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-10. **WebView Data Collection**: When `collectDataAction.url` is present, display the URL in a WebView rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+10. **WebView Data Collection**: When `selectedOption.collectData?.url` is present, display the URL in a WebView rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+
+11. **Per-Option Data Collection**: When displaying payment options, check each option's `collectData` field. Show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present — use the option's `collectData.url` which is already scoped to that option's account.

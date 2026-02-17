@@ -337,14 +337,14 @@ If you must parse the typed data, be aware of these issues:
 
 ```
 LOADING → ERROR (if failed)
-        → WEBVIEW_DATA_COLLECTION (if collectData.url exists) → CONFIRM → CONFIRMING → SUCCESS
-        → CONFIRM → CONFIRMING → SUCCESS
+        → CONFIRM (show options) → WEBVIEW (if selected option needs IC) → CONFIRMING → SUCCESS
+        → CONFIRM (show options) → CONFIRMING → SUCCESS
 ```
 
 ### State Definition
 
 ```typescript
-type Step = 'loading' | 'intro' | 'webviewDataCollection' | 'confirm' | 'confirming' | 'result';
+type Step = 'loading' | 'confirm' | 'webviewDataCollection' | 'confirming' | 'result';
 
 interface PaymentModalState {
   step: Step;
@@ -361,9 +361,9 @@ interface PaymentModalState {
 ### Required UI Components
 
 1. **Loading View** - Spinner with message
-2. **Intro View** - Merchant info, amount, continue button
-3. **WebView Data Collection View** - WebView form (if `paymentOptions.collectData?.url` exists)
-4. **Confirm View** - Payment options list, selected option details, approve button
+2. **Confirm View** - Payment options list (with "Info required" badge on options with `collectData`), selected option details, approve button
+3. **WebView Data Collection View** - WebView form (if `selectedOption.collectData?.url` exists)
+4. **Confirming View** - Spinner while signing and confirming
 5. **Result View** - Success or error message with close button
 
 ### Display Elements
@@ -486,6 +486,7 @@ interface PaymentOption {
   amount: PayAmount;
   etaS: number;
   actions: Action[];
+  collectData?: CollectDataAction;  // Per-option data collection
 }
 
 interface PayAmount {
@@ -573,7 +574,7 @@ const signature = await web3.eth.signTypedData(address, typedData);
 
 ### 3.5 WebView Data Collection
 
-When `paymentOptions.collectData?.url` is present, display the URL in a WebView. The hosted form handles rendering, validation, and T&C acceptance.
+When `selectedOption.collectData?.url` is present, display the URL in a WebView. The URL comes from the selected option's `collectData.url`, which is already scoped to that option's account. The hosted form handles rendering, validation, and T&C acceptance.
 
 Install `react-native-webview`:
 
