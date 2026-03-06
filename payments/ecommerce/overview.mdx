@@ -1,21 +1,24 @@
 ---
 title: "WalletConnect Pay for Ecommerce and Online Checkout"
+description: "Add crypto and stablecoin payments to your online checkout with a single API integration."
 sidebarTitle: "Overview"
 ---
 
 WalletConnect Pay enables you to add crypto and stablecoin payments to your online checkout with a single integration, offering a familiar, wallet-based experience for customers worldwide.
 
+<Note>
+Before integrating, complete [merchant onboarding](/payments/merchant/onboarding) to obtain your API Key and Merchant ID.
+</Note>
 
+## How It Works
 
-## Crypto payments, designed for online checkout
+Your backend creates a payment via a single API call and redirects the buyer to the WalletConnect Pay checkout portal. The buyer connects their wallet, selects a payment option, and completes the transaction. After payment, the buyer is redirected back to your site and you verify the result server-side.
 
-Enabling crypto payments for ecommerce and online checkout. For more information, contact us by filling out the form below:
-
-<CardGroup cols={2}>
-  <Card title="Contact Sales" icon="credit-card" href="https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s">
-    Talk to our team about integrating WalletConnect Pay for ecommerce checkout.
-  </Card>
-</CardGroup>
+1. Your backend calls `POST /v1/merchant/payment` with the order amount and redirect URLs
+2. You redirect the buyer to the checkout portal using the `gatewayUrl` from the response
+3. The buyer connects their wallet, picks a token and network, and signs the transaction
+4. The checkout portal redirects the buyer back to your `successUrl` or `errorUrl`
+5. Your backend verifies the payment status via `GET /v1/merchant/payment/{id}/status`
 
 ## What does WalletConnect Pay offer for ecommerce?
 
@@ -36,4 +39,21 @@ Enabling crypto payments for ecommerce and online checkout. For more information
     Integrate WalletConnect Pay to let your users pay across POS and ecommerce. You keep custody and control of the experience—while WalletConnect Pay handles PSP compatibility behind the scenes.
   </Step>
 </Steps>
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Integration Guide" icon="code" href="/payments/ecommerce/integration">
+    Step-by-step guide to integrate WalletConnect Pay checkout into your site.
+  </Card>
+  <Card title="API Reference" icon="rectangle-terminal" href="/payments/ecommerce/api-reference">
+    Merchant API endpoint reference for creating and verifying payments.
+  </Card>
+  <Card title="Merchant Onboarding" icon="user-plus" href="/payments/merchant/onboarding">
+    Set up your merchant account and obtain your API credentials.
+  </Card>
+  <Card title="Example Implementation" icon="github" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/ecommerce-poc">
+    Full-stack Next.js reference implementation.
+  </Card>
+</CardGroup>
 
