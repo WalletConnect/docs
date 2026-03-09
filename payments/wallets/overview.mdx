@@ -59,6 +59,14 @@ For wallets that prefer direct API integration without using an SDK, you can use
 
 ## Getting Started
 
+<video
+  controls
+  className="w-full"
+  autoPlay
+  muted
+  src="/images/videos/wc-pay-getting-started.mp4"
+></video>
+
 To get started with WalletConnect Pay integration:
 
 1. **Get a Project ID**: Create a project at the [WalletConnect Dashboard](https://dashboard.walletconnect.com) to obtain your Project ID.
@@ -77,6 +85,30 @@ Regardless of which integration approach you choose, the payment flow follows th
 4. **Sign Actions**: Sign the required permits/transactions using your wallet's signing infrastructure
 5. **Collect User Data** (if required for selected option): If the selected payment option requires compliance information, display a WebView for the user to provide it
 6. **Confirm Payment**: Submit signatures and complete the payment
+
+## Testing
+
+Test your WalletConnect Pay integration with the Point-of-Sale app in the WalletConnect Dashboard. To enable the app, configure a mock-merchant recipient address, any payments will arrive to this address and you won't lose any testing funds.
+
+<video
+  controls
+  className="w-full"
+  autoPlay
+  muted
+  src="/images/videos/wc-pay-testing.mp4"
+></video>
+
+## Recommended Implementation
+
+For best user experience, follow the recommended implementation below.
+
+<video
+  controls
+  className="w-full"
+  autoPlay
+  muted
+  src="/images/videos/wc-pay-recommended-implementation.mp4"
+></video>
 
 ## Supported Networks
 
