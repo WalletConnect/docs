@@ -309,6 +309,8 @@ case .expired:
     print("Payment expired")
 case .requiresAction:
     print("Additional action required")
+case .cancelled:
+    print("Payment cancelled")
 }
 ```
 
@@ -477,11 +479,16 @@ class PaymentManager {
             signatures: signatures
         )
         
-        guard result.status == .succeeded else {
+        switch result.status {
+        case .succeeded:
+            break // Success
+        case .cancelled:
+            throw PaymentError.paymentCancelled
+        default:
             throw PaymentError.paymentFailed(result.status)
         }
     }
-    
+
     private func signTypedData(
         action: Action,
         walletAddress: String,
@@ -682,6 +689,7 @@ struct ConfirmPaymentResultResponse {
     let status: PaymentStatus          // Final payment status
     let isFinal: Bool                  // Whether status is final
     let pollInMs: Int64?               // Suggested poll interval
+    let info: PaymentResultInfo?       // Transaction result details (present on success)
 }
 
 enum PaymentStatus {
@@ -690,6 +698,7 @@ enum PaymentStatus {
     case succeeded                     // Payment completed
     case failed                        // Payment failed
     case expired                       // Payment expired
+    case cancelled                     // Payment cancelled by user
 }
 ```
 

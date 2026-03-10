@@ -414,6 +414,8 @@ class PaymentService {
           throw Exception('Payment failed');
         case PaymentStatus.expired:
           throw Exception('Payment expired');
+        case PaymentStatus.cancelled:
+          throw Exception('Payment cancelled');
         case PaymentStatus.requires_action:
           throw Exception('Payment requires additional action');
         case PaymentStatus.processing:
@@ -531,6 +533,7 @@ ConfirmPaymentResponse({
   required PaymentStatus status,
   required bool isFinal,
   int? pollInMs,
+  PaymentResultInfo? info,           // Transaction result details (present on success)
 })
 ```
 
@@ -543,6 +546,7 @@ enum PaymentStatus {
   succeeded,
   failed,
   expired,
+  cancelled,
 }
 ```
 

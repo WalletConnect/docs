@@ -318,6 +318,9 @@ confirmResult.onSuccess { response ->
         Pay.PaymentStatus.REQUIRES_ACTION -> {
             // Additional action required
         }
+        Pay.PaymentStatus.CANCELLED -> {
+            // Payment cancelled by user
+        }
     }
 }.onFailure { error ->
     handleError(error)
@@ -497,6 +500,7 @@ class PaymentViewModel : ViewModel() {
             Pay.PaymentStatus.FAILED -> showFailure()
             Pay.PaymentStatus.EXPIRED -> showExpired()
             Pay.PaymentStatus.REQUIRES_ACTION -> { /* Handle additional actions */ }
+            Pay.PaymentStatus.CANCELLED -> showCancelled()
         }
     }
 }
@@ -622,7 +626,8 @@ data class CollectDataAction(
 data class ConfirmPaymentResponse(
     val status: PaymentStatus,
     val isFinal: Boolean,
-    val pollInMs: Long?
+    val pollInMs: Long?,
+    val info: PaymentResultInfo?      // Transaction result details (present on success)
 )
 ```
 
@@ -635,6 +640,7 @@ data class ConfirmPaymentResponse(
 | `SUCCEEDED` | Payment completed |
 | `FAILED` | Payment failed |
 | `EXPIRED` | Payment expired |
+| `CANCELLED` | Payment cancelled by user |
 
 ## Error Handling
 

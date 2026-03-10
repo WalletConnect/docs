@@ -34,13 +34,6 @@
             ]
           },
           {
-            "group": "Point of Sale (POS) Integration",
-            "pages": [
-              "payments/point-of-sale",
-              "payments/kotlin/installation"
-            ]
-          },
-          {
             "group": "Merchant Dashboard",
             "pages": [
               "payments/merchant/onboarding"

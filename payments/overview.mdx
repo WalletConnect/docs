@@ -21,7 +21,7 @@ It also aligns with common **payment compliance requirements**, such as required
 
 There are a couple of primary actors that can benefit from WalletConnect Pay:
 
-- **Payment Service Providers (PSPs) and Acquirers** - PSPs and Acquirers can use the POS (Point of Sale) SDK to integrate WalletConnect Pay into their existing payment stack. This allows them to offer their merchants and customers an option to accept crypto payments without changing how payments operate today.
+- **Payment Service Providers (PSPs) and Acquirers** - PSPs and Acquirers can integrate WalletConnect Pay into their existing payment stack, allowing them to offer their merchants and customers an option to accept crypto payments without changing how payments operate today.
 - **Merchants** - PSPs and Acquirers can offer their merchants an option to accept crypto payments without changing how payments operate today.
 - **Wallets** - Wallets can work closely with WalletConnect to provide a seamless payment experience for their users by integrating the WalletConnect Pay SDK into their wallet.
 
@@ -36,8 +36,6 @@ There are a couple of primary actors that can benefit from WalletConnect Pay:
 
 ## What would WalletConnect Pay look like in action?
 
-WalletConnect Pay would live inside the POS device that a merchant uses to accept day-to-day payments. The flow would be as follows:
-
 <video
   controls
   className="w-full"
@@ -46,27 +44,25 @@ WalletConnect Pay would live inside the POS device that a merchant uses to accep
   src="/images/videos/wc-pay.mp4"
  ></video>
 
-1. The merchant selects "Pay with Crypto" on the POS device.
-2. The POS device generates a WalletConnect QR with the payment intent.
-3. The customer scans the QR with their wallet:
+1. The merchant presents a WalletConnect QR code with the payment intent.
+2. The customer scans the QR with their wallet:
    - The wallet displays the payment intent.
    - The customer picks the token and network of their choice (e.g., USDC on Ethereum) and approves the payment.
    - The wallet builds the transaction and sends it to the network.
-
-4. Or alternatively, the customer scans the QR code with their QR scanner:
+3. Or alternatively, the customer scans the QR code with their QR scanner:
     - This takes the customer to a payment gateway URL that is pre-filled with the payment intent.
     - The customer can connect their wallet (using WalletConnect).
     - The wallet displays the payment intent.
     - The customer picks the token and network of their choice (e.g., USDC on Ethereum) and approves the payment.
     - The wallet builds the transaction and sends it to the network.
-5. The POS device receives the transaction result and displays it to the customer.
-6. The merchant then receives fiat or crypto settlement from the PSP.
+4. The merchant receives the transaction result and the customer is notified.
+5. The merchant then receives fiat or crypto settlement from the PSP.
 
 ## What does WalletConnect Pay offer? 
 
 <Steps> 
   <Step title="Any wallet can be used across checkout types" icon="wallet">
-    Buyers can pay from any wallet at POS and online checkout.
+    Buyers can pay from any wallet at online checkout and in-person.
   </Step>
   <Step title="Payments are only confirmed when they can be completed" icon="check">
     Balance checks, routing, and compliance (screening, KYC/KYT) are completed before a payment is confirmed.
@@ -83,7 +79,7 @@ WalletConnect Pay would live inside the POS device that a merchant uses to accep
 </Steps>
 ## What else does WalletConnect Pay offer?
 
-WalletConnect Pay is designed to fit into existing checkout workflows so crypto payments can feel like a natural extension of how payments already run today. In addition to the point of sale payment experience described above, WalletConnect Pay will be available as a compliant e-commerce (checkout) solution. This will be **available soon**.
+WalletConnect Pay is designed to fit into existing checkout workflows so crypto payments can feel like a natural extension of how payments already run today. WalletConnect Pay is also available as a compliant e-commerce (checkout) solution.
 
 To learn more about what’s available and what’s coming next, contact us by filling out the form below:
 
@@ -96,7 +92,10 @@ To learn more about what’s available and what’s coming next, contact us by f
 ## Get Started
 
 <CardGroup cols={2}>
-  <Card title="WalletConnect POS SDK" icon="cart-shopping" href="/payments/point-of-sale">
-    Get started with WalletConnect POS SDK.
+  <Card title="Wallet Integration" icon="wallet" href="/payments/wallets/overview">
+    Integrate WalletConnect Pay into your wallet.
+  </Card>
+  <Card title="Ecommerce" icon="cart-shopping" href="/payments/ecommerce/overview">
+    Add crypto payments to your online checkout.
   </Card>
 </CardGroup>

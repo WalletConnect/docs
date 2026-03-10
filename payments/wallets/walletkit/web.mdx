@@ -534,6 +534,7 @@ interface ConfirmPaymentResponse {
   status: PaymentStatus;    // Payment status
   isFinal: boolean;         // Whether status is final
   pollInMs?: number;        // Suggested poll interval
+  info?: PaymentResultInfo; // Transaction result details (present on success)
 }
 
 type PaymentStatus =
@@ -541,7 +542,8 @@ type PaymentStatus =
   | "processing"
   | "succeeded"
   | "failed"
-  | "expired";
+  | "expired"
+  | "cancelled";
 ```
 
 #### PaymentInfo
