@@ -52,7 +52,7 @@ import com.walletconnect.pay.WalletConnectPay
 WalletConnectPay.initialize(
     Pay.SdkConfig(
         apiKey = "your-api-key",        // Your WalletConnect Pay API key (optional)
-        appId = "your-project-id",      // Your WalletConnect Project ID (optional)
+        appId = "your-wcp-id",             // Your WCP ID (optional)
         packageName = "com.your.app"    // Your app's package name
     )
 )
@@ -63,7 +63,7 @@ WalletConnectPay.initialize(
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `apiKey` | `String` | No* | Your WalletConnect Pay API key |
-| `appId` | `String` | No* | Your WalletConnect Project ID |
+| `appId` | `String` | No* | Your WCP ID |
 | `packageName` | `String` | Yes | Your application's package name |
 
 <Note>
@@ -151,7 +151,7 @@ import com.walletconnect.pay.WalletConnectPay
 // In your Application class or before payment operations
 WalletConnectPay.initialize(
     Pay.SdkConfig(
-        appId = "your-project-id",     // Your WalletConnect Project ID
+        appId = "your-wcp-id",            // Your WCP ID
         packageName = "com.your.app"
     )
 )
@@ -422,7 +422,7 @@ class PaymentViewModel : ViewModel() {
         fun initializeSdk() {
             WalletConnectPay.initialize(
                 Pay.SdkConfig(
-                    appId = "your-project-id",     // Your WalletConnect Project ID
+                    appId = "your-wcp-id",            // Your WCP ID
                     packageName = "com.your.app"
                 )
             )

@@ -51,7 +51,7 @@ import WalletConnectPay
 func application(_ application: UIApplication, didFinishLaunchingWithOptions...) {
     // Option 1: With appId (recommended for wallets)
     WalletConnectPay.configure(
-        appId: "your-walletconnect-project-id",
+        appId: "your-wcp-id",
         logging: true
     )
     
@@ -67,7 +67,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions...)
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `apiKey` | `String?` | No* | `nil` | Your WalletConnect Pay API key |
-| `appId` | `String?` | No* | `nil` | Your WalletConnect project ID |
+| `appId` | `String?` | No* | `nil` | Your WCP ID |
 | `baseUrl` | `String` | No | Production URL | Custom API URL |
 | `logging` | `Bool` | No | `false` | Enable debug logging |
 

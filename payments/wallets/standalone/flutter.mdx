@@ -26,7 +26,7 @@ flutter pub add walletconnect_pay
 
 ## Configuration
 
-Initialize the `WalletConnectPay` client with your app ID and client ID or API key:
+Initialize the `WalletConnectPay` client with your WCP ID and client ID or API key:
 
 ```dart
 import 'package:walletconnect_pay/walletconnect_pay.dart';
@@ -34,7 +34,7 @@ import 'package:walletconnect_pay/walletconnect_pay.dart';
 // Initialize WalletConnect Pay. Either apiKey or appId must be passed
 final payClient = WalletConnectPay(
   apiKey: 'YOUR_API_KEY', // Optional
-  appId: 'YOUR_APP_ID', // Optional
+  appId: 'YOUR_WCP_ID', // Optional
   clientId: 'OPTIONAL_CLIENT_ID', // Optional
   baseUrl: 'https://api.pay.walletconnect.com', // Optional
 );
@@ -52,7 +52,7 @@ try {
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `apiKey` | `String?` | No* | WalletConnect Pay API key |
-| `appId` | `String?` | No* | WalletConnect app ID |
+| `appId` | `String?` | No* | WCP ID |
 | `clientId` | `String?` | No | Client identifier |
 | `baseUrl` | `String?` | No | Base URL for the API (defaults to production) |
 
@@ -370,7 +370,7 @@ class PaymentService {
 
   Future<void> initialize() async {
     _payClient = WalletConnectPay(
-      appId: 'YOUR_APP_ID',
+      appId: 'YOUR_WCP_ID',
     );
     await _payClient.init();
   }

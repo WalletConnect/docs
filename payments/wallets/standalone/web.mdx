@@ -48,7 +48,7 @@ Initialize the WalletConnect Pay client with your credentials:
 import { WalletConnectPay } from "@walletconnect/pay";
 
 const client = new WalletConnectPay({
-  appId: "your-app-id",
+  appId: "your-wcp-id",
   // OR use apiKey instead:
   // apiKey: "your-api-key",
 });
@@ -58,7 +58,7 @@ const client = new WalletConnectPay({
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `appId` | `string` | No* | App ID for authentication |
+| `appId` | `string` | No* | WCP ID for authentication |
 | `apiKey` | `string` | No* | API key for authentication |
 | `clientId` | `string` | No | Client ID for tracking |
 | `baseUrl` | `string` | No | Custom API base URL |
@@ -100,7 +100,7 @@ sequenceDiagram
     participant Wallet
     participant PaySDK as Pay SDK
     participant Backend as WalletConnect Pay
-    participant WebView
+    participant Iframe
 
     User->>Wallet: Scan QR / Open payment link
     Wallet->>PaySDK: getPaymentOptions(link, accounts)
@@ -119,10 +119,10 @@ sequenceDiagram
     User->>Wallet: Approve & sign
 
     alt Selected option requires data collection
-        Wallet->>WebView: Load selectedOption.collectData.url
-        WebView->>User: Display data collection form
-        User->>WebView: Fill form & accept T&C
-        WebView-->>Wallet: IC_COMPLETE message
+        Wallet->>Iframe: Load selectedOption.collectData.url in iframe
+        Iframe->>User: Display data collection form
+        User->>Iframe: Fill form & accept T&C
+        Iframe-->>Wallet: IC_COMPLETE message via postMessage
     end
 
     Wallet->>PaySDK: confirmPayment(signatures, collectedData)
@@ -328,7 +328,7 @@ class PaymentManager {
 
   constructor() {
     this.client = new WalletConnectPay({
-      appId: "your-app-id",
+      appId: "your-wcp-id",
     });
   }
 
@@ -668,7 +668,7 @@ interface BuyerInfo {
 
 ```typescript
 interface CollectDataAction {
-  /** WebView URL for data collection */
+  /** URL for data collection (displayed in iframe) */
   url: string;
   /** JSON schema describing required fields */
   schema?: string;
