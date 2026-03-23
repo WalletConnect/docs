@@ -151,10 +151,14 @@ A single `build` action may resolve into multiple `walletRpc` actions. Always it
 
 Each `walletRpc` action contains:
 - `chain_id` — the chain to execute on (CAIP-2 format, e.g., `eip155:8453`)
-- `method` — the RPC method (e.g., `eth_signTypedData_v4`, `personal_sign`)
+- `method` — the RPC method (e.g., `eth_signTypedData_v4`, `eth_sendTransaction`, `personal_sign`)
 - `params` — JSON-encoded parameters
 
-Execute each action in order using your wallet's signing implementation, and collect the result (e.g., signature hex string) for each.
+Execute each action in order using your wallet's signing or transaction implementation. For signing methods (e.g., `eth_signTypedData_v4`), collect the signature hex string. For transaction methods (e.g., `eth_sendTransaction`), collect the transaction hash. Store each result for submission.
+
+<Note>
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient token allowance for Permit2 returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check each action's `method` field and dispatch to the appropriate handler.
+</Note>
 
 ### Submitting results
 

@@ -104,7 +104,7 @@ dependencies: [
        │  4. getRequiredPaymentActions(paymentId, optionId)            │
        │──────────────────────▶┌─────────────┐                         │
        │◀──────────────────────│  Pay API    │                         │
-       │  Actions[] (eth_signTypedData_v4)                             │
+       │  Actions[] (walletRpc — method varies)                             │
        │                       └─────────────┘                         │
        │                                                               │
        │  5. Sign typed data (wallet's EIP-712 signer)                 │
@@ -363,20 +363,41 @@ func confirmPayment(
         let rpc = action.walletRpc
 
         // rpc.chainId  - e.g., "eip155:8453"
-        // rpc.method   - "eth_signTypedData_v4"
-        // rpc.params   - JSON: ["address", "typedDataJson"]
+        // rpc.method   - e.g., "eth_signTypedData_v4", "eth_sendTransaction"
+        // rpc.params   - JSON-encoded parameters
 
-        // Parse typed data from params
         guard let paramsData = rpc.params.data(using: .utf8),
-              let params = try JSONSerialization.jsonObject(with: paramsData) as? [Any],
-              params.count >= 2,
-              let typedDataJson = params[1] as? String else {
+              let params = try JSONSerialization.jsonObject(with: paramsData) as? [Any] else {
             throw PaymentError.invalidParams
         }
 
-        // Sign using your wallet's EIP-712 implementation
-        let signature = try await yourWallet.signTypedData(typedDataJson)
-        signatures.append(signature)
+        switch rpc.method {
+        case "eth_signTypedData_v4":
+            guard params.count >= 2,
+                  let typedDataJson = params[1] as? String else {
+                throw PaymentError.invalidParams
+            }
+            let signature = try await yourWallet.signTypedData(typedDataJson)
+            signatures.append(signature)
+
+        case "eth_sendTransaction":
+            guard let txParams = params[0] as? [String: Any] else {
+                throw PaymentError.invalidParams
+            }
+            let txHash = try await yourWallet.sendTransaction(txParams)
+            signatures.append(txHash)
+
+        case "personal_sign":
+            guard params.count >= 2,
+                  let message = params[0] as? String else {
+                throw PaymentError.invalidParams
+            }
+            let signature = try await yourWallet.personalSign(message)
+            signatures.append(signature)
+
+        default:
+            throw PaymentError.unsupportedMethod(rpc.method)
+        }
     }
 
     // 3. Collect data via WebView if required for selected option
@@ -579,7 +600,7 @@ struct Action {
 
 struct WalletRpcAction {
     let chainId: String    // "eip155:8453"
-    let method: String     // "eth_signTypedData_v4"
+    let method: String     // e.g., "eth_signTypedData_v4", "eth_sendTransaction"
     let params: String     // JSON: ["address", "typedDataJson"]
 }
 
@@ -634,7 +655,7 @@ enum PaymentStatus {
 
 | Symptom | Cause | Solution |
 |---------|-------|----------|
-| Invalid signature error | Wrong method | Use `eth_signTypedData_v4` (EIP-712) |
+| Invalid signature error | Wrong method | Check `action.walletRpc.method` and dispatch to the correct handler for each method |
 | Params parsing fails | Unexpected format | Parse as `["address", "typedDataJson"]` |
 
 ---
@@ -660,7 +681,7 @@ enum PaymentStatus {
 
 4. **Not handling cold start** - Deep links on app launch need delayed handling.
 
-5. **Using wrong signing method** - Must use `eth_signTypedData_v4` for EIP-712 typed data.
+5. **Not dispatching on RPC method** — Always check `action.walletRpc.method` and use the appropriate handler. For example, `eth_signTypedData_v4` requires EIP-712 signing, while `eth_sendTransaction` requires sending a transaction on-chain.
 
 6. **Missing chains** - Provide accounts for all chains you support to maximize payment options.
 

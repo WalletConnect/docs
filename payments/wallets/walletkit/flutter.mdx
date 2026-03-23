@@ -178,9 +178,14 @@ for (final action in actions) {
   final walletRpc = action.walletRpc;
   print('Chain ID: ${walletRpc.chainId}');
   print('Method: ${walletRpc.method}');
-  // Sign the transaction using your wallet SDK
+
+  // Dispatch based on walletRpc.method — see Sign Actions below
 }
 ```
+
+<Note>
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+</Note>
 
 </Step>
 
@@ -378,8 +383,11 @@ class PaymentService {
       // Step 5: Execute wallet actions and collect signatures
       final signatures = <String>[];
       for (final action in actions) {
-        // Sign the transaction using your wallet SDK
-        // Example: signatures.add(await signTransaction(action.walletRpc));
+        // Dispatch based on action.walletRpc.method:
+        // 'eth_signTypedData_v4' -> sign EIP-712 typed data
+        // 'eth_sendTransaction'  -> send transaction (e.g., token approval)
+        // 'personal_sign'        -> personal message signing
+        signatures.add(await signAction(action.walletRpc));
       }
 
       // Step 6: Confirm payment

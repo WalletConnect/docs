@@ -189,16 +189,29 @@ for (const action of actions) {
 Sign each action with your wallet's signing implementation:
 
 ```typescript
-// Sign each action with your wallet (implementation depends on your wallet SDK)
+// Sign each action based on its RPC method
 const signatures = await Promise.all(
-  actions.map((action) =>
-    wallet.signTypedData(
-      action.walletRpc.chainId,
-      JSON.parse(action.walletRpc.params)
-    )
-  )
+  actions.map(async (action) => {
+    const { chainId, method, params } = action.walletRpc;
+    const parsedParams = JSON.parse(params);
+
+    switch (method) {
+      case "eth_signTypedData_v4":
+        return await wallet.signTypedData(chainId, parsedParams);
+      case "eth_sendTransaction":
+        return await wallet.sendTransaction(chainId, parsedParams[0]);
+      case "personal_sign":
+        return await wallet.personalSign(chainId, parsedParams);
+      default:
+        throw new Error(`Unsupported RPC method: ${method}`);
+    }
+  })
 );
 ```
+
+<Note>
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+</Note>
 
 <Warning>
 Signatures must be in the same order as the actions array.
@@ -425,9 +438,18 @@ class PaymentManager {
 
   private async signAction(action: Action, walletAddress: string): Promise<string> {
     const { chainId, method, params } = action.walletRpc;
+    const parsedParams = JSON.parse(params);
 
-    // Use your wallet's signing implementation
-    return await wallet.signTypedData(chainId, JSON.parse(params));
+    switch (method) {
+      case "eth_signTypedData_v4":
+        return await wallet.signTypedData(chainId, parsedParams);
+      case "eth_sendTransaction":
+        return await wallet.sendTransaction(chainId, parsedParams[0]);
+      case "personal_sign":
+        return await wallet.personalSign(chainId, parsedParams);
+      default:
+        throw new Error(`Unsupported RPC method: ${method}`);
+    }
   }
 }
 ```
@@ -636,7 +658,7 @@ interface Action {
 interface WalletRpcAction {
   /** Chain ID in CAIP-2 format (e.g., "eip155:8453") */
   chainId: string;
-  /** RPC method name (e.g., "eth_signTypedData_v4") */
+  /** RPC method name (e.g., "eth_signTypedData_v4", "eth_sendTransaction") */
   method: string;
   /** JSON-encoded params array */
   params: string;

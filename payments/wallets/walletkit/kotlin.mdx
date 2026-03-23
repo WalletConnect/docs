@@ -237,6 +237,7 @@ val signatures = actions.map { action ->
             when (rpc.method) {
                 "eth_signTypedData_v4" -> signTypedDataV4(rpc.params)
                 "personal_sign" -> personalSign(rpc.params)
+                "eth_sendTransaction" -> sendTransaction(rpc.params)
                 else -> throw UnsupportedOperationException("Unsupported: ${rpc.method}")
             }
         }
@@ -273,6 +274,10 @@ fun signTypedDataV4(params: String): String {
     return "0x$rHex$sHex$vHex".lowercase()
 }
 ```
+
+<Note>
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+</Note>
 
 <Warning>
 Signatures must be in the same order as the actions array.
@@ -635,7 +640,7 @@ data class PaymentAmountDisplay(
 ```kotlin
 data class WalletRpcAction(
     val chainId: String,   // CAIP-2 chain ID (e.g., "eip155:8453")
-    val method: String,    // RPC method
+    val method: String,    // RPC method (e.g., "eth_signTypedData_v4", "eth_sendTransaction")
     val params: String     // JSON-encoded parameters
 )
 ```

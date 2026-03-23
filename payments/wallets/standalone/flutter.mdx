@@ -177,10 +177,13 @@ for (final action in actions) {
   print('Method: ${walletRpc.method}');
   print('Params: ${walletRpc.params}');
   
-  // Sign the transaction using your wallet SDK
-  // final signature = await signTransaction(walletRpc);
+  // Dispatch based on walletRpc.method — see Sign Actions below
 }
 ```
+
+<Note>
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+</Note>
 
 </Step>
 
@@ -406,7 +409,7 @@ class PaymentService {
     // Step 4: Sign all actions
     final signatures = <String>[];
     for (final action in actions) {
-      final signature = await signTransaction(action.walletRpc);
+      final signature = await signAction(action.walletRpc);
       signatures.add(signature);
     }
 
@@ -443,10 +446,17 @@ class PaymentService {
     return response;
   }
 
-  Future<String> signTransaction(WalletRpcAction walletRpc) async {
-    // Implement your wallet's signing logic
-    // Use walletRpc.chainId, walletRpc.method, walletRpc.params
-    throw UnimplementedError('Implement signing logic');
+  Future<String> signAction(WalletRpcAction walletRpc) async {
+    switch (walletRpc.method) {
+      case 'eth_signTypedData_v4':
+        return await signTypedData(walletRpc.chainId, walletRpc.params);
+      case 'eth_sendTransaction':
+        return await sendTransaction(walletRpc.chainId, walletRpc.params);
+      case 'personal_sign':
+        return await personalSign(walletRpc.chainId, walletRpc.params);
+      default:
+        throw UnimplementedError('Unsupported RPC method: ${walletRpc.method}');
+    }
   }
 }
 ```
@@ -577,7 +587,7 @@ class Action {
 
 class WalletRpcAction {
   final String chainId;   // CAIP-2 chain ID (e.g., "eip155:8453")
-  final String method;    // RPC method (e.g., "eth_signTypedData_v4")
+  final String method;    // RPC method (e.g., "eth_signTypedData_v4", "eth_sendTransaction")
   final String params;    // JSON-encoded parameters
 }
 ```

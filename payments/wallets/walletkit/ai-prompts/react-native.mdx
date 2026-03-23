@@ -256,6 +256,12 @@ const confirmPayment = async () => {
       );
 
       signatures.push(signature);
+    } else if (method === 'eth_sendTransaction') {
+      const txHash = await wallet.sendTransaction(parsedParams[0]);
+      signatures.push(txHash);
+    } else if (method === 'personal_sign') {
+      const sig = await wallet.personalSign(parsedParams);
+      signatures.push(sig);
     }
   }
 

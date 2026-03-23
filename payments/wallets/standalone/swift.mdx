@@ -115,7 +115,7 @@ func isPaymentLink(_ string: String) -> Bool {
 
 The payment flow consists of four main steps:
 
-**Get Options -> Get Actions -> Sign Permit -> Confirm Payment**
+**Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -216,35 +216,52 @@ let actions = try await WalletConnectPay.instance.getRequiredPaymentActions(
 
 </Step>
 
-<Step title="Sign the Permit" titleSize="h3">
+<Step title="Sign Actions" titleSize="h3">
 
-Each action contains a `walletRpc` with EIP-712 typed data that needs to be signed. The method is `eth_signTypedData_v4`.
+Each action contains a `walletRpc` describing the RPC call to execute. Your wallet must check the `method` field and dispatch accordingly — for example, a payment option may require an `eth_sendTransaction` to approve a token allowance followed by an `eth_signTypedData_v4` to sign Permit2 typed data.
 
 ```swift
 var signatures: [String] = []
 
 for action in actions {
     let rpc = action.walletRpc
-    
-    // rpc.chainId - The chain to sign on (e.g., "eip155:8453")
-    // rpc.method  - "eth_signTypedData_v4"  
-    // rpc.params  - JSON string: ["address", "{...typed data...}"]
-    
-    // Parse the params to extract typed data
-    let paramsData = rpc.params.data(using: .utf8)!
-    let params = try JSONSerialization.jsonObject(with: paramsData) as! [Any]
-    let typedDataJson = params[1] as! String
-    
-    // Sign using your wallet's existing EIP-712 signing implementation
-    let signature = try await yourWallet.signTypedData(
-        typedData: typedDataJson,
-        address: walletAddress,
-        chainId: rpc.chainId
-    )
-    
-    signatures.append(signature)
+
+    // rpc.chainId - The chain to execute on (e.g., "eip155:8453")
+    // rpc.method  - The RPC method (e.g., "eth_signTypedData_v4", "eth_sendTransaction")
+    // rpc.params  - JSON string with method-specific parameters
+
+    let result: String
+    switch rpc.method {
+    case "eth_signTypedData_v4":
+        let paramsData = rpc.params.data(using: .utf8)!
+        let params = try JSONSerialization.jsonObject(with: paramsData) as! [Any]
+        let typedDataJson = params[1] as! String
+        result = try await yourWallet.signTypedData(
+            typedData: typedDataJson,
+            address: walletAddress,
+            chainId: rpc.chainId
+        )
+    case "eth_sendTransaction":
+        result = try await yourWallet.sendTransaction(
+            params: rpc.params,
+            chainId: rpc.chainId
+        )
+    case "personal_sign":
+        result = try await yourWallet.personalSign(
+            params: rpc.params,
+            chainId: rpc.chainId
+        )
+    default:
+        throw PaymentError.unsupportedMethod(rpc.method)
+    }
+
+    signatures.append(result)
 }
 ```
+
+<Note>
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+</Note>
 
 <Warning>
 Signatures must be in the same order as the actions array.
@@ -458,7 +475,7 @@ class PaymentManager {
         // 4. Sign all actions
         var signatures: [String] = []
         for action in actions {
-            let signature = try await signTypedData(
+            let signature = try await signAction(
                 action: action,
                 walletAddress: walletAddress,
                 signer: signer
@@ -489,26 +506,38 @@ class PaymentManager {
         }
     }
 
-    private func signTypedData(
+    private func signAction(
         action: Action,
         walletAddress: String,
         signer: YourSignerProtocol
     ) async throws -> String {
         let rpc = action.walletRpc
 
-        // Parse params: ["address", "typedDataJson"]
-        guard let paramsData = rpc.params.data(using: .utf8),
-              let params = try JSONSerialization.jsonObject(with: paramsData) as? [Any],
-              params.count >= 2,
-              let typedDataJson = params[1] as? String else {
-            throw PaymentError.invalidParams
+        switch rpc.method {
+        case "eth_signTypedData_v4":
+            guard let paramsData = rpc.params.data(using: .utf8),
+                  let params = try JSONSerialization.jsonObject(with: paramsData) as? [Any],
+                  params.count >= 2,
+                  let typedDataJson = params[1] as? String else {
+                throw PaymentError.invalidParams
+            }
+            return try await signer.signTypedData(
+                data: typedDataJson,
+                address: walletAddress
+            )
+        case "eth_sendTransaction":
+            return try await signer.sendTransaction(
+                params: rpc.params,
+                chainId: rpc.chainId
+            )
+        case "personal_sign":
+            return try await signer.personalSign(
+                params: rpc.params,
+                address: walletAddress
+            )
+        default:
+            throw PaymentError.unsupportedMethod(rpc.method)
         }
-
-        // Use your wallet's signing implementation
-        return try await signer.signTypedData(
-            data: typedDataJson,
-            address: walletAddress
-        )
     }
 }
 ```
@@ -668,7 +697,7 @@ struct Action {
 
 struct WalletRpcAction {
     let chainId: String                // Chain ID (e.g., "eip155:8453")
-    let method: String                 // RPC method (eth_signTypedData_v4)
+    let method: String                 // RPC method (e.g., "eth_signTypedData_v4", "eth_sendTransaction")
     let params: String                 // JSON-encoded parameters
 }
 ```
