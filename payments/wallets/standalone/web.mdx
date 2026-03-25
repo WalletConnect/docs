@@ -7,6 +7,14 @@ sidebarTitle: "Web/Node.js"
 
 The WalletConnect Pay SDK allows wallet users to pay merchants using their crypto assets. The SDK handles payment option discovery, permit signing coordination, and payment confirmation while leveraging your wallet's existing signing infrastructure.
 
+## Sample Wallet
+
+For a complete working example, check out our sample wallet implementation:
+
+<Card title="Sample Wallet - Web/Node.js" icon="github" href="https://github.com/reown-com/web-examples/tree/main/advanced/wallets/react-wallet-v2">
+  A reference web wallet app demonstrating WalletConnect Pay integration.
+</Card>
+
 ## Requirements
 
 - Node.js 16+
@@ -69,17 +77,19 @@ Either `appId` or `apiKey` must be provided for authentication.
 Don't have a project ID? Create one at the [WalletConnect Dashboard](https://dashboard.walletconnect.com) by signing up and creating a new project.
 </Info>
 
-## Supported Networks
+## Supported Networks & Tokens
 
-WalletConnect Pay currently supports the following networks with USDC:
+WalletConnect Pay currently supports the following tokens and networks:
 
-| Network | Chain ID | CAIP-10 Format |
-|---------|----------|----------------|
-| Ethereum | 1 | `eip155:1:{address}` |
-| Base | 8453 | `eip155:8453:{address}` |
-| Optimism | 10 | `eip155:10:{address}` |
-| Polygon | 137 | `eip155:137:{address}` |
-| Arbitrum | 42161 | `eip155:42161:{address}` |
+| Token | Network | Chain ID | CAIP-10 Format |
+|-------|---------|----------|----------------|
+| USDC | Ethereum | 1 | `eip155:1:{address}` |
+| USDC | Base | 8453 | `eip155:8453:{address}` |
+| USDC | Optimism | 10 | `eip155:10:{address}` |
+| USDC | Polygon | 137 | `eip155:137:{address}` |
+| USDC | Arbitrum | 42161 | `eip155:42161:{address}` |
+| EURC | Ethereum | 1 | `eip155:1:{address}` |
+| EURC | Base | 8453 | `eip155:8453:{address}` |
 
 <Note>
 Support for all EVM chains, Solana, and additional native and non-native assets is coming soon. Include accounts for all supported networks to maximize payment options for your users.

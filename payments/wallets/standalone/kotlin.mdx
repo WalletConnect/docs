@@ -10,6 +10,14 @@ import WebViewMessageTypes from "/snippets/webview-message-types.mdx";
 
 The WalletConnect Pay SDK allows wallet users to pay merchants using their crypto assets. The SDK handles payment option discovery, permit signing coordination, and payment confirmation while leveraging your wallet's existing signing infrastructure.
 
+## Sample Wallet
+
+For a complete working example, check out our sample wallet implementation:
+
+<Card title="Sample Wallet - Kotlin" icon="github" href="https://github.com/reown-com/reown-kotlin/tree/develop/sample/wallet">
+  A reference Android wallet app demonstrating WalletConnect Pay integration.
+</Card>
+
 ## Requirements
 
 - **Min SDK**: 23 (Android 6.0)
@@ -78,17 +86,19 @@ Don't have a project ID? Create one at the [WalletConnect Dashboard](https://das
 The SDK will throw `IllegalStateException` if already initialized. Call `initialize()` only once.
 </Warning>
 
-## Supported Networks
+## Supported Networks & Tokens
 
-WalletConnect Pay currently supports USDC payments on the following networks:
+WalletConnect Pay currently supports the following tokens and networks:
 
-| Network | Chain ID | CAIP-2 Format |
-|---------|----------|---------------|
-| Ethereum | 1 | `eip155:1` |
-| Base | 8453 | `eip155:8453` |
-| Optimism | 10 | `eip155:10` |
-| Polygon | 137 | `eip155:137` |
-| Arbitrum | 42161 | `eip155:42161` |
+| Token | Network | Chain ID | CAIP-2 Format |
+|-------|---------|----------|---------------|
+| USDC | Ethereum | 1 | `eip155:1` |
+| USDC | Base | 8453 | `eip155:8453` |
+| USDC | Optimism | 10 | `eip155:10` |
+| USDC | Polygon | 137 | `eip155:137` |
+| USDC | Arbitrum | 42161 | `eip155:42161` |
+| EURC | Ethereum | 1 | `eip155:1` |
+| EURC | Base | 8453 | `eip155:8453` |
 
 All account addresses must be provided in CAIP-10 format: `eip155:<chainId>:<address>`
 
