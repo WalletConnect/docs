@@ -110,13 +110,12 @@
               {
                 "group": "Merchants",
                 "pages": [
-                  "api-reference/2026-02-18/get-v1-merchants",
-                  "api-reference/2026-02-18/put-v1-merchants-merchantid",
                   "api-reference/2026-02-18/get-v1-merchants-payments",
-                  "api-reference/2026-02-18/get-v1-merchants-settlements-accounts",
-                  "api-reference/2026-02-18/delete-v1-merchants-settlements-accounts-accountid",
-                  "api-reference/2026-02-18/get-v1-merchants-settlements-configs",
-                  "api-reference/2026-02-18/delete-v1-merchants-settlements-configs-configid",
+                  "api-reference/2026-02-18/post-v1-merchants",
+                  "api-reference/2026-02-18/get-v1-merchants",
+                  "api-reference/2026-02-18/get-v1-merchants-merchantid",
+                  "api-reference/2026-02-18/patch-v1-merchants-merchantid",
+                  "api-reference/2026-02-18/delete-v1-merchants-merchantid",
                   "api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
                 ]
               }
@@ -215,13 +214,12 @@
               {
                 "group": "Merchants",
                 "pages": [
-                  "api-reference/2026-02-19.preview/get-v1-merchants",
-                  "api-reference/2026-02-19.preview/put-v1-merchants-merchantid",
                   "api-reference/2026-02-19.preview/get-v1-merchants-payments",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-settlements-accounts",
-                  "api-reference/2026-02-19.preview/delete-v1-merchants-settlements-accounts-accountid",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-settlements-configs",
-                  "api-reference/2026-02-19.preview/delete-v1-merchants-settlements-configs-configid",
+                  "api-reference/2026-02-19.preview/post-v1-merchants",
+                  "api-reference/2026-02-19.preview/get-v1-merchants",
+                  "api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
+                  "api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
+                  "api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
                   "api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
                 ]
               }

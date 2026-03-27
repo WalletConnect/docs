@@ -89,8 +89,6 @@ async function generatePages(version, spec) {
   const dir = join(ROOT, "api-reference", version);
   await mkdir(dir, { recursive: true });
 
-  const existingFiles = new Set(await readdir(dir));
-
   // Group by second path segment: /v1/{segment}/...
   const groupOps = new Map();
   for (const [path, methods] of Object.entries(spec.paths)) {
@@ -104,18 +102,27 @@ async function generatePages(version, spec) {
 
   const writes = [];
   const groups = [];
+  const expectedFiles = new Set();
   for (const [group, ops] of groupOps) {
     const pages = [];
     for (const { method, path, op } of ops) {
       const slug = slugify(method, path);
-      if (!existingFiles.has(`${slug}.mdx`)) {
-        const title = (op.summary || `${method} ${path}`).replace(/["\\]/g, "\\$&");
-        const mdx = `---\ntitle: "${title}"\nopenapi: "api/${version}.json ${method} ${path}"\n---\n`;
-        writes.push(writeFile(join(dir, `${slug}.mdx`), mdx));
-      }
+      const filename = `${slug}.mdx`;
+      expectedFiles.add(filename);
+      const title = (op.summary || `${method} ${path}`).replace(/["\\]/g, "\\$&");
+      const mdx = `---\ntitle: "${title}"\nopenapi: "api/${version}.json ${method} ${path}"\n---\n`;
+      writes.push(writeFile(join(dir, filename), mdx));
       pages.push(`api-reference/${version}/${slug}`);
     }
     groups.push({ group, pages });
+  }
+
+  const existing = await readdir(dir);
+  for (const file of existing) {
+    if (file.endsWith(".mdx") && !expectedFiles.has(file)) {
+      writes.push(rm(join(dir, file)));
+      console.log(`Removed stale page ${version}/${file}`);
+    }
   }
 
   await Promise.all(writes);
@@ -170,7 +177,7 @@ async function buildNavigation(
           tab: "API Reference",
           icon: "code",
           groups: [
-            { group: "Overview", pages: ["api-reference/index"] },
+            { group: "Overview", pages: ["api-reference/index", "api-reference/versioning"] },
             ...groups,
           ],
         },

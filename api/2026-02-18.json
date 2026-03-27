@@ -1819,668 +1819,6 @@
         }
       }
     },
-    "/v1/merchants": {
-      "get": {
-        "operationId": "Merchants_list",
-        "tags": [
-          "Merchants"
-        ],
-        "summary": "List merchants",
-        "parameters": [
-          {
-            "name": "WCP-Version",
-            "in": "header",
-            "required": false,
-            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
-            "schema": {
-              "type": "string",
-              "examples": [
-                "2026-02-18",
-                "2026-02-19.preview"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "active",
-                "inactive",
-                "suspended"
-              ]
-            },
-            "description": "Filter by merchant status"
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "description": "Search by merchant name or ID (case-insensitive)"
-          },
-          {
-            "in": "query",
-            "name": "cursor",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Opaque pagination cursor. Use value from `nextCursor`."
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "default": 20,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100
-            },
-            "description": "Page size (default 20, max 100)"
-          }
-        ],
-        "description": "Retrieve a paginated list of merchants belonging to the authenticated customer.",
-        "responses": {
-          "200": {
-            "description": "Paginated list of merchants",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MerchantsListResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — invalid parameters or API version",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "invalid_params",
-                        "params_validation",
-                        "invalid_api_version",
-                        "unknown_api_version",
-                        "api_version_downgrade"
-                      ],
-                      "description": "Machine-readable error code"
-                    },
-                    "issues": {
-                      "description": "Field-level validation issues (present on validation errors)",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "field": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "field",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "invalid_params": {
-                    "summary": "Invalid request parameters",
-                    "value": {
-                      "code": "invalid_params",
-                      "message": "Invalid request parameters"
-                    }
-                  },
-                  "params_validation": {
-                    "summary": "Validation failed",
-                    "value": {
-                      "code": "params_validation",
-                      "message": "Validation failed"
-                    }
-                  },
-                  "invalid_api_version": {
-                    "summary": "Invalid API version",
-                    "value": {
-                      "code": "invalid_api_version",
-                      "message": "Invalid API version"
-                    }
-                  },
-                  "unknown_api_version": {
-                    "summary": "Unknown API version",
-                    "value": {
-                      "code": "unknown_api_version",
-                      "message": "Unknown API version"
-                    }
-                  },
-                  "api_version_downgrade": {
-                    "summary": "Requested API version is older than the partner pin",
-                    "value": {
-                      "code": "api_version_downgrade",
-                      "message": "Requested API version is older than the partner pin"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid API key",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "missing_api_key",
-                        "invalid_api_key"
-                      ],
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "missing_api_key": {
-                    "summary": "Missing API key",
-                    "value": {
-                      "code": "missing_api_key",
-                      "message": "Missing API key"
-                    }
-                  },
-                  "invalid_api_key": {
-                    "summary": "Invalid API key",
-                    "value": {
-                      "code": "invalid_api_key",
-                      "message": "Invalid API key"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "const": "internal_error",
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "internal_error": {
-                    "summary": "Internal Server Error",
-                    "value": {
-                      "code": "internal_error",
-                      "message": "Internal Server Error"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/merchants/{merchantId}": {
-      "put": {
-        "operationId": "Merchants_upsert",
-        "tags": [
-          "Merchants"
-        ],
-        "summary": "Create or update a merchant",
-        "parameters": [
-          {
-            "name": "WCP-Version",
-            "in": "header",
-            "required": false,
-            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
-            "schema": {
-              "type": "string",
-              "examples": [
-                "2026-02-18",
-                "2026-02-19.preview"
-              ]
-            }
-          },
-          {
-            "in": "path",
-            "name": "merchantId",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 128,
-              "pattern": "^[a-zA-Z0-9._:-]+$"
-            },
-            "required": true
-          }
-        ],
-        "description": "Create or update a merchant by partner-provided merchantId. First call creates the merchant (201); subsequent calls update it (200). Provisions a Turnkey wallet on first create.",
-        "responses": {
-          "200": {
-            "description": "Merchant updated successfully",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "merchant": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "externalId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "externalId",
-                        "name"
-                      ]
-                    },
-                    "offrampOptions": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "caip19Asset": {
-                            "type": "string"
-                          },
-                          "caip10Destination": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "caip19Asset",
-                          "caip10Destination"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "merchant",
-                    "offrampOptions"
-                  ]
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Merchant created successfully",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "merchant": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "externalId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "externalId",
-                        "name"
-                      ]
-                    },
-                    "offrampOptions": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "caip19Asset": {
-                            "type": "string"
-                          },
-                          "caip10Destination": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "caip19Asset",
-                          "caip10Destination"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "merchant",
-                    "offrampOptions"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request — invalid parameters or API version",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "invalid_params",
-                        "params_validation",
-                        "invalid_api_version",
-                        "unknown_api_version",
-                        "api_version_downgrade"
-                      ],
-                      "description": "Machine-readable error code"
-                    },
-                    "issues": {
-                      "description": "Field-level validation issues (present on validation errors)",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "field": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "field",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "invalid_params": {
-                    "summary": "Invalid request parameters",
-                    "value": {
-                      "code": "invalid_params",
-                      "message": "Invalid request parameters"
-                    }
-                  },
-                  "params_validation": {
-                    "summary": "Validation failed",
-                    "value": {
-                      "code": "params_validation",
-                      "message": "Validation failed"
-                    }
-                  },
-                  "invalid_api_version": {
-                    "summary": "Invalid API version",
-                    "value": {
-                      "code": "invalid_api_version",
-                      "message": "Invalid API version"
-                    }
-                  },
-                  "unknown_api_version": {
-                    "summary": "Unknown API version",
-                    "value": {
-                      "code": "unknown_api_version",
-                      "message": "Unknown API version"
-                    }
-                  },
-                  "api_version_downgrade": {
-                    "summary": "Requested API version is older than the partner pin",
-                    "value": {
-                      "code": "api_version_downgrade",
-                      "message": "Requested API version is older than the partner pin"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized — missing or invalid partner API key",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "missing_api_key",
-                        "invalid_api_key"
-                      ],
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "missing_api_key": {
-                    "summary": "Missing API key",
-                    "value": {
-                      "code": "missing_api_key",
-                      "message": "Missing API key"
-                    }
-                  },
-                  "invalid_api_key": {
-                    "summary": "Invalid API key",
-                    "value": {
-                      "code": "invalid_api_key",
-                      "message": "Invalid API key"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "const": "internal_error",
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "internal_error": {
-                    "summary": "Internal Server Error",
-                    "value": {
-                      "code": "internal_error",
-                      "message": "Internal Server Error"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad gateway — upstream service returned an error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "const": "bad_gateway",
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "bad_gateway": {
-                    "summary": "Bad Gateway",
-                    "value": {
-                      "code": "bad_gateway",
-                      "message": "Bad Gateway"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "merchantName": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "offrampOptions": {
-                    "default": [],
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "caip10Destination": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "caip19Asset": {
-                          "type": "string",
-                          "minLength": 1
-                        }
-                      },
-                      "required": [
-                        "caip10Destination",
-                        "caip19Asset"
-                      ]
-                    }
-                  },
-                  "iconUrl": {
-                    "default": null,
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "format": "uri"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "merchantName"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/merchants/payments": {
       "get": {
         "operationId": "MerchantPayments_list",
@@ -2896,304 +2234,88 @@
         "description": "Retrieve paginated payments with optional filters."
       }
     },
-    "/v1/merchants/settlements/accounts": {
-      "get": {
-        "operationId": "Settlement_listAccounts",
-        "parameters": [
-          {
-            "name": "Merchant-Id",
-            "in": "header",
-            "required": true,
-            "description": "Merchant identifier.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "WCP-Version",
-            "in": "header",
-            "required": false,
-            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
-            "schema": {
-              "type": "string",
-              "examples": [
-                "2026-02-18",
-                "2026-02-19.preview"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Settlement accounts",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "accounts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "caip2ChainId": {
-                            "type": "string"
-                          },
-                          "caip10AccountId": {
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "caip2ChainId",
-                          "caip10AccountId",
-                          "createdAt",
-                          "updatedAt"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "accounts"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - invalid API version",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "invalid_api_version",
-                        "unknown_api_version",
-                        "api_version_downgrade"
-                      ],
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "invalid_api_version": {
-                    "summary": "Invalid API version",
-                    "value": {
-                      "code": "invalid_api_version",
-                      "message": "Invalid API version"
-                    }
-                  },
-                  "unknown_api_version": {
-                    "summary": "Unknown API version",
-                    "value": {
-                      "code": "unknown_api_version",
-                      "message": "Unknown API version"
-                    }
-                  },
-                  "api_version_downgrade": {
-                    "summary": "Requested API version is older than the partner pin",
-                    "value": {
-                      "code": "api_version_downgrade",
-                      "message": "Requested API version is older than the partner pin"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "missing_api_key",
-                        "invalid_api_key",
-                        "missing_merchant_id"
-                      ],
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "missing_api_key": {
-                    "summary": "Missing API key",
-                    "value": {
-                      "code": "missing_api_key",
-                      "message": "Missing API key"
-                    }
-                  },
-                  "invalid_api_key": {
-                    "summary": "Invalid API key",
-                    "value": {
-                      "code": "invalid_api_key",
-                      "message": "Invalid API key"
-                    }
-                  },
-                  "missing_merchant_id": {
-                    "summary": "Missing Merchant ID",
-                    "value": {
-                      "code": "missing_merchant_id",
-                      "message": "Missing Merchant ID"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "const": "internal_error",
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "internal_error": {
-                    "summary": "Internal Server Error",
-                    "value": {
-                      "code": "internal_error",
-                      "message": "Internal Server Error"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
+    "/v1/merchants": {
+      "post": {
+        "operationId": "MerchantManagement_create",
         "tags": [
-          "Settlement"
+          "Merchant Management"
         ],
-        "summary": "List settlement accounts"
-      }
-    },
-    "/v1/merchants/settlements/accounts/{accountId}": {
-      "delete": {
-        "operationId": "Settlement_deleteAccount",
+        "summary": "Create a merchant",
         "parameters": [
           {
-            "name": "Merchant-Id",
+            "name": "Idempotency-Key",
             "in": "header",
             "required": true,
-            "description": "Merchant identifier.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "WCP-Version",
-            "in": "header",
-            "required": false,
-            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
+            "description": "Unique key to ensure idempotent request processing. Max 255 characters.",
             "schema": {
               "type": "string",
-              "examples": [
-                "2026-02-18",
-                "2026-02-19.preview"
-              ]
+              "maxLength": 255
             }
-          },
-          {
-            "in": "path",
-            "name": "accountId",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-            },
-            "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Account deleted",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+          "201": {
+            "description": "Merchant created",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean"
+                    "merchant": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "status",
+                        "iconUrl",
+                        "createdAt"
+                      ]
                     }
                   },
                   "required": [
-                    "success"
+                    "merchant"
                   ]
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - invalid parameters or API version",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3206,11 +2328,8 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        "invalid_params",
                         "params_validation",
-                        "invalid_api_version",
-                        "unknown_api_version",
-                        "api_version_downgrade"
+                        "missing_idempotency_key"
                       ],
                       "description": "Machine-readable error code"
                     },
@@ -3240,13 +2359,6 @@
                   ]
                 },
                 "examples": {
-                  "invalid_params": {
-                    "summary": "Invalid request parameters",
-                    "value": {
-                      "code": "invalid_params",
-                      "message": "Invalid request parameters"
-                    }
-                  },
                   "params_validation": {
                     "summary": "Validation failed",
                     "value": {
@@ -3254,25 +2366,11 @@
                       "message": "Validation failed"
                     }
                   },
-                  "invalid_api_version": {
-                    "summary": "Invalid API version",
+                  "missing_idempotency_key": {
+                    "summary": "Missing Idempotency-Key header",
                     "value": {
-                      "code": "invalid_api_version",
-                      "message": "Invalid API version"
-                    }
-                  },
-                  "unknown_api_version": {
-                    "summary": "Unknown API version",
-                    "value": {
-                      "code": "unknown_api_version",
-                      "message": "Unknown API version"
-                    }
-                  },
-                  "api_version_downgrade": {
-                    "summary": "Requested API version is older than the partner pin",
-                    "value": {
-                      "code": "api_version_downgrade",
-                      "message": "Requested API version is older than the partner pin"
+                      "code": "missing_idempotency_key",
+                      "message": "Missing Idempotency-Key header"
                     }
                   }
                 }
@@ -3294,8 +2392,7 @@
                       "type": "string",
                       "enum": [
                         "missing_api_key",
-                        "invalid_api_key",
-                        "missing_merchant_id"
+                        "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
                     }
@@ -3319,20 +2416,13 @@
                       "code": "invalid_api_key",
                       "message": "Invalid API key"
                     }
-                  },
-                  "missing_merchant_id": {
-                    "summary": "Missing Merchant ID",
-                    "value": {
-                      "code": "missing_merchant_id",
-                      "message": "Missing Merchant ID"
-                    }
                   }
                 }
               }
             }
           },
-          "404": {
-            "description": "Account not found",
+          "409": {
+            "description": "Idempotency conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -3344,7 +2434,7 @@
                     },
                     "code": {
                       "type": "string",
-                      "const": "not_found",
+                      "const": "idempotency_conflict",
                       "description": "Machine-readable error code"
                     }
                   },
@@ -3354,11 +2444,11 @@
                   ]
                 },
                 "examples": {
-                  "not_found": {
-                    "summary": "Not Found",
+                  "idempotency_conflict": {
+                    "summary": "Idempotency key conflict: same key was used with a different request body",
                     "value": {
-                      "code": "not_found",
-                      "message": "Not Found"
+                      "code": "idempotency_conflict",
+                      "message": "Idempotency key conflict: same key was used with a different request body"
                     }
                   }
                 }
@@ -3366,7 +2456,7 @@
             }
           },
           "500": {
-            "description": "Internal server error",
+            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3398,85 +2488,106 @@
                 }
               }
             }
-          }
-        },
-        "tags": [
-          "Settlement"
-        ],
-        "summary": "Soft-delete a settlement account"
-      }
-    },
-    "/v1/merchants/settlements/configs": {
-      "get": {
-        "operationId": "Settlement_listConfigs",
-        "parameters": [
-          {
-            "name": "Merchant-Id",
-            "in": "header",
-            "required": true,
-            "description": "Merchant identifier.",
-            "schema": {
-              "type": "string"
-            }
           },
-          {
-            "name": "WCP-Version",
-            "in": "header",
-            "required": false,
-            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
-            "schema": {
-              "type": "string",
-              "examples": [
-                "2026-02-18",
-                "2026-02-19.preview"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Settlement configs",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+          "502": {
+            "description": "Bad gateway",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "configs": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "bad_gateway",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "bad_gateway": {
+                    "summary": "Bad Gateway",
+                    "value": {
+                      "code": "bad_gateway",
+                      "message": "Bad Gateway"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "merchantName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "merchantEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "iconUrl": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "merchantName",
+                  "merchantEmail"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "MerchantManagement_list",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "List merchants",
+        "responses": {
+          "200": {
+            "description": "Merchants list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchants": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            "type": "string"
                           },
-                          "type": {
-                            "type": "string",
-                            "enum": [
-                              "crypto",
-                              "fiat"
-                            ]
+                          "name": {
+                            "type": "string"
                           },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "collecting_info",
-                              "pending_verification",
-                              "pending_setup",
-                              "active",
-                              "disabled"
-                            ]
-                          },
-                          "provider": {
+                          "email": {
                             "anyOf": [
                               {
                                 "type": "string"
@@ -3486,351 +2597,60 @@
                               }
                             ]
                           },
-                          "networks": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "id": {
-                                  "type": "string",
-                                  "format": "uuid",
-                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                                },
-                                "caip2ChainId": {
-                                  "type": "string"
-                                },
-                                "account": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string",
-                                      "format": "uuid",
-                                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                                    },
-                                    "caip2ChainId": {
-                                      "type": "string"
-                                    },
-                                    "caip10AccountId": {
-                                      "type": "string"
-                                    },
-                                    "createdAt": {
-                                      "type": "string",
-                                      "format": "date-time",
-                                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-                                    },
-                                    "updatedAt": {
-                                      "type": "string",
-                                      "format": "date-time",
-                                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "caip2ChainId",
-                                    "caip10AccountId",
-                                    "createdAt",
-                                    "updatedAt"
-                                  ]
-                                },
-                                "tokens": {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "object",
-                                    "properties": {
-                                      "id": {
-                                        "type": "string",
-                                        "format": "uuid",
-                                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                                      },
-                                      "assetId": {
-                                        "type": "string"
-                                      },
-                                      "caip2ChainId": {
-                                        "type": "string"
-                                      },
-                                      "symbol": {
-                                        "type": "string"
-                                      },
-                                      "name": {
-                                        "type": "string"
-                                      },
-                                      "decimals": {
-                                        "type": "integer",
-                                        "minimum": -9007199254740991,
-                                        "maximum": 9007199254740991
-                                      },
-                                      "imageUrl": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "assetId",
-                                      "caip2ChainId",
-                                      "symbol",
-                                      "name",
-                                      "decimals",
-                                      "imageUrl"
-                                    ]
-                                  }
-                                }
+                          "status": {
+                            "type": "string"
+                          },
+                          "iconUrl": {
+                            "anyOf": [
+                              {
+                                "type": "string"
                               },
-                              "required": [
-                                "id",
-                                "caip2ChainId",
-                                "account",
-                                "tokens"
-                              ]
-                            }
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                            "type": "string"
                           }
                         },
                         "required": [
                           "id",
-                          "type",
+                          "name",
+                          "email",
                           "status",
-                          "provider",
-                          "networks",
-                          "createdAt",
-                          "updatedAt"
+                          "iconUrl",
+                          "createdAt"
                         ]
                       }
+                    },
+                    "totalCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "nextCursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
-                    "configs"
+                    "merchants",
+                    "totalCount",
+                    "nextCursor"
                   ]
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - invalid API version",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "invalid_api_version",
-                        "unknown_api_version",
-                        "api_version_downgrade"
-                      ],
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "invalid_api_version": {
-                    "summary": "Invalid API version",
-                    "value": {
-                      "code": "invalid_api_version",
-                      "message": "Invalid API version"
-                    }
-                  },
-                  "unknown_api_version": {
-                    "summary": "Unknown API version",
-                    "value": {
-                      "code": "unknown_api_version",
-                      "message": "Unknown API version"
-                    }
-                  },
-                  "api_version_downgrade": {
-                    "summary": "Requested API version is older than the partner pin",
-                    "value": {
-                      "code": "api_version_downgrade",
-                      "message": "Requested API version is older than the partner pin"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "missing_api_key",
-                        "invalid_api_key",
-                        "missing_merchant_id"
-                      ],
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "missing_api_key": {
-                    "summary": "Missing API key",
-                    "value": {
-                      "code": "missing_api_key",
-                      "message": "Missing API key"
-                    }
-                  },
-                  "invalid_api_key": {
-                    "summary": "Invalid API key",
-                    "value": {
-                      "code": "invalid_api_key",
-                      "message": "Invalid API key"
-                    }
-                  },
-                  "missing_merchant_id": {
-                    "summary": "Missing Merchant ID",
-                    "value": {
-                      "code": "missing_merchant_id",
-                      "message": "Missing Merchant ID"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Human-readable error message"
-                    },
-                    "code": {
-                      "type": "string",
-                      "const": "internal_error",
-                      "description": "Machine-readable error code"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ]
-                },
-                "examples": {
-                  "internal_error": {
-                    "summary": "Internal Server Error",
-                    "value": {
-                      "code": "internal_error",
-                      "message": "Internal Server Error"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Settlement"
-        ],
-        "summary": "List settlement configs with networks and tokens"
-      }
-    },
-    "/v1/merchants/settlements/configs/{configId}": {
-      "delete": {
-        "operationId": "Settlement_deleteConfig",
-        "parameters": [
-          {
-            "name": "Merchant-Id",
-            "in": "header",
-            "required": true,
-            "description": "Merchant identifier.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "WCP-Version",
-            "in": "header",
-            "required": false,
-            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
-            "schema": {
-              "type": "string",
-              "examples": [
-                "2026-02-18",
-                "2026-02-19.preview"
-              ]
-            }
-          },
-          {
-            "in": "path",
-            "name": "configId",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-            },
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Config deleted",
-            "headers": {
-              "WCP-Version": {
-                "description": "WalletConnect Pay API version resolved for this request.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "success"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - invalid parameters or API version",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3844,9 +2664,7 @@
                       "type": "string",
                       "enum": [
                         "params_validation",
-                        "invalid_api_version",
-                        "unknown_api_version",
-                        "api_version_downgrade"
+                        "invalid_params"
                       ],
                       "description": "Machine-readable error code"
                     },
@@ -3883,25 +2701,11 @@
                       "message": "Validation failed"
                     }
                   },
-                  "invalid_api_version": {
-                    "summary": "Invalid API version",
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
                     "value": {
-                      "code": "invalid_api_version",
-                      "message": "Invalid API version"
-                    }
-                  },
-                  "unknown_api_version": {
-                    "summary": "Unknown API version",
-                    "value": {
-                      "code": "unknown_api_version",
-                      "message": "Unknown API version"
-                    }
-                  },
-                  "api_version_downgrade": {
-                    "summary": "Requested API version is older than the partner pin",
-                    "value": {
-                      "code": "api_version_downgrade",
-                      "message": "Requested API version is older than the partner pin"
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
                     }
                   }
                 }
@@ -3923,8 +2727,7 @@
                       "type": "string",
                       "enum": [
                         "missing_api_key",
-                        "invalid_api_key",
-                        "missing_merchant_id"
+                        "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
                     }
@@ -3948,12 +2751,218 @@
                       "code": "invalid_api_key",
                       "message": "Invalid API key"
                     }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "suspended"
+              ]
+            },
+            "description": "Filter by merchant status"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "description": "Search by merchant name or ID (case-insensitive)"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Page size (default 20, max 100)"
+          }
+        ]
+      }
+    },
+    "/v1/merchants/{merchantId}": {
+      "get": {
+        "operationId": "MerchantManagement_get",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "Get a merchant",
+        "responses": {
+          "200": {
+            "description": "Merchant details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchant": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "settlements": {
+                          "type": "object",
+                          "properties": {
+                            "crypto": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "configId": {
+                                    "type": "string"
+                                  },
+                                  "asset": {
+                                    "type": "string"
+                                  },
+                                  "destination": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "configId",
+                                  "asset",
+                                  "destination"
+                                ]
+                              }
+                            },
+                            "fiat": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "configId": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "bankType": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "configId",
+                                  "status",
+                                  "bankType"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "crypto",
+                            "fiat"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "status",
+                        "iconUrl",
+                        "createdAt",
+                        "settlements"
+                      ]
+                    }
                   },
-                  "missing_merchant_id": {
-                    "summary": "Missing Merchant ID",
+                  "required": [
+                    "merchant"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
                     "value": {
-                      "code": "missing_merchant_id",
-                      "message": "Missing Merchant ID"
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
                     }
                   }
                 }
@@ -3961,7 +2970,7 @@
             }
           },
           "404": {
-            "description": "Config not found",
+            "description": "Not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3993,9 +3002,88 @@
                 }
               }
             }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "MerchantManagement_update",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "Update a merchant",
+        "responses": {
+          "200": {
+            "description": "Merchant updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchant": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "status",
+                        "iconUrl",
+                        "createdAt"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "merchant"
+                  ]
+                }
+              }
+            }
           },
-          "500": {
-            "description": "Internal server error",
+          "400": {
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4007,7 +3095,63 @@
                     },
                     "code": {
                       "type": "string",
-                      "const": "internal_error",
+                      "const": "params_validation",
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
                       "description": "Machine-readable error code"
                     }
                   },
@@ -4017,11 +3161,52 @@
                   ]
                 },
                 "examples": {
-                  "internal_error": {
-                    "summary": "Internal Server Error",
+                  "missing_api_key": {
+                    "summary": "Missing API key",
                     "value": {
-                      "code": "internal_error",
-                      "message": "Internal Server Error"
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
                     }
                   }
                 }
@@ -4029,10 +3214,167 @@
             }
           }
         },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "merchantName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "merchantEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "iconUrl": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "MerchantManagement_delete",
         "tags": [
-          "Settlement"
+          "Merchant Management"
         ],
-        "summary": "Soft-delete a settlement config"
+        "summary": "Delete a merchant",
+        "responses": {
+          "200": {
+            "description": "Merchant deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "deleted"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
       }
     },
     "/v1/merchants/{merchant_id}/payments": {
@@ -4354,10 +3696,7 @@
       "name": "Payments"
     },
     {
-      "name": "Merchants"
-    },
-    {
-      "name": "Settlement"
+      "name": "Merchant Management"
     }
   ],
   "components": {
@@ -4989,7 +4328,7 @@
           "expiresAt": 1718236800,
           "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
           "isFinal": false,
-          "paymentId": "pay_7fa2ecc101KMGP1HTFMDDBA9HX42FJ55R6",
+          "paymentId": "pay_6ea2ecc101KMNV56BF1FXA71QKXJVHTJ4T",
           "pollInMs": 1000,
           "status": "requires_action"
         }
@@ -5123,7 +4462,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_7ea2ecc101KMGP1HTGJ8CF3N5CKGS2V1KD",
+          "paymentId": "pay_05a2ecc101KMNV56BG17RM6A2S3YKVGPQ2",
           "status": "cancelled"
         }
       },
@@ -5814,7 +5153,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_f3a2ecc101KMGP1HTF5GFTH6BDVX88WN5S",
+          "paymentId": "pay_aaa2ecc101KMNV56BF66Z1C0VTFGA740M7",
           "status": "cancelled"
         }
       },
@@ -6198,79 +5537,6 @@
           "data",
           "nextCursor",
           "stats"
-        ]
-      },
-      "MerchantsListResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Partner-provided merchant ID"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "active",
-                    "inactive",
-                    "suspended"
-                  ]
-                },
-                "iconUrl": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "description": "Merchant logo URL, or null if not set"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "description": "ISO 8601 timestamp"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "status",
-                "iconUrl",
-                "createdAt"
-              ]
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Total number of merchants matching the query (ignoring pagination)"
-          },
-          "nextCursor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Cursor for the next page, or null if no more results"
-          }
-        },
-        "required": [
-          "data",
-          "totalCount",
-          "nextCursor"
         ]
       },
       "MerchantLegacyPaymentsResponse": {
