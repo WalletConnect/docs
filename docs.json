@@ -18,76 +18,215 @@
       "apiHost": "https://pineapple.walletconnect.com"
     }
   },
-  "openapi": "api/walletconnect-pay-gateway.yaml",
   "favicon": "/favicon.ico",
   "navigation": {
-    "tabs": [
+    "versions": [
       {
-        "tab": "Payments",
-        "icon": "credit-card",
-        "groups": [
+        "version": "2026-02-18",
+        "tabs": [
           {
-            "group": "WalletConnect Pay",
-            "pages": [
-              "payments/overview",
-              "payments/for-users"
+            "tab": "Payments",
+            "icon": "credit-card",
+            "groups": [
+              {
+                "group": "WalletConnect Pay",
+                "pages": [
+                  "payments/overview",
+                  "payments/for-users"
+                ]
+              },
+              {
+                "group": "Merchant Dashboard",
+                "pages": [
+                  "payments/merchant/onboarding"
+                ]
+              },
+              {
+                "group": "WalletConnect Pay for Wallets",
+                "pages": [
+                  "payments/wallets/overview",
+                  {
+                    "group": "Standalone integration",
+                    "pages": [
+                      "payments/wallets/standalone/kotlin",
+                      "payments/wallets/standalone/swift",
+                      "payments/wallets/standalone/react-native",
+                      "payments/wallets/standalone/flutter",
+                      "payments/wallets/standalone/web"
+                    ]
+                  },
+                  {
+                    "group": "Integrate using the Wallet SDK",
+                    "pages": [
+                      "payments/wallets/walletkit/kotlin",
+                      "payments/wallets/walletkit/swift",
+                      "payments/wallets/walletkit/flutter",
+                      "payments/wallets/walletkit/react-native",
+                      "payments/wallets/walletkit/web"
+                    ]
+                  },
+                  "payments/wallets/api-first"
+                ]
+              },
+              {
+                "group": "Ecommerce and Online Checkout",
+                "pages": [
+                  "payments/ecommerce/overview"
+                ]
+              }
             ]
           },
           {
-            "group": "Merchant Dashboard",
-            "pages": [
-              "payments/merchant/onboarding"
-            ]
-          },
-                    {
-                      "group": "WalletConnect Pay for Wallets",
-                      "pages": [
-                        "payments/wallets/overview",
-                        {
-                          "group": "Standalone integration",
-                          "pages": [
-                            "payments/wallets/standalone/kotlin",
-                            "payments/wallets/standalone/swift",
-                            "payments/wallets/standalone/react-native",
-                            "payments/wallets/standalone/flutter",
-                            "payments/wallets/standalone/web"
-                          ]
-                        },
-                        {
-                          "group": "Integrate using the Wallet SDK",
-                          "pages": [
-                            "payments/wallets/walletkit/kotlin",
-                            "payments/wallets/walletkit/swift",
-                            "payments/wallets/walletkit/flutter",
-                            "payments/wallets/walletkit/react-native",
-                            "payments/wallets/walletkit/web"
-                          ]
-                        },
-                        "payments/wallets/api-first"
-                      ]
-                    },
-          {
-            "group": "Ecommerce and Online Checkout",
-            "pages": [
-              "payments/ecommerce/overview"
+            "tab": "API Reference",
+            "icon": "code",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference/index",
+                  "api-reference/versioning"
+                ]
+              },
+              {
+                "group": "Gateway",
+                "pages": [
+                  "api-reference/2026-02-18/get-v1-gateway-payment-id",
+                  "api-reference/2026-02-18/post-v1-gateway-payment-id-cancel",
+                  "api-reference/2026-02-18/post-v1-gateway-payment-id-confirm",
+                  "api-reference/2026-02-18/post-v1-gateway-payment-id-fetch",
+                  "api-reference/2026-02-18/post-v1-gateway-payment-id-options",
+                  "api-reference/2026-02-18/get-v1-gateway-payment-id-status"
+                ]
+              },
+              {
+                "group": "Payments",
+                "pages": [
+                  "api-reference/2026-02-18/post-v1-payments",
+                  "api-reference/2026-02-18/get-v1-payments",
+                  "api-reference/2026-02-18/post-v1-payments-id-cancel",
+                  "api-reference/2026-02-18/get-v1-payments-id-status"
+                ]
+              },
+              {
+                "group": "Merchants",
+                "pages": [
+                  "api-reference/2026-02-18/get-v1-merchants-payments",
+                  "api-reference/2026-02-18/post-v1-merchants",
+                  "api-reference/2026-02-18/get-v1-merchants",
+                  "api-reference/2026-02-18/get-v1-merchants-merchantid",
+                  "api-reference/2026-02-18/patch-v1-merchants-merchantid",
+                  "api-reference/2026-02-18/delete-v1-merchants-merchantid",
+                  "api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
+                ]
+              }
             ]
           }
-        ]
+        ],
+        "tag": "Latest",
+        "default": true
       },
       {
-        "tab": "API Reference",
-        "icon": "code",
-        "groups": [
+        "version": "2026-02-19.preview",
+        "tabs": [
           {
-            "group": "Gateway",
-            "pages": [
-              "api-reference/index",
-              "api-reference/gateway/get-payment-options",
-              "api-reference/gateway/fetch-action",
-              "api-reference/gateway/confirm-payment"
+            "tab": "Payments",
+            "icon": "credit-card",
+            "groups": [
+              {
+                "group": "WalletConnect Pay",
+                "pages": [
+                  "payments/overview",
+                  "payments/for-users"
+                ]
+              },
+              {
+                "group": "Merchant Dashboard",
+                "pages": [
+                  "payments/merchant/onboarding"
+                ]
+              },
+              {
+                "group": "WalletConnect Pay for Wallets",
+                "pages": [
+                  "payments/wallets/overview",
+                  {
+                    "group": "Standalone integration",
+                    "pages": [
+                      "payments/wallets/standalone/kotlin",
+                      "payments/wallets/standalone/swift",
+                      "payments/wallets/standalone/react-native",
+                      "payments/wallets/standalone/flutter",
+                      "payments/wallets/standalone/web"
+                    ]
+                  },
+                  {
+                    "group": "Integrate using the Wallet SDK",
+                    "pages": [
+                      "payments/wallets/walletkit/kotlin",
+                      "payments/wallets/walletkit/swift",
+                      "payments/wallets/walletkit/flutter",
+                      "payments/wallets/walletkit/react-native",
+                      "payments/wallets/walletkit/web"
+                    ]
+                  },
+                  "payments/wallets/api-first"
+                ]
+              },
+              {
+                "group": "Ecommerce and Online Checkout",
+                "pages": [
+                  "payments/ecommerce/overview"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "icon": "code",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference/index",
+                  "api-reference/versioning"
+                ]
+              },
+              {
+                "group": "Gateway",
+                "pages": [
+                  "api-reference/2026-02-19.preview/get-v1-gateway-payment-id",
+                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-cancel",
+                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
+                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
+                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
+                  "api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
+                ]
+              },
+              {
+                "group": "Payments",
+                "pages": [
+                  "api-reference/2026-02-19.preview/post-v1-payments",
+                  "api-reference/2026-02-19.preview/get-v1-payments",
+                  "api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
+                  "api-reference/2026-02-19.preview/get-v1-payments-id-status"
+                ]
+              },
+              {
+                "group": "Merchants",
+                "pages": [
+                  "api-reference/2026-02-19.preview/get-v1-merchants-payments",
+                  "api-reference/2026-02-19.preview/post-v1-merchants",
+                  "api-reference/2026-02-19.preview/get-v1-merchants",
+                  "api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
+                  "api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
+                  "api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
+                  "api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
+                ]
+              }
             ]
           }
-        ]
+        ],
+        "tag": "Preview"
       }
     ],
     "global": {
@@ -123,7 +262,16 @@
     }
   },
   "contextual": {
-    "options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {

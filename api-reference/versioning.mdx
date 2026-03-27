@@ -1,0 +1,54 @@
+---
+title: "API Versioning"
+description: "How the WalletConnect Pay API is versioned using date-based versions, account pinning, and preview releases."
+sidebarTitle: "Versioning"
+---
+
+The WalletConnect Pay API uses date-based versions in `YYYY-MM-DD` format. Each version is a stable snapshot of the API's behavior and response shapes.
+
+## How it works
+
+When a merchant account is created, it gets pinned to the current API version. All requests from that account use the pinned version by default, so existing integrations keep working without any changes.
+
+You can override the version on any request with the `WCP-Version` header:
+
+```http Request header
+POST /v1/payments HTTP/1.1
+WCP-Version: 2026-02-04
+```
+
+If you omit the header, the request uses your account's pinned version. Overrides can only target versions newer than your pinned version.
+
+To permanently upgrade your pinned version, use the merchant dashboard. Downgrades are not supported.
+
+<Tip>
+  Use the version selector at the top of these docs to browse the API reference for a specific version.
+</Tip>
+
+## Preview versions
+
+Preview versions let you test upcoming changes before they reach GA. They use a `.preview` suffix:
+
+```http Preview version header
+WCP-Version: 2026-06-01.preview
+```
+
+Previews require an explicit header on every request. They are not covered by the same stability guarantees as GA versions, and breaking changes may land with minimal notice.
+
+## Client compatibility requirements
+
+For the stability guarantees to hold, your client must:
+
+- Ignore unknown fields in API responses. New fields can appear in any version.
+- Tolerate unknown enum values. New statuses and types ship without a version bump.
+- Handle unknown webhook event types without crashing.
+- Treat unrecognized error codes as generic errors rather than hard-failing.
+
+These are all additive, non-breaking changes that apply across versions.
+
+## Breaking vs non-breaking changes
+
+Breaking changes only ship in new dated versions. A change is breaking if it removes or renames a field, changes a field's type, alters default behavior, removes an endpoint, or makes an optional parameter required.
+
+Non-breaking changes apply to all versions: new endpoints, optional parameters, response fields, enum values, webhook types, and error codes. No version bump needed.
+

@@ -1,0 +1,5903 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WalletConnect Pay API",
+    "version": "2026-02-19.preview"
+  },
+  "servers": [
+    {
+      "url": "https://api.pay.walletconnect.com"
+    }
+  ],
+  "paths": {
+    "/v1/gateway/payment/{id}": {
+      "get": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Get a payment",
+        "description": "This endpoint returns only basic information to display to the user to begin the payment flow.",
+        "operationId": "gatewayGetPayment",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "App-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Payment ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gateway/payment/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Gateway"
+        ],
+        "operationId": "gatewayCancelPayment",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "App-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayCancelPaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payment cannot be cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gateway/payment/{id}/confirm": {
+      "post": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Confirm a payment",
+        "description": "This endpoint confirms a payment and submits it to the blockchain for processing.",
+        "operationId": "confirm_payment_handler",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "App-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Payment ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          },
+          {
+            "name": "maxPollMs",
+            "in": "query",
+            "description": "Maximum time to long-poll for payment status, in milliseconds.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Payment confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmPaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gateway/payment/{id}/fetch": {
+      "post": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Fetches an action",
+        "description": "This endpoint fetches an action for a payment.",
+        "operationId": "fetch_handler",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "App-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Payment ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Action built successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gateway/payment/{id}/options": {
+      "post": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Get payment options",
+        "description": "This endpoint takes a list of accounts and returns a list of options that can be used to complete the payment.",
+        "operationId": "gatewayGetPaymentOptions",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "App-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Payment ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          },
+          {
+            "name": "includePaymentInfo",
+            "in": "query",
+            "description": "Whether to include payment information in the response",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetPaymentOptionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Payment options retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPaymentOptionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gateway/payment/{id}/status": {
+      "get": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Get the payment status",
+        "description": "Retrieves the status of a payment by its ID. Returns a polling delay to wait\nbefore checking the status again.",
+        "operationId": "gatewayGetPaymentStatus",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "App-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Payment ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          },
+          {
+            "name": "maxPollMs",
+            "in": "query",
+            "description": "Maximum time to long-poll for payment status, in milliseconds.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPaymentStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payments": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Create a new payment",
+        "description": "Creates a new payment with the provided payment details.",
+        "operationId": "paymentsCreatePayment",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Merchant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePayment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Payment created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "PartnerPayments_list",
+        "parameters": [
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "2026-02-18",
+                "2026-02-19.preview"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "startTs",
+            "schema": {
+              "type": "string"
+            },
+            "description": "RFC3339 timestamp, inclusive (e.g. 2026-01-06T00:00:00Z)"
+          },
+          {
+            "in": "query",
+            "name": "endTs",
+            "schema": {
+              "type": "string"
+            },
+            "description": "RFC3339 timestamp, exclusive (e.g. 2026-01-07T00:00:00Z)"
+          },
+          {
+            "in": "query",
+            "name": "asset",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated crypto currencies. Currently ignored."
+          },
+          {
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated chain IDs (matches `chain_id`)."
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "date",
+                "amount"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortDir",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "description": "Page size (default 50, max 200)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "requires_action",
+                  "processing",
+                  "succeeded",
+                  "failed",
+                  "expired",
+                  "cancelled"
+                ]
+              }
+            },
+            "description": "Filter by status. Repeat for multiple: ?status=succeeded&status=processing"
+          },
+          {
+            "in": "query",
+            "name": "merchantId",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "description": "Filter by merchant ID. Repeat for multiple: ?merchantId=merchant_1&merchantId=merchant_2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments with statistics",
+            "headers": {
+              "WCP-Version": {
+                "description": "WalletConnect Pay API version resolved for this request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantPaymentsResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "paymentId": "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ",
+                      "merchant": {
+                        "id": "merchant_id",
+                        "name": "Acme Store",
+                        "iconUrl": "https://imagedelivery.net/example/icon.png"
+                      },
+                      "referenceId": "a1b2cad4e5f2783012345678axcdea90",
+                      "status": "succeeded",
+                      "isTerminal": true,
+                      "fiatAmount": {
+                        "unit": "iso4217/USD",
+                        "value": "10000",
+                        "display": {
+                          "assetSymbol": "USD",
+                          "assetName": "US Dollar",
+                          "decimals": 2
+                        }
+                      },
+                      "tokenAmount": {
+                        "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                        "value": "100000000",
+                        "display": {
+                          "assetSymbol": "USDC",
+                          "assetName": "USD Coin",
+                          "decimals": 6,
+                          "networkName": "Base",
+                          "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                          "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                        }
+                      },
+                      "buyer": {
+                        "accountCaip10": "eip155:8453:0x0000000000000000000000000000000000000000",
+                        "accountProviderName": "MetaMask",
+                        "accountProviderIcon": "https://api.walletconnect.com/assets/v1/image/wallet/metamask/md"
+                      },
+                      "transaction": {
+                        "networkId": "8453",
+                        "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "nonce": 42
+                      },
+                      "settlement": {
+                        "status": "pending",
+                        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+                      "createdAt": "2024-01-01T12:00:00.000Z",
+                      "lastUpdatedAt": "2024-01-01T12:00:00.000Z",
+                      "settledAt": "2024-01-01T12:00:00.000Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "stats": {
+                    "totalRevenue": [
+                      {
+                        "amount": 1000,
+                        "currency": "USD"
+                      }
+                    ],
+                    "totalTransactions": 100,
+                    "totalCustomers": 25
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — invalid parameters or API version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_params",
+                        "params_validation",
+                        "invalid_api_version",
+                        "unknown_api_version",
+                        "api_version_downgrade"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  },
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "invalid_api_version": {
+                    "summary": "Invalid API version",
+                    "value": {
+                      "code": "invalid_api_version",
+                      "message": "Invalid API version"
+                    }
+                  },
+                  "unknown_api_version": {
+                    "summary": "Unknown API version",
+                    "value": {
+                      "code": "unknown_api_version",
+                      "message": "Unknown API version"
+                    }
+                  },
+                  "api_version_downgrade": {
+                    "summary": "Requested API version is older than the partner pin",
+                    "value": {
+                      "code": "api_version_downgrade",
+                      "message": "Requested API version is older than the partner pin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid partner API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "internal_error",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Internal Server Error",
+                    "value": {
+                      "code": "internal_error",
+                      "message": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — upstream service returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "bad_gateway",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "bad_gateway": {
+                    "summary": "Bad Gateway",
+                    "value": {
+                      "code": "bad_gateway",
+                      "message": "Bad Gateway"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Payments"
+        ],
+        "summary": "List payments",
+        "description": "Retrieve paginated payments with optional filters."
+      }
+    },
+    "/v1/payments/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "paymentsCancelPayment",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Merchant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentsCancelPaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payment cannot be cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payments/{id}/status": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Get the payment status",
+        "description": "Retrieves the status of a payment by its ID. Returns a polling delay to wait\nbefore checking the status again.",
+        "operationId": "paymentsGetPaymentStatus",
+        "parameters": [
+          {
+            "name": "Api-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Merchant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Name",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Sdk-Platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Payment ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          },
+          {
+            "name": "maxPollMs",
+            "in": "query",
+            "description": "Maximum time to long-poll for payment status, in milliseconds.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPaymentStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/merchants/payments": {
+      "get": {
+        "operationId": "MerchantPayments_list",
+        "parameters": [
+          {
+            "name": "Merchant-Id",
+            "in": "header",
+            "required": true,
+            "description": "Merchant identifier.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "2026-02-18",
+                "2026-02-19.preview"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "startTs",
+            "schema": {
+              "type": "string"
+            },
+            "description": "RFC3339 timestamp, inclusive (e.g. 2026-01-06T00:00:00Z)"
+          },
+          {
+            "in": "query",
+            "name": "endTs",
+            "schema": {
+              "type": "string"
+            },
+            "description": "RFC3339 timestamp, exclusive (e.g. 2026-01-07T00:00:00Z)"
+          },
+          {
+            "in": "query",
+            "name": "asset",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated crypto currencies. Currently ignored."
+          },
+          {
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated chain IDs (matches `chain_id`)."
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "date",
+                "amount"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortDir",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "description": "Page size (default 50, max 200)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "requires_action",
+                  "processing",
+                  "succeeded",
+                  "failed",
+                  "expired",
+                  "cancelled"
+                ]
+              }
+            },
+            "description": "Filter by status. Repeat for multiple: ?status=succeeded&status=processing"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments with statistics",
+            "headers": {
+              "WCP-Version": {
+                "description": "WalletConnect Pay API version resolved for this request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantPaymentsResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "paymentId": "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ",
+                      "merchant": {
+                        "id": "merchant_id",
+                        "name": "Acme Store",
+                        "iconUrl": "https://imagedelivery.net/example/icon.png"
+                      },
+                      "referenceId": "a1b2cad4e5f2783012345678axcdea90",
+                      "status": "succeeded",
+                      "isTerminal": true,
+                      "fiatAmount": {
+                        "unit": "iso4217/USD",
+                        "value": "10000",
+                        "display": {
+                          "assetSymbol": "USD",
+                          "assetName": "US Dollar",
+                          "decimals": 2
+                        }
+                      },
+                      "tokenAmount": {
+                        "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                        "value": "100000000",
+                        "display": {
+                          "assetSymbol": "USDC",
+                          "assetName": "USD Coin",
+                          "decimals": 6,
+                          "networkName": "Base",
+                          "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                          "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                        }
+                      },
+                      "buyer": {
+                        "accountCaip10": "eip155:8453:0x0000000000000000000000000000000000000000",
+                        "accountProviderName": "MetaMask",
+                        "accountProviderIcon": "https://api.walletconnect.com/assets/v1/image/wallet/metamask/md"
+                      },
+                      "transaction": {
+                        "networkId": "8453",
+                        "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "nonce": 42
+                      },
+                      "settlement": {
+                        "status": "pending",
+                        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+                      "createdAt": "2024-01-01T12:00:00.000Z",
+                      "lastUpdatedAt": "2024-01-01T12:00:00.000Z",
+                      "settledAt": "2024-01-01T12:00:00.000Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "stats": {
+                    "totalRevenue": [
+                      {
+                        "amount": 1000,
+                        "currency": "USD"
+                      }
+                    ],
+                    "totalTransactions": 100,
+                    "totalCustomers": 25
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — invalid parameters or API version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_params",
+                        "params_validation",
+                        "invalid_api_version",
+                        "unknown_api_version",
+                        "api_version_downgrade"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  },
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "invalid_api_version": {
+                    "summary": "Invalid API version",
+                    "value": {
+                      "code": "invalid_api_version",
+                      "message": "Invalid API version"
+                    }
+                  },
+                  "unknown_api_version": {
+                    "summary": "Unknown API version",
+                    "value": {
+                      "code": "unknown_api_version",
+                      "message": "Unknown API version"
+                    }
+                  },
+                  "api_version_downgrade": {
+                    "summary": "Requested API version is older than the partner pin",
+                    "value": {
+                      "code": "api_version_downgrade",
+                      "message": "Requested API version is older than the partner pin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid API key, or missing merchant id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key",
+                        "missing_merchant_id"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  },
+                  "missing_merchant_id": {
+                    "summary": "Missing Merchant ID",
+                    "value": {
+                      "code": "missing_merchant_id",
+                      "message": "Missing Merchant ID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "internal_error",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Internal Server Error",
+                    "value": {
+                      "code": "internal_error",
+                      "message": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — upstream service returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "bad_gateway",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "bad_gateway": {
+                    "summary": "Bad Gateway",
+                    "value": {
+                      "code": "bad_gateway",
+                      "message": "Bad Gateway"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Payments"
+        ],
+        "summary": "List payments for a merchant",
+        "description": "Retrieve paginated payments with optional filters."
+      }
+    },
+    "/v1/merchants": {
+      "post": {
+        "operationId": "MerchantManagement_create",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "Create a merchant",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique key to ensure idempotent request processing. Max 255 characters.",
+            "schema": {
+              "type": "string",
+              "maxLength": 255
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Merchant created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchant": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "status",
+                        "iconUrl",
+                        "createdAt"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "merchant"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "params_validation",
+                        "missing_idempotency_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "missing_idempotency_key": {
+                    "summary": "Missing Idempotency-Key header",
+                    "value": {
+                      "code": "missing_idempotency_key",
+                      "message": "Missing Idempotency-Key header"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "idempotency_conflict",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "idempotency_conflict": {
+                    "summary": "Idempotency key conflict: same key was used with a different request body",
+                    "value": {
+                      "code": "idempotency_conflict",
+                      "message": "Idempotency key conflict: same key was used with a different request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "internal_error",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Internal Server Error",
+                    "value": {
+                      "code": "internal_error",
+                      "message": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "bad_gateway",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "bad_gateway": {
+                    "summary": "Bad Gateway",
+                    "value": {
+                      "code": "bad_gateway",
+                      "message": "Bad Gateway"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "merchantName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "merchantEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "iconUrl": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "merchantName",
+                  "merchantEmail"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "MerchantManagement_list",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "List merchants",
+        "responses": {
+          "200": {
+            "description": "Merchants list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchants": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "iconUrl": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "email",
+                          "status",
+                          "iconUrl",
+                          "createdAt"
+                        ]
+                      }
+                    },
+                    "totalCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "nextCursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "merchants",
+                    "totalCount",
+                    "nextCursor"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "params_validation",
+                        "invalid_params"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "suspended"
+              ]
+            },
+            "description": "Filter by merchant status"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "description": "Search by merchant name or ID (case-insensitive)"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Page size (default 20, max 100)"
+          }
+        ]
+      }
+    },
+    "/v1/merchants/{merchantId}": {
+      "get": {
+        "operationId": "MerchantManagement_get",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "Get a merchant",
+        "responses": {
+          "200": {
+            "description": "Merchant details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchant": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "settlements": {
+                          "type": "object",
+                          "properties": {
+                            "crypto": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "configId": {
+                                    "type": "string"
+                                  },
+                                  "asset": {
+                                    "type": "string"
+                                  },
+                                  "destination": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "configId",
+                                  "asset",
+                                  "destination"
+                                ]
+                              }
+                            },
+                            "fiat": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "configId": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "bankType": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "configId",
+                                  "status",
+                                  "bankType"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "crypto",
+                            "fiat"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "status",
+                        "iconUrl",
+                        "createdAt",
+                        "settlements"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "merchant"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "MerchantManagement_update",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "Update a merchant",
+        "responses": {
+          "200": {
+            "description": "Merchant updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "merchant": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "status",
+                        "iconUrl",
+                        "createdAt"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "merchant"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "params_validation",
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "merchantName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "merchantEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "iconUrl": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "MerchantManagement_delete",
+        "tags": [
+          "Merchant Management"
+        ],
+        "summary": "Delete a merchant",
+        "responses": {
+          "200": {
+            "description": "Merchant deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "deleted"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/merchants/{merchant_id}/payments": {
+      "get": {
+        "operationId": "Payments_get",
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Get payments for a merchant",
+        "description": "**Deprecated:** Use `GET /v1/merchants/payments` with partner `api-key` and `merchant-id` headers instead.\n\nRetrieve paginated payments with optional filters.",
+        "deprecated": true,
+        "security": [
+          {
+            "apiKeyLegacy": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments with statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantLegacyPaymentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_params",
+                        "params_validation"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  },
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "internal_error",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Internal Server Error",
+                    "value": {
+                      "code": "internal_error",
+                      "message": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway — upstream service returned an error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "bad_gateway",
+                      "description": "Machine-readable error code"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "bad_gateway": {
+                    "summary": "Bad Gateway",
+                    "value": {
+                      "code": "bad_gateway",
+                      "message": "Bad Gateway"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "start_ts",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_ts",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "asset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "date",
+                "amount"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "requires_action",
+                    "processing",
+                    "succeeded",
+                    "failed",
+                    "expired"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "requires_action",
+                      "processing",
+                      "succeeded",
+                      "failed",
+                      "expired"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Gateway"
+    },
+    {
+      "name": "Payments"
+    },
+    {
+      "name": "Merchant Management"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Action": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "An action that requires a wallet RPC call to complete",
+            "required": [
+              "data",
+              "type"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/WalletRpcAction",
+                "description": "An action that requires a wallet RPC call to complete"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "walletRpc"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "An action that requires building to complete",
+            "required": [
+              "data",
+              "type"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/Build",
+                "description": "An action that requires building to complete"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "build"
+                ]
+              }
+            }
+          }
+        ],
+        "example": {
+          "data": {
+            "chain_id": "eip155:8453",
+            "method": "eth_signTypedData_v4",
+            "params": [
+              "0x0000000000000000000000000000000000000000",
+              "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
+            ]
+          },
+          "type": "walletRpc"
+        }
+      },
+      "Amount": {
+        "type": "object",
+        "required": [
+          "unit",
+          "value",
+          "display"
+        ],
+        "properties": {
+          "display": {
+            "$ref": "#/components/schemas/AmountDisplay",
+            "description": "Display information for the amount"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/String",
+            "description": "Currency unit, prefixed with either \"iso4217/\" or \"caip19/\""
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount value, in the currency unit's minor units"
+          }
+        },
+        "example": {
+          "display": {
+            "assetName": "USD Coin",
+            "assetSymbol": "USDC",
+            "decimals": 6,
+            "iconUrl": "https://assets.walletconnect.com/usdc.png",
+            "networkIconUrl": "https://assets.walletconnect.com/base.png",
+            "networkName": "Base"
+          },
+          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+          "value": "1000000"
+        }
+      },
+      "AmountDisplay": {
+        "type": "object",
+        "required": [
+          "assetSymbol",
+          "assetName",
+          "decimals"
+        ],
+        "properties": {
+          "assetName": {
+            "type": "string",
+            "description": "Full name of the asset"
+          },
+          "assetSymbol": {
+            "type": "string",
+            "description": "Ticker/symbol of the asset"
+          },
+          "decimals": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of minor decimals of the asset",
+            "minimum": 0
+          },
+          "iconUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "URL of the icon of the asset (if token)"
+          },
+          "networkIconUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "URL of the icon of the network (if token)"
+          },
+          "networkName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name of the network of the asset (if token)"
+          }
+        },
+        "example": {
+          "assetName": "USD Coin",
+          "assetSymbol": "USDC",
+          "decimals": 6,
+          "iconUrl": "https://assets.walletconnect.com/usdc.png",
+          "networkIconUrl": "https://assets.walletconnect.com/base.png",
+          "networkName": "Base"
+        }
+      },
+      "AmountParameter": {
+        "type": "object",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "properties": {
+          "unit": {
+            "$ref": "#/components/schemas/String",
+            "description": "Currency unit, prefixed with either \"iso4217/\" or \"caip19/\""
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount value, in the currency unit's minor units"
+          }
+        },
+        "example": {
+          "unit": "iso4217/USD",
+          "value": "100"
+        }
+      },
+      "Build": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "data": "..."
+        }
+      },
+      "BuyerInfo": {
+        "type": "object",
+        "required": [
+          "accountCaip10",
+          "accountProviderName"
+        ],
+        "properties": {
+          "accountCaip10": {
+            "type": "string",
+            "description": "Account CAIP-10"
+          },
+          "accountProviderIcon": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Account provider icon URL"
+          },
+          "accountProviderName": {
+            "type": "string",
+            "description": "Account provider name"
+          }
+        },
+        "example": {
+          "accountCaip10": "eip155:1:0x0000000000000000000000000000000000000000",
+          "accountProviderIcon": "https://example.com/icon.png",
+          "accountProviderName": "Wallet"
+        }
+      },
+      "CheckoutConfig": {
+        "type": "object",
+        "required": [
+          "successUrl",
+          "errorUrl"
+        ],
+        "properties": {
+          "errorUrl": {
+            "type": "string",
+            "description": "HTTPS URL to redirect to on payment error"
+          },
+          "successUrl": {
+            "type": "string",
+            "description": "HTTPS URL to redirect to on successful payment"
+          }
+        },
+        "example": {
+          "errorUrl": "https://example.com/error",
+          "successUrl": "https://example.com/success"
+        }
+      },
+      "CollectData": {
+        "type": "object",
+        "required": [
+          "fields",
+          "schema",
+          "url"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectDataField"
+            },
+            "description": "Deprecated: Use `schema` and `url` fields instead for webview-based data collection",
+            "deprecated": true
+          },
+          "schema": {
+            "description": "JSON Schema for validating IC form data (for webview mode)"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for webview-based data collection"
+          }
+        },
+        "example": {
+          "fields": [
+            {
+              "id": "fullName",
+              "name": "Full name",
+              "required": true,
+              "type": "text"
+            },
+            {
+              "id": "dob",
+              "name": "Date of birth",
+              "required": true,
+              "type": "date"
+            }
+          ],
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "pobCountry",
+                  "pobAddress"
+                ]
+              },
+              {
+                "required": [
+                  "porCountry",
+                  "porAddress"
+                ]
+              }
+            ],
+            "properties": {
+              "dob": {
+                "description": "Date of birth in YYYY-MM-DD format",
+                "format": "date",
+                "title": "Date of Birth",
+                "type": "string"
+              },
+              "fullName": {
+                "description": "User's full legal name",
+                "minLength": 1,
+                "title": "Full Name",
+                "type": "string"
+              },
+              "pobAddress": {
+                "description": "Place of birth city and state (e.g., 'New York, NY')",
+                "maxLength": 200,
+                "title": "Place of Birth Address",
+                "type": "string"
+              },
+              "pobCountry": {
+                "description": "Place of birth country code (ISO 3166-1 alpha-2)",
+                "pattern": "^[A-Z]{2}$",
+                "title": "Place of Birth Country",
+                "type": "string"
+              },
+              "porAddress": {
+                "description": "Place of residence street address, city, and state",
+                "maxLength": 200,
+                "title": "Place of Residence Address",
+                "type": "string"
+              },
+              "porCountry": {
+                "description": "Place of residence country code (ISO 3166-1 alpha-2)",
+                "pattern": "^[A-Z]{2}$",
+                "title": "Place of Residence Country",
+                "type": "string"
+              },
+              "tosConfirmed": {
+                "const": true,
+                "description": "Must be true to confirm Terms of Service acceptance",
+                "title": "Terms of Service Confirmation",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "fullName",
+              "dob",
+              "tosConfirmed"
+            ],
+            "type": "object"
+          },
+          "url": "https://data-collection.walletconnect.com/ic/pay_123?accounts=eip155:1:0x123"
+        }
+      },
+      "CollectDataField": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "name",
+          "required"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the field for submission"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human readable name of the field"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Requiredness of the field"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CollectDataFieldType",
+            "description": "Type of the field"
+          }
+        },
+        "example": {
+          "id": "fullName",
+          "name": "Full name",
+          "required": true,
+          "type": "text"
+        }
+      },
+      "CollectDataFieldResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "value"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "id": "fullName",
+          "value": "John"
+        }
+      },
+      "CollectDataFieldType": {
+        "type": "string",
+        "enum": [
+          "text",
+          "date",
+          "checkbox"
+        ]
+      },
+      "CollectDataResult": {
+        "type": "object",
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectDataFieldResult"
+            }
+          }
+        },
+        "example": {
+          "fields": [
+            {
+              "id": "fullName",
+              "value": "John Smith"
+            },
+            {
+              "id": "dob",
+              "value": "1990-01-01"
+            },
+            {
+              "id": "tosConfirmed",
+              "value": "true"
+            },
+            {
+              "id": "pobCountry",
+              "value": "US"
+            },
+            {
+              "id": "pobAddress",
+              "value": "New York, NY"
+            }
+          ]
+        }
+      },
+      "ConfirmPaymentRequest": {
+        "type": "object",
+        "required": [
+          "optionId",
+          "results"
+        ],
+        "properties": {
+          "collectedData": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CollectDataResult"
+              }
+            ]
+          },
+          "optionId": {
+            "type": "string",
+            "description": "ID of the option to confirm"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmPaymentResult"
+            }
+          }
+        },
+        "example": {
+          "collectedData": {
+            "fields": [
+              {
+                "id": "fullName",
+                "value": "John Smith"
+              },
+              {
+                "id": "dob",
+                "value": "1990-01-01"
+              },
+              {
+                "id": "tosConfirmed",
+                "value": "true"
+              },
+              {
+                "id": "pobCountry",
+                "value": "US"
+              },
+              {
+                "id": "pobAddress",
+                "value": "New York, NY"
+              }
+            ]
+          },
+          "excludeFromRelayer": null,
+          "optionId": "opt_123",
+          "results": [
+            {
+              "data": [
+                "0x123"
+              ],
+              "type": "walletRpc"
+            }
+          ]
+        }
+      },
+      "ConfirmPaymentResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "isFinal"
+        ],
+        "properties": {
+          "info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GatewayPaymentInformation",
+                "description": "Payment information (transaction hash). Present when status is\nSucceeded, null otherwise."
+              }
+            ]
+          },
+          "isFinal": {
+            "type": "boolean",
+            "description": "True if the payment is in a final state and no longer requires polling"
+          },
+          "pollInMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
+            "minimum": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus",
+            "description": "Payment status"
+          }
+        },
+        "example": {
+          "info": null,
+          "isFinal": true,
+          "pollInMs": null,
+          "status": "succeeded"
+        }
+      },
+      "ConfirmPaymentResult": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "data",
+              "type"
+            ],
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {}
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "walletRpc"
+                ]
+              }
+            }
+          }
+        ],
+        "example": {
+          "data": [
+            "0x123"
+          ],
+          "type": "walletRpc"
+        }
+      },
+      "CreatePayment": {
+        "type": "object",
+        "required": [
+          "referenceId",
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountParameter",
+            "description": "Amount to be paid"
+          },
+          "checkout": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CheckoutConfig"
+              }
+            ]
+          },
+          "expiresAt": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Optional custom expiration timestamp (Unix seconds since epoch).\nMust be in the future if provided. If not provided, defaults to 5 minutes from now."
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "Merchant/PSP order ID"
+          }
+        },
+        "example": {
+          "amount": {
+            "unit": "iso4217/USD",
+            "value": "100"
+          },
+          "checkout": null,
+          "expiresAt": null,
+          "referenceId": "ORDER-123"
+        }
+      },
+      "CreatePaymentResponse": {
+        "type": "object",
+        "required": [
+          "paymentId",
+          "status",
+          "expiresAt",
+          "isFinal",
+          "gatewayUrl"
+        ],
+        "properties": {
+          "expiresAt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Payment expiration timestamp, in seconds since epoch",
+            "minimum": 0
+          },
+          "gatewayUrl": {
+            "type": "string",
+            "description": "Gateway URL to redirect the user to for payment"
+          },
+          "isFinal": {
+            "type": "boolean",
+            "description": "True if the payment is in a final state and no longer requires polling"
+          },
+          "paymentId": {
+            "$ref": "#/components/schemas/PaymentId",
+            "description": "Payment ID"
+          },
+          "pollInMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
+            "minimum": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus",
+            "description": "Payment status"
+          }
+        },
+        "example": {
+          "expiresAt": 1718236800,
+          "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
+          "isFinal": false,
+          "paymentId": "pay_6ea2ecc101KMNV56BF1FXA71QKXJVHTJ4T",
+          "pollInMs": 1000,
+          "status": "requires_action"
+        }
+      },
+      "ErrorCode": {
+        "type": "string",
+        "description": "Standard error codes for API responses.\n\nThis prevents typos like \"invlaid_params\" from reaching production.",
+        "enum": [
+          "rate_limited",
+          "invalid_params",
+          "params_validation",
+          "payment_not_found",
+          "idempotency_conflict",
+          "internal_error",
+          "invalid_api_key",
+          "unauthorized",
+          "forbidden",
+          "invalid_state",
+          "payment_expired",
+          "quote_expired",
+          "missing_api_key",
+          "missing_merchant_api_key",
+          "missing_merchant_id",
+          "header_not_ascii",
+          "not_sandbox_api_key",
+          "merchant_not_found",
+          "merchant_exists",
+          "api_key_not_found",
+          "partner_not_found",
+          "customer_not_found",
+          "wallet_not_found",
+          "missing_app_id",
+          "missing_client_id",
+          "invalid_app_id",
+          "conflicting_auth_headers",
+          "missing_auth_headers",
+          "invalid_api_version",
+          "unknown_api_version",
+          "api_version_downgrade",
+          "sanctioned_user"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Standard error response structure for API errors.",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "FetchRequest": {
+        "type": "object",
+        "required": [
+          "optionId",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "string",
+            "description": "Extra build payload"
+          },
+          "optionId": {
+            "type": "string",
+            "description": "ID of the option to build an action for"
+          }
+        },
+        "example": {
+          "data": "...",
+          "optionId": "opt_123"
+        }
+      },
+      "FetchResponse": {
+        "type": "object",
+        "required": [
+          "actions"
+        ],
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            }
+          }
+        },
+        "example": {
+          "actions": [
+            {
+              "data": {
+                "chain_id": "eip155:8453",
+                "method": "eth_signTypedData_v4",
+                "params": [
+                  "0x0000000000000000000000000000000000000000",
+                  "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
+                ]
+              },
+              "type": "walletRpc"
+            }
+          ]
+        }
+      },
+      "GatewayCancelPaymentResponse": {
+        "type": "object",
+        "required": [
+          "paymentId",
+          "status",
+          "cancelledReason",
+          "cancelledAt"
+        ],
+        "properties": {
+          "cancelledAt": {
+            "type": "string"
+          },
+          "cancelledReason": {
+            "type": "string"
+          },
+          "paymentId": {
+            "$ref": "#/components/schemas/PaymentId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
+        "example": {
+          "cancelledAt": "2025-01-14T10:30:00Z",
+          "cancelledReason": "cancelled_by_user",
+          "paymentId": "pay_05a2ecc101KMNV56BG17RM6A2S3YKVGPQ2",
+          "status": "cancelled"
+        }
+      },
+      "GatewayPaymentInformation": {
+        "type": "object",
+        "description": "Payment information returned when a gateway payment succeeds.",
+        "required": [
+          "txId",
+          "optionAmount"
+        ],
+        "properties": {
+          "optionAmount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Amount paid in token units"
+          },
+          "txId": {
+            "type": "string",
+            "description": "Transaction identifier (hash)"
+          }
+        }
+      },
+      "GetPaymentOptionsRequest": {
+        "type": "object",
+        "required": [
+          "accounts"
+        ],
+        "properties": {
+          "accounts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "refresh": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "accounts": [
+            "eip155:8453:0x123"
+          ],
+          "refresh": null
+        }
+      },
+      "GetPaymentOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "collectData": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CollectData"
+              }
+            ]
+          },
+          "info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GetPaymentResponse"
+              }
+            ]
+          },
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PaymentOption"
+            }
+          }
+        },
+        "example": {
+          "collectData": {
+            "fields": [
+              {
+                "id": "fullName",
+                "name": "Full name",
+                "required": true,
+                "type": "text"
+              },
+              {
+                "id": "dob",
+                "name": "Date of birth",
+                "required": true,
+                "type": "date"
+              }
+            ],
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": false,
+              "anyOf": [
+                {
+                  "required": [
+                    "pobCountry",
+                    "pobAddress"
+                  ]
+                },
+                {
+                  "required": [
+                    "porCountry",
+                    "porAddress"
+                  ]
+                }
+              ],
+              "properties": {
+                "dob": {
+                  "description": "Date of birth in YYYY-MM-DD format",
+                  "format": "date",
+                  "title": "Date of Birth",
+                  "type": "string"
+                },
+                "fullName": {
+                  "description": "User's full legal name",
+                  "minLength": 1,
+                  "title": "Full Name",
+                  "type": "string"
+                },
+                "pobAddress": {
+                  "description": "Place of birth city and state (e.g., 'New York, NY')",
+                  "maxLength": 200,
+                  "title": "Place of Birth Address",
+                  "type": "string"
+                },
+                "pobCountry": {
+                  "description": "Place of birth country code (ISO 3166-1 alpha-2)",
+                  "pattern": "^[A-Z]{2}$",
+                  "title": "Place of Birth Country",
+                  "type": "string"
+                },
+                "porAddress": {
+                  "description": "Place of residence street address, city, and state",
+                  "maxLength": 200,
+                  "title": "Place of Residence Address",
+                  "type": "string"
+                },
+                "porCountry": {
+                  "description": "Place of residence country code (ISO 3166-1 alpha-2)",
+                  "pattern": "^[A-Z]{2}$",
+                  "title": "Place of Residence Country",
+                  "type": "string"
+                },
+                "tosConfirmed": {
+                  "const": true,
+                  "description": "Must be true to confirm Terms of Service acceptance",
+                  "title": "Terms of Service Confirmation",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "fullName",
+                "dob",
+                "tosConfirmed"
+              ],
+              "type": "object"
+            },
+            "url": "https://data-collection.walletconnect.com/ic/pay_123?accounts=eip155:1:0x123"
+          },
+          "info": {
+            "amount": {
+              "display": {
+                "assetName": "USD Coin",
+                "assetSymbol": "USDC",
+                "decimals": 6,
+                "iconUrl": "https://assets.walletconnect.com/usdc.png",
+                "networkIconUrl": "https://assets.walletconnect.com/base.png",
+                "networkName": "Base"
+              },
+              "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+              "value": "1000000"
+            },
+            "buyer": {
+              "accountCaip10": "eip155:1:0x0000000000000000000000000000000000000000",
+              "accountProviderIcon": "https://example.com/icon.png",
+              "accountProviderName": "Wallet"
+            },
+            "expiresAt": 1700000000,
+            "merchant": {
+              "iconUrl": "https://example.com/icon.png",
+              "name": "Merchant"
+            },
+            "status": "requires_action"
+          },
+          "options": [
+            {
+              "account": "eip155:1:0x0000000000000000000000000000000000000000",
+              "actions": [
+                {
+                  "data": {
+                    "chain_id": "eip155:8453",
+                    "method": "eth_signTypedData_v4",
+                    "params": [
+                      "0x0000000000000000000000000000000000000000",
+                      "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
+                    ]
+                  },
+                  "type": "walletRpc"
+                }
+              ],
+              "amount": {
+                "display": {
+                  "assetName": "USD Coin",
+                  "assetSymbol": "USDC",
+                  "decimals": 6,
+                  "iconUrl": "https://assets.walletconnect.com/usdc.png",
+                  "networkIconUrl": "https://assets.walletconnect.com/base.png",
+                  "networkName": "Base"
+                },
+                "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                "value": "1000000"
+              },
+              "collectData": {
+                "fields": [
+                  {
+                    "id": "fullName",
+                    "name": "Full name",
+                    "required": true,
+                    "type": "text"
+                  },
+                  {
+                    "id": "dob",
+                    "name": "Date of birth",
+                    "required": true,
+                    "type": "date"
+                  }
+                ],
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "pobCountry",
+                        "pobAddress"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "porCountry",
+                        "porAddress"
+                      ]
+                    }
+                  ],
+                  "properties": {
+                    "dob": {
+                      "description": "Date of birth in YYYY-MM-DD format",
+                      "format": "date",
+                      "title": "Date of Birth",
+                      "type": "string"
+                    },
+                    "fullName": {
+                      "description": "User's full legal name",
+                      "minLength": 1,
+                      "title": "Full Name",
+                      "type": "string"
+                    },
+                    "pobAddress": {
+                      "description": "Place of birth city and state (e.g., 'New York, NY')",
+                      "maxLength": 200,
+                      "title": "Place of Birth Address",
+                      "type": "string"
+                    },
+                    "pobCountry": {
+                      "description": "Place of birth country code (ISO 3166-1 alpha-2)",
+                      "pattern": "^[A-Z]{2}$",
+                      "title": "Place of Birth Country",
+                      "type": "string"
+                    },
+                    "porAddress": {
+                      "description": "Place of residence street address, city, and state",
+                      "maxLength": 200,
+                      "title": "Place of Residence Address",
+                      "type": "string"
+                    },
+                    "porCountry": {
+                      "description": "Place of residence country code (ISO 3166-1 alpha-2)",
+                      "pattern": "^[A-Z]{2}$",
+                      "title": "Place of Residence Country",
+                      "type": "string"
+                    },
+                    "tosConfirmed": {
+                      "const": true,
+                      "description": "Must be true to confirm Terms of Service acceptance",
+                      "title": "Terms of Service Confirmation",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "fullName",
+                    "dob",
+                    "tosConfirmed"
+                  ],
+                  "type": "object"
+                },
+                "url": "https://data-collection.walletconnect.com/ic/pay_123?accounts=eip155:1:0x123"
+              },
+              "etaS": 5,
+              "expiresAt": 1700000300,
+              "id": "opt_123"
+            }
+          ]
+        }
+      },
+      "GetPaymentResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "amount",
+          "expiresAt",
+          "merchant"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "buyer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BuyerInfo"
+              }
+            ]
+          },
+          "expiresAt": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MerchantInfo"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
+        "example": {
+          "amount": {
+            "display": {
+              "assetName": "USD Coin",
+              "assetSymbol": "USDC",
+              "decimals": 6,
+              "iconUrl": "https://assets.walletconnect.com/usdc.png",
+              "networkIconUrl": "https://assets.walletconnect.com/base.png",
+              "networkName": "Base"
+            },
+            "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+            "value": "1000000"
+          },
+          "buyer": {
+            "accountCaip10": "eip155:1:0x0000000000000000000000000000000000000000",
+            "accountProviderIcon": "https://example.com/icon.png",
+            "accountProviderName": "Wallet"
+          },
+          "expiresAt": 1700000000,
+          "merchant": {
+            "iconUrl": "https://example.com/icon.png",
+            "name": "Merchant"
+          },
+          "status": "requires_action"
+        }
+      },
+      "GetPaymentStatusResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "isFinal"
+        ],
+        "properties": {
+          "info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentInformation",
+                "description": "Payment information (transaction hash, amount). Present when status is\nSucceeded, null otherwise."
+              }
+            ]
+          },
+          "isFinal": {
+            "type": "boolean",
+            "description": "True if the payment is in a final state and no longer requires polling"
+          },
+          "pollInMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
+            "minimum": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus",
+            "description": "Payment status"
+          }
+        },
+        "example": {
+          "info": null,
+          "isFinal": false,
+          "pollInMs": 1000,
+          "status": "requires_action"
+        }
+      },
+      "MerchantInfo": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "iconUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Merchant icon URL"
+          },
+          "name": {
+            "type": "string",
+            "description": "Merchant name"
+          }
+        },
+        "example": {
+          "iconUrl": "https://example.com/icon.png",
+          "name": "Merchant"
+        }
+      },
+      "PaymentId": {
+        "type": "string",
+        "description": "Payment ID",
+        "examples": [
+          "pay_7fa2ecc101ARZ3NDEKTSV4RRFFQ69G5FAV"
+        ]
+      },
+      "PaymentInformation": {
+        "type": "object",
+        "description": "Payment information returned when payment succeeds",
+        "required": [
+          "txId",
+          "optionAmount"
+        ],
+        "properties": {
+          "optionAmount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Amount paid in token units"
+          },
+          "txId": {
+            "type": "string",
+            "description": "Transaction identifier (hash)"
+          }
+        },
+        "example": {
+          "optionAmount": {
+            "display": {
+              "assetName": "USD Coin",
+              "assetSymbol": "USDC",
+              "decimals": 6,
+              "iconUrl": "https://assets.walletconnect.com/usdc.png",
+              "networkIconUrl": "https://assets.walletconnect.com/base.png",
+              "networkName": "Base"
+            },
+            "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+            "value": "1000000"
+          },
+          "txId": "0xabc123..."
+        }
+      },
+      "PaymentOption": {
+        "type": "object",
+        "required": [
+          "id",
+          "account",
+          "amount",
+          "etaS",
+          "actions"
+        ],
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "The account to use for the option"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "description": "Actions required to complete the option"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "The option's token and amount"
+          },
+          "collectData": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CollectData",
+                "description": "Per-option IC data collection info. Present when this option's account requires data collection, null otherwise."
+              }
+            ]
+          },
+          "etaS": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Estimated time to complete the option, in seconds",
+            "minimum": 0
+          },
+          "expiresAt": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Unix timestamp (seconds) after which this quote is stale and confirm_payment\nwill reject it with `quote_expired`. The wallet should re-fetch options before\nthis deadline. `None` for direct-currency options that don't involve a rate.",
+            "minimum": 0
+          },
+          "id": {
+            "type": "string",
+            "description": "ID of the option to be used to refer to it in other requests. May be up to 2^16 characters."
+          }
+        },
+        "example": {
+          "account": "eip155:1:0x0000000000000000000000000000000000000000",
+          "actions": [
+            {
+              "data": {
+                "chain_id": "eip155:8453",
+                "method": "eth_signTypedData_v4",
+                "params": [
+                  "0x0000000000000000000000000000000000000000",
+                  "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
+                ]
+              },
+              "type": "walletRpc"
+            }
+          ],
+          "amount": {
+            "display": {
+              "assetName": "USD Coin",
+              "assetSymbol": "USDC",
+              "decimals": 6,
+              "iconUrl": "https://assets.walletconnect.com/usdc.png",
+              "networkIconUrl": "https://assets.walletconnect.com/base.png",
+              "networkName": "Base"
+            },
+            "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+            "value": "1000000"
+          },
+          "collectData": {
+            "fields": [
+              {
+                "id": "fullName",
+                "name": "Full name",
+                "required": true,
+                "type": "text"
+              },
+              {
+                "id": "dob",
+                "name": "Date of birth",
+                "required": true,
+                "type": "date"
+              }
+            ],
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": false,
+              "anyOf": [
+                {
+                  "required": [
+                    "pobCountry",
+                    "pobAddress"
+                  ]
+                },
+                {
+                  "required": [
+                    "porCountry",
+                    "porAddress"
+                  ]
+                }
+              ],
+              "properties": {
+                "dob": {
+                  "description": "Date of birth in YYYY-MM-DD format",
+                  "format": "date",
+                  "title": "Date of Birth",
+                  "type": "string"
+                },
+                "fullName": {
+                  "description": "User's full legal name",
+                  "minLength": 1,
+                  "title": "Full Name",
+                  "type": "string"
+                },
+                "pobAddress": {
+                  "description": "Place of birth city and state (e.g., 'New York, NY')",
+                  "maxLength": 200,
+                  "title": "Place of Birth Address",
+                  "type": "string"
+                },
+                "pobCountry": {
+                  "description": "Place of birth country code (ISO 3166-1 alpha-2)",
+                  "pattern": "^[A-Z]{2}$",
+                  "title": "Place of Birth Country",
+                  "type": "string"
+                },
+                "porAddress": {
+                  "description": "Place of residence street address, city, and state",
+                  "maxLength": 200,
+                  "title": "Place of Residence Address",
+                  "type": "string"
+                },
+                "porCountry": {
+                  "description": "Place of residence country code (ISO 3166-1 alpha-2)",
+                  "pattern": "^[A-Z]{2}$",
+                  "title": "Place of Residence Country",
+                  "type": "string"
+                },
+                "tosConfirmed": {
+                  "const": true,
+                  "description": "Must be true to confirm Terms of Service acceptance",
+                  "title": "Terms of Service Confirmation",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "fullName",
+                "dob",
+                "tosConfirmed"
+              ],
+              "type": "object"
+            },
+            "url": "https://data-collection.walletconnect.com/ic/pay_123?accounts=eip155:1:0x123"
+          },
+          "etaS": 5,
+          "expiresAt": 1700000300,
+          "id": "opt_123"
+        }
+      },
+      "PaymentStatus": {
+        "type": "string",
+        "description": "Payment status representing the lifecycle of a payment.\n\nPayments progress through these states from creation to terminal status.\nSome states are specific to the payment source (pull vs push).",
+        "enum": [
+          "requires_action",
+          "processing",
+          "succeeded",
+          "failed",
+          "expired",
+          "cancelled"
+        ]
+      },
+      "PaymentsCancelPaymentResponse": {
+        "type": "object",
+        "required": [
+          "paymentId",
+          "status",
+          "cancelledReason",
+          "cancelledAt"
+        ],
+        "properties": {
+          "cancelledAt": {
+            "type": "string"
+          },
+          "cancelledReason": {
+            "type": "string"
+          },
+          "paymentId": {
+            "$ref": "#/components/schemas/PaymentId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
+        "example": {
+          "cancelledAt": "2025-01-14T10:30:00Z",
+          "cancelledReason": "cancelled_by_merchant",
+          "paymentId": "pay_aaa2ecc101KMNV56BF66Z1C0VTFGA740M7",
+          "status": "cancelled"
+        }
+      },
+      "String": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "Fiat currency (ISO 4217 format)",
+            "required": [
+              "Iso4217"
+            ],
+            "properties": {
+              "Iso4217": {
+                "type": "string",
+                "description": "Fiat currency (ISO 4217 format)"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Blockchain token (CAIP-19 format)",
+            "required": [
+              "Caip19"
+            ],
+            "properties": {
+              "Caip19": {
+                "type": "string",
+                "description": "Blockchain token (CAIP-19 format)"
+              }
+            }
+          }
+        ],
+        "description": "Represents a currency/token unit for payment amounts.\n\nCan be either:\n- A fiat currency (ISO 4217): `\"iso4217/USD\"`, `\"iso4217/EUR\"`\n- A blockchain token (CAIP-19): `\"caip19/eip155:1/erc20:0x...\"`",
+        "example": "iso4217/USD"
+      },
+      "WalletRpcAction": {
+        "type": "object",
+        "required": [
+          "chain_id",
+          "method",
+          "params"
+        ],
+        "properties": {
+          "chain_id": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "params": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "example": {
+          "chain_id": "eip155:8453",
+          "method": "eth_signTypedData_v4",
+          "params": [
+            "0x0000000000000000000000000000000000000000",
+            "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
+          ]
+        }
+      },
+      "MerchantApiErrorCode": {
+        "type": "string",
+        "enum": [
+          "invalid_params",
+          "params_validation",
+          "not_found",
+          "internal_error",
+          "bad_gateway",
+          "missing_api_key",
+          "invalid_api_key",
+          "missing_merchant_id",
+          "invalid_api_version",
+          "unknown_api_version",
+          "api_version_downgrade",
+          "idempotency_conflict",
+          "version_conflict",
+          "missing_idempotency_key"
+        ],
+        "description": "Machine-readable error code"
+      },
+      "MerchantApiErrorResponse": {
+        "type": "object",
+        "required": [
+          "message",
+          "code"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "code": {
+            "$ref": "#/components/schemas/MerchantApiErrorCode"
+          },
+          "issues": {
+            "type": "array",
+            "description": "Field-level validation issues (present on validation errors)",
+            "items": {
+              "type": "object",
+              "required": [
+                "field",
+                "message"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MerchantPaymentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "paymentId": {
+                  "type": "string"
+                },
+                "merchant": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "iconUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                },
+                "referenceId": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "requires_action",
+                    "processing",
+                    "succeeded",
+                    "failed",
+                    "expired",
+                    "cancelled"
+                  ]
+                },
+                "isTerminal": {
+                  "type": "boolean"
+                },
+                "fiatAmount": {
+                  "type": "object",
+                  "properties": {
+                    "unit": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    },
+                    "display": {
+                      "type": "object",
+                      "properties": {
+                        "assetSymbol": {
+                          "type": "string"
+                        },
+                        "assetName": {
+                          "type": "string"
+                        },
+                        "decimals": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "assetSymbol",
+                        "assetName",
+                        "decimals"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "unit",
+                    "value",
+                    "display"
+                  ]
+                },
+                "tokenAmount": {
+                  "type": "object",
+                  "properties": {
+                    "unit": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "assetSymbol": {
+                              "type": "string"
+                            },
+                            "assetName": {
+                              "type": "string"
+                            },
+                            "decimals": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "iconUrl": {
+                              "type": "string"
+                            },
+                            "networkName": {
+                              "type": "string"
+                            },
+                            "networkIconUrl": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "assetSymbol",
+                            "assetName",
+                            "decimals"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "unit",
+                    "value",
+                    "display"
+                  ]
+                },
+                "buyer": {
+                  "type": "object",
+                  "properties": {
+                    "accountCaip10": {
+                      "type": "string"
+                    },
+                    "accountProviderName": {
+                      "type": "string"
+                    },
+                    "accountProviderIcon": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "accountCaip10"
+                  ]
+                },
+                "transaction": {
+                  "type": "object",
+                  "properties": {
+                    "networkId": {
+                      "type": "string"
+                    },
+                    "hash": {
+                      "type": "string"
+                    },
+                    "nonce": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "networkId"
+                  ]
+                },
+                "settlement": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "txHash": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "lastUpdatedAt": {
+                  "type": "string"
+                },
+                "settledAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "paymentId",
+                "merchant",
+                "referenceId",
+                "status",
+                "isTerminal",
+                "createdAt",
+                "lastUpdatedAt"
+              ]
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "totalRevenue": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number"
+                    },
+                    "currency": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "currency"
+                  ]
+                }
+              },
+              "totalTransactions": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "totalCustomers": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "totalRevenue",
+              "totalTransactions",
+              "totalCustomers"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "nextCursor",
+          "stats"
+        ]
+      },
+      "MerchantLegacyPaymentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "payment_id": {
+                  "type": "string"
+                },
+                "merchant_id": {
+                  "type": "string"
+                },
+                "reference_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "requires_action",
+                    "processing",
+                    "succeeded",
+                    "failed",
+                    "expired"
+                  ]
+                },
+                "is_terminal": {
+                  "type": "boolean"
+                },
+                "wallet_name": {
+                  "type": "string"
+                },
+                "chain_id": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "buyer_caip10": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "token_caip19": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "tx_hash": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "nonce": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2147483647
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "token_amount": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fiat_amount": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fiat_currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "last_updated_at": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "settled_at": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "settlement_status": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "settlement_tx_hash": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "token_symbol": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "token_decimals": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "token_logo": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "chain_logo": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "wallet_logo": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "payment_id",
+                "merchant_id",
+                "reference_id",
+                "status",
+                "is_terminal",
+                "wallet_name",
+                "token_symbol",
+                "token_decimals",
+                "token_logo",
+                "chain_logo",
+                "wallet_logo"
+              ]
+            }
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "total_customers": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              "total_revenue": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency"
+                ]
+              },
+              "total_transactions": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "total_customers",
+              "total_revenue",
+              "total_transactions"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "stats"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "API Key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Api-Key"
+      },
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Api-Key",
+        "description": "Private API key for wallet authentication"
+      },
+      "AppId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "App-Id",
+        "description": "Public App ID for wallet authentication. When using this auth mode, the Client-Id header is also required."
+      },
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Api-Key",
+        "description": "Partner API key."
+      },
+      "apiKeyLegacy": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Key",
+        "description": "**Deprecated.** Legacy service API key for path-based routes. `Api-Key` header is also accepted for backward compatibility."
+      }
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    },
+    {
+      "ApiKey": []
+    },
+    {
+      "AppId": []
+    }
+  ]
+}
