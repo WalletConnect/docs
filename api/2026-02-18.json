@@ -1131,33 +1131,46 @@
             "in": "query",
             "name": "startTs",
             "schema": {
+              "examples": [
+                "2026-01-06T00:00:00Z"
+              ],
               "type": "string"
             },
-            "description": "RFC3339 timestamp, inclusive (e.g. 2026-01-06T00:00:00Z)"
+            "description": "RFC3339 timestamp, inclusive"
           },
           {
             "in": "query",
             "name": "endTs",
             "schema": {
+              "examples": [
+                "2026-01-07T00:00:00Z"
+              ],
               "type": "string"
             },
-            "description": "RFC3339 timestamp, exclusive (e.g. 2026-01-07T00:00:00Z)"
+            "description": "RFC3339 timestamp, exclusive"
           },
           {
             "in": "query",
             "name": "asset",
             "schema": {
+              "examples": [
+                "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+              ],
               "type": "string"
             },
-            "description": "Comma-separated crypto currencies. Currently ignored."
+            "description": "Filter by [CAIP-19](https://standards.chainagnostic.org/CAIPs/caip-19) asset identifier. Comma-separated for multiple."
           },
           {
             "in": "query",
             "name": "network",
             "schema": {
+              "examples": [
+                "eip155:8453",
+                "eip155:8453,eip155:1"
+              ],
               "type": "string"
             },
-            "description": "Comma-separated chain IDs (matches `chain_id`)."
+            "description": "Filter by [CAIP-2](https://standards.chainagnostic.org/CAIPs/caip-2) chain ID. Comma-separated for multiple."
           },
           {
             "in": "query",
@@ -1168,7 +1181,8 @@
                 "date",
                 "amount"
               ]
-            }
+            },
+            "description": "Field to sort by"
           },
           {
             "in": "query",
@@ -1179,7 +1193,8 @@
                 "asc",
                 "desc"
               ]
-            }
+            },
+            "description": "Sort direction"
           },
           {
             "in": "query",
@@ -1187,7 +1202,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
           },
           {
             "in": "query",
@@ -1215,7 +1230,7 @@
                 ]
               }
             },
-            "description": "Filter by status. Repeat for multiple: ?status=succeeded&status=processing"
+            "description": "Filter by payment status. Accepts a single value or multiple repeated params:\n\n- Single: `?status=succeeded`\n- Multiple: `?status=succeeded&status=processing`"
           },
           {
             "in": "query",
@@ -1225,9 +1240,18 @@
               "items": {
                 "type": "string",
                 "minLength": 1
-              }
+              },
+              "examples": [
+                [
+                  "acme-store-1"
+                ],
+                [
+                  "acme-store-1",
+                  "widget_co"
+                ]
+              ]
             },
-            "description": "Filter by merchant ID. Repeat for multiple: ?merchantId=merchant_1&merchantId=merchant_2"
+            "description": "Filter by merchant ID. Accepts a single value or multiple repeated params:\n\n- Single: `?merchantId=acme-store-1`\n- Multiple: `?merchantId=acme-store-1&merchantId=widget_co`"
           }
         ],
         "responses": {
@@ -1251,7 +1275,7 @@
                     {
                       "paymentId": "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ",
                       "merchant": {
-                        "id": "merchant_id",
+                        "id": "acme-store-1",
                         "name": "Acme Store",
                         "iconUrl": "https://imagedelivery.net/example/icon.png"
                       },
@@ -1260,7 +1284,7 @@
                       "isTerminal": true,
                       "fiatAmount": {
                         "unit": "iso4217/USD",
-                        "value": "10000",
+                        "value": "500",
                         "display": {
                           "assetSymbol": "USD",
                           "assetName": "US Dollar",
@@ -1269,7 +1293,7 @@
                       },
                       "tokenAmount": {
                         "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
-                        "value": "100000000",
+                        "value": "5000000",
                         "display": {
                           "assetSymbol": "USDC",
                           "assetName": "USD Coin",
@@ -1290,8 +1314,47 @@
                         "nonce": 42
                       },
                       "settlement": {
-                        "status": "pending",
+                        "amount": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "4840000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "settled": true,
                         "txHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+                      "fees": {
+                        "total": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "160000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "fixed": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "140000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "percentage": "0.4"
                       },
                       "createdAt": "2024-01-01T12:00:00.000Z",
                       "lastUpdatedAt": "2024-01-01T12:00:00.000Z",
@@ -1829,7 +1892,10 @@
             "required": true,
             "description": "Merchant identifier.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "examples": [
+                "acme-store-1"
+              ]
             }
           },
           {
@@ -1849,33 +1915,46 @@
             "in": "query",
             "name": "startTs",
             "schema": {
+              "examples": [
+                "2026-01-06T00:00:00Z"
+              ],
               "type": "string"
             },
-            "description": "RFC3339 timestamp, inclusive (e.g. 2026-01-06T00:00:00Z)"
+            "description": "RFC3339 timestamp, inclusive"
           },
           {
             "in": "query",
             "name": "endTs",
             "schema": {
+              "examples": [
+                "2026-01-07T00:00:00Z"
+              ],
               "type": "string"
             },
-            "description": "RFC3339 timestamp, exclusive (e.g. 2026-01-07T00:00:00Z)"
+            "description": "RFC3339 timestamp, exclusive"
           },
           {
             "in": "query",
             "name": "asset",
             "schema": {
+              "examples": [
+                "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+              ],
               "type": "string"
             },
-            "description": "Comma-separated crypto currencies. Currently ignored."
+            "description": "Filter by [CAIP-19](https://standards.chainagnostic.org/CAIPs/caip-19) asset identifier. Comma-separated for multiple."
           },
           {
             "in": "query",
             "name": "network",
             "schema": {
+              "examples": [
+                "eip155:8453",
+                "eip155:8453,eip155:1"
+              ],
               "type": "string"
             },
-            "description": "Comma-separated chain IDs (matches `chain_id`)."
+            "description": "Filter by [CAIP-2](https://standards.chainagnostic.org/CAIPs/caip-2) chain ID. Comma-separated for multiple."
           },
           {
             "in": "query",
@@ -1886,7 +1965,8 @@
                 "date",
                 "amount"
               ]
-            }
+            },
+            "description": "Field to sort by"
           },
           {
             "in": "query",
@@ -1897,7 +1977,8 @@
                 "asc",
                 "desc"
               ]
-            }
+            },
+            "description": "Sort direction"
           },
           {
             "in": "query",
@@ -1905,7 +1986,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
           },
           {
             "in": "query",
@@ -1933,7 +2014,7 @@
                 ]
               }
             },
-            "description": "Filter by status. Repeat for multiple: ?status=succeeded&status=processing"
+            "description": "Filter by payment status. Accepts a single value or multiple repeated params:\n\n- Single: `?status=succeeded`\n- Multiple: `?status=succeeded&status=processing`"
           }
         ],
         "responses": {
@@ -1957,7 +2038,7 @@
                     {
                       "paymentId": "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ",
                       "merchant": {
-                        "id": "merchant_id",
+                        "id": "acme-store-1",
                         "name": "Acme Store",
                         "iconUrl": "https://imagedelivery.net/example/icon.png"
                       },
@@ -1966,7 +2047,7 @@
                       "isTerminal": true,
                       "fiatAmount": {
                         "unit": "iso4217/USD",
-                        "value": "10000",
+                        "value": "500",
                         "display": {
                           "assetSymbol": "USD",
                           "assetName": "US Dollar",
@@ -1975,7 +2056,7 @@
                       },
                       "tokenAmount": {
                         "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
-                        "value": "100000000",
+                        "value": "5000000",
                         "display": {
                           "assetSymbol": "USDC",
                           "assetName": "USD Coin",
@@ -1996,8 +2077,47 @@
                         "nonce": 42
                       },
                       "settlement": {
-                        "status": "pending",
+                        "amount": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "4840000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "settled": true,
                         "txHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+                      "fees": {
+                        "total": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "160000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "fixed": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "140000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "percentage": "0.4"
                       },
                       "createdAt": "2024-01-01T12:00:00.000Z",
                       "lastUpdatedAt": "2024-01-01T12:00:00.000Z",
@@ -2265,10 +2385,15 @@
                       "type": "object",
                       "properties": {
                         "id": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Merchant ID",
+                          "examples": [
+                            "mrch_7kBz2qR9xPvLmN4Yw"
+                          ]
                         },
                         "name": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Merchant display name"
                         },
                         "email": {
                           "anyOf": [
@@ -2278,10 +2403,18 @@
                             {
                               "type": "null"
                             }
+                          ],
+                          "description": "Contact email",
+                          "examples": [
+                            "billing@acme.store"
                           ]
                         },
                         "status": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Current merchant status",
+                          "examples": [
+                            "active"
+                          ]
                         },
                         "iconUrl": {
                           "anyOf": [
@@ -2291,10 +2424,18 @@
                             {
                               "type": "null"
                             }
+                          ],
+                          "description": "Merchant logo URL, or null if not set",
+                          "examples": [
+                            "https://imagedelivery.net/example/acme-icon.png"
                           ]
                         },
                         "createdAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "ISO 8601 creation timestamp",
+                          "examples": [
+                            "2025-06-15T10:30:00.000Z"
+                          ]
                         }
                       },
                       "required": [
@@ -2310,6 +2451,16 @@
                   "required": [
                     "merchant"
                   ]
+                },
+                "example": {
+                  "merchant": {
+                    "id": "mrch_7kBz2qR9xPvLmN4Yw",
+                    "name": "Acme Store",
+                    "email": "billing@acme.store",
+                    "status": "active",
+                    "iconUrl": "https://imagedelivery.net/example/acme-icon.png",
+                    "createdAt": "2025-06-15T10:30:00.000Z"
+                  }
                 }
               }
             }
@@ -2533,15 +2684,27 @@
                   "merchantName": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 256
+                    "maxLength": 256,
+                    "description": "Display name for the merchant",
+                    "examples": [
+                      "Acme Store"
+                    ]
                   },
                   "merchantEmail": {
                     "type": "string",
                     "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "description": "Contact email for the merchant",
+                    "examples": [
+                      "billing@acme.store"
+                    ]
                   },
                   "iconUrl": {
                     "default": null,
+                    "description": "Merchant logo URL (HTTPS only), or null to unset",
+                    "examples": [
+                      "https://example.com/logo.png"
+                    ],
                     "anyOf": [
                       {
                         "type": "string",
@@ -2556,6 +2719,13 @@
                 "required": [
                   "merchantName",
                   "merchantEmail"
+                ],
+                "examples": [
+                  {
+                    "merchantName": "Acme Store",
+                    "merchantEmail": "billing@acme.store",
+                    "iconUrl": "https://example.com/logo.png"
+                  }
                 ]
               }
             }
@@ -2582,10 +2752,15 @@
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Merchant ID",
+                            "examples": [
+                              "mrch_7kBz2qR9xPvLmN4Yw"
+                            ]
                           },
                           "name": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Merchant display name"
                           },
                           "email": {
                             "anyOf": [
@@ -2595,10 +2770,18 @@
                               {
                                 "type": "null"
                               }
+                            ],
+                            "description": "Contact email",
+                            "examples": [
+                              "billing@acme.store"
                             ]
                           },
                           "status": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Current merchant status",
+                            "examples": [
+                              "active"
+                            ]
                           },
                           "iconUrl": {
                             "anyOf": [
@@ -2608,10 +2791,18 @@
                               {
                                 "type": "null"
                               }
+                            ],
+                            "description": "Merchant logo URL, or null if not set",
+                            "examples": [
+                              "https://imagedelivery.net/example/acme-icon.png"
                             ]
                           },
                           "createdAt": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "ISO 8601 creation timestamp",
+                            "examples": [
+                              "2025-06-15T10:30:00.000Z"
+                            ]
                           }
                         },
                         "required": [
@@ -2627,7 +2818,8 @@
                     "totalCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
-                      "maximum": 9007199254740991
+                      "maximum": 9007199254740991,
+                      "description": "Total number of merchants matching the query (ignoring pagination)"
                     },
                     "nextCursor": {
                       "anyOf": [
@@ -2637,7 +2829,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "Cursor for the next page, or null if no more results"
                     }
                   },
                   "required": [
@@ -2645,6 +2838,28 @@
                     "totalCount",
                     "nextCursor"
                   ]
+                },
+                "example": {
+                  "merchants": [
+                    {
+                      "id": "mrch_7kBz2qR9xPvLmN4Yw",
+                      "name": "Acme Store",
+                      "email": "billing@acme.store",
+                      "status": "active",
+                      "iconUrl": "https://imagedelivery.net/example/acme-icon.png",
+                      "createdAt": "2025-06-15T10:30:00.000Z"
+                    },
+                    {
+                      "id": "mrch_Qx8fTp3YwKjR5vNm2",
+                      "name": "Widget Co",
+                      "email": null,
+                      "status": "active",
+                      "iconUrl": null,
+                      "createdAt": "2025-07-01T08:00:00.000Z"
+                    }
+                  ],
+                  "totalCount": 2,
+                  "nextCursor": null
                 }
               }
             }
@@ -2775,6 +2990,9 @@
             "in": "query",
             "name": "search",
             "schema": {
+              "examples": [
+                "Acme"
+              ],
               "type": "string",
               "minLength": 1,
               "maxLength": 256
@@ -2787,7 +3005,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque pagination cursor. Use value from `nextCursor`."
+            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
           },
           {
             "in": "query",
@@ -2822,10 +3040,15 @@
                       "type": "object",
                       "properties": {
                         "id": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Merchant ID",
+                          "examples": [
+                            "mrch_7kBz2qR9xPvLmN4Yw"
+                          ]
                         },
                         "name": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Merchant display name"
                         },
                         "email": {
                           "anyOf": [
@@ -2835,10 +3058,18 @@
                             {
                               "type": "null"
                             }
+                          ],
+                          "description": "Contact email",
+                          "examples": [
+                            "billing@acme.store"
                           ]
                         },
                         "status": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Current merchant status",
+                          "examples": [
+                            "active"
+                          ]
                         },
                         "iconUrl": {
                           "anyOf": [
@@ -2848,10 +3079,18 @@
                             {
                               "type": "null"
                             }
+                          ],
+                          "description": "Merchant logo URL, or null if not set",
+                          "examples": [
+                            "https://imagedelivery.net/example/acme-icon.png"
                           ]
                         },
                         "createdAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "ISO 8601 creation timestamp",
+                          "examples": [
+                            "2025-06-15T10:30:00.000Z"
+                          ]
                         },
                         "settlements": {
                           "type": "object",
@@ -2862,13 +3101,22 @@
                                 "type": "object",
                                 "properties": {
                                   "configId": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Settlement config ID"
                                   },
                                   "asset": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "[CAIP-19](https://standards.chainagnostic.org/CAIPs/caip-19) asset ID",
+                                    "examples": [
+                                      "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                                    ]
                                   },
                                   "destination": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "[CAIP-10](https://standards.chainagnostic.org/CAIPs/caip-10) settlement destination",
+                                    "examples": [
+                                      "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -2884,13 +3132,16 @@
                                 "type": "object",
                                 "properties": {
                                   "configId": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Settlement config ID"
                                   },
                                   "status": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Fiat settlement status"
                                   },
                                   "bankType": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Bank account type"
                                   }
                                 },
                                 "required": [
@@ -2921,6 +3172,32 @@
                   "required": [
                     "merchant"
                   ]
+                },
+                "example": {
+                  "merchant": {
+                    "id": "mrch_7kBz2qR9xPvLmN4Yw",
+                    "name": "Acme Store",
+                    "email": "billing@acme.store",
+                    "status": "active",
+                    "iconUrl": "https://imagedelivery.net/example/acme-icon.png",
+                    "createdAt": "2025-06-15T10:30:00.000Z",
+                    "settlements": {
+                      "crypto": [
+                        {
+                          "configId": "crypto_Vx9mRp3TwKj7YqNz4",
+                          "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                          "destination": "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
+                        }
+                      ],
+                      "fiat": [
+                        {
+                          "configId": "fiat_Bk4nWp8XmQj2YrTv6",
+                          "status": "active",
+                          "bankType": "ACH"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -3033,10 +3310,15 @@
                       "type": "object",
                       "properties": {
                         "id": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Merchant ID",
+                          "examples": [
+                            "mrch_7kBz2qR9xPvLmN4Yw"
+                          ]
                         },
                         "name": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Merchant display name"
                         },
                         "email": {
                           "anyOf": [
@@ -3046,10 +3328,18 @@
                             {
                               "type": "null"
                             }
+                          ],
+                          "description": "Contact email",
+                          "examples": [
+                            "billing@acme.store"
                           ]
                         },
                         "status": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Current merchant status",
+                          "examples": [
+                            "active"
+                          ]
                         },
                         "iconUrl": {
                           "anyOf": [
@@ -3059,10 +3349,18 @@
                             {
                               "type": "null"
                             }
+                          ],
+                          "description": "Merchant logo URL, or null if not set",
+                          "examples": [
+                            "https://imagedelivery.net/example/acme-icon.png"
                           ]
                         },
                         "createdAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "ISO 8601 creation timestamp",
+                          "examples": [
+                            "2025-06-15T10:30:00.000Z"
+                          ]
                         }
                       },
                       "required": [
@@ -3078,6 +3376,16 @@
                   "required": [
                     "merchant"
                   ]
+                },
+                "example": {
+                  "merchant": {
+                    "id": "mrch_7kBz2qR9xPvLmN4Yw",
+                    "name": "Acme Store v2",
+                    "email": "billing@acme.store",
+                    "status": "active",
+                    "iconUrl": "https://imagedelivery.net/example/acme-icon.png",
+                    "createdAt": "2025-06-15T10:30:00.000Z"
+                  }
                 }
               }
             }
@@ -3221,16 +3529,28 @@
                 "type": "object",
                 "properties": {
                   "merchantName": {
+                    "description": "Updated display name",
+                    "examples": [
+                      "Acme Store v2"
+                    ],
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 256
                   },
                   "merchantEmail": {
+                    "description": "Updated contact email",
+                    "examples": [
+                      "new-billing@acme.store"
+                    ],
                     "type": "string",
                     "format": "email",
                     "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   },
                   "iconUrl": {
+                    "description": "Updated logo URL (HTTPS only), or null to unset",
+                    "examples": [
+                      "https://example.com/new-logo.png"
+                    ],
                     "anyOf": [
                       {
                         "type": "string",
@@ -3272,16 +3592,22 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Merchant ID"
                     },
                     "deleted": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Whether the merchant was successfully deleted"
                     }
                   },
                   "required": [
                     "id",
                     "deleted"
                   ]
+                },
+                "example": {
+                  "id": "mrch_7kBz2qR9xPvLmN4Yw",
+                  "deleted": true
                 }
               }
             }
@@ -4328,7 +4654,7 @@
           "expiresAt": 1718236800,
           "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
           "isFinal": false,
-          "paymentId": "pay_6ea2ecc101KMNV56BF1FXA71QKXJVHTJ4T",
+          "paymentId": "pay_c8a2ecc101KN47A9Z5GPQYP88YANPHD7QJ",
           "pollInMs": 1000,
           "status": "requires_action"
         }
@@ -4462,7 +4788,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_05a2ecc101KMNV56BG17RM6A2S3YKVGPQ2",
+          "paymentId": "pay_99a2ecc101KN47A9Z61FHFQ7FG42MNZV8X",
           "status": "cancelled"
         }
       },
@@ -5153,7 +5479,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_aaa2ecc101KMNV56BF66Z1C0VTFGA740M7",
+          "paymentId": "pay_79a2ecc101KN47A9Z5BR44TS4KEKAJMCEF",
           "status": "cancelled"
         }
       },
@@ -5272,6 +5598,106 @@
           }
         }
       },
+      "MerchantPaymentFiatAmount": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "string",
+            "pattern": "^iso4217\\/",
+            "description": "Fiat unit, for example \"iso4217/USD\""
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount in minor units for the fiat currency"
+          },
+          "display": {
+            "type": "object",
+            "properties": {
+              "assetSymbol": {
+                "type": "string"
+              },
+              "assetName": {
+                "type": "string"
+              },
+              "decimals": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "assetSymbol",
+              "assetName",
+              "decimals"
+            ],
+            "description": "Display metadata for fiat-denominated amounts"
+          }
+        },
+        "required": [
+          "unit",
+          "value",
+          "display"
+        ],
+        "description": "Fiat-denominated amount"
+      },
+      "MerchantPaymentTokenAmount": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "string",
+            "pattern": "^caip19\\/",
+            "description": "Token unit, for example \"caip19/...\""
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount in minor units for the token asset"
+          },
+          "display": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "assetSymbol": {
+                    "type": "string"
+                  },
+                  "assetName": {
+                    "type": "string"
+                  },
+                  "decimals": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "iconUrl": {
+                    "type": "string"
+                  },
+                  "networkName": {
+                    "type": "string"
+                  },
+                  "networkIconUrl": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "assetSymbol",
+                  "assetName",
+                  "decimals"
+                ],
+                "description": "Display metadata for token-denominated amounts"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "unit",
+          "value",
+          "display"
+        ],
+        "description": "Token-denominated amount"
+      },
       "MerchantPaymentsResponse": {
         "type": "object",
         "properties": {
@@ -5281,18 +5707,22 @@
               "type": "object",
               "properties": {
                 "paymentId": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Unique payment identifier"
                 },
                 "merchant": {
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Partner-provided merchant ID"
                     },
                     "name": {
+                      "description": "Merchant display name",
                       "type": "string"
                     },
                     "iconUrl": {
+                      "description": "Merchant logo URL",
                       "anyOf": [
                         {
                           "type": "string"
@@ -5308,7 +5738,8 @@
                   ]
                 },
                 "referenceId": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Idempotency / reference ID provided at payment creation"
                 },
                 "status": {
                   "type": "string",
@@ -5321,108 +5752,35 @@
                   ]
                 },
                 "isTerminal": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Whether the payment has reached a final state"
                 },
                 "fiatAmount": {
-                  "type": "object",
-                  "properties": {
-                    "unit": {
-                      "type": "string"
-                    },
-                    "value": {
-                      "type": "string"
-                    },
-                    "display": {
-                      "type": "object",
-                      "properties": {
-                        "assetSymbol": {
-                          "type": "string"
-                        },
-                        "assetName": {
-                          "type": "string"
-                        },
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        }
-                      },
-                      "required": [
-                        "assetSymbol",
-                        "assetName",
-                        "decimals"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "unit",
-                    "value",
-                    "display"
-                  ]
+                  "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
                 },
                 "tokenAmount": {
-                  "type": "object",
-                  "properties": {
-                    "unit": {
-                      "type": "string"
-                    },
-                    "value": {
-                      "type": "string"
-                    },
-                    "display": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "assetSymbol": {
-                              "type": "string"
-                            },
-                            "assetName": {
-                              "type": "string"
-                            },
-                            "decimals": {
-                              "type": "integer",
-                              "minimum": -9007199254740991,
-                              "maximum": 9007199254740991
-                            },
-                            "iconUrl": {
-                              "type": "string"
-                            },
-                            "networkName": {
-                              "type": "string"
-                            },
-                            "networkIconUrl": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "assetSymbol",
-                            "assetName",
-                            "decimals"
-                          ]
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "unit",
-                    "value",
-                    "display"
-                  ]
+                  "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
                 },
                 "buyer": {
+                  "description": "Buyer wallet information",
                   "type": "object",
                   "properties": {
                     "accountCaip10": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Buyer address as a [CAIP-10](https://standards.chainagnostic.org/CAIPs/caip-10) account ID",
+                      "examples": [
+                        "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
+                      ]
                     },
                     "accountProviderName": {
+                      "description": "Wallet provider name",
+                      "examples": [
+                        "MetaMask"
+                      ],
                       "type": "string"
                     },
                     "accountProviderIcon": {
+                      "description": "Wallet provider logo URL",
                       "type": "string"
                     }
                   },
@@ -5431,15 +5789,22 @@
                   ]
                 },
                 "transaction": {
+                  "description": "On-chain transaction details",
                   "type": "object",
                   "properties": {
                     "networkId": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Numeric chain ID",
+                      "examples": [
+                        "8453"
+                      ]
                     },
                     "hash": {
+                      "description": "On-chain transaction hash",
                       "type": "string"
                     },
                     "nonce": {
+                      "description": "Transaction nonce",
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -5449,27 +5814,99 @@
                     "networkId"
                   ]
                 },
-                "settlement": {
+                "fees": {
+                  "description": "Fee breakdown derived from payment option data. Omitted when total fee data is unavailable.",
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "type": "string"
+                    "total": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+                        },
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+                        }
+                      ],
+                      "description": "Total fee amount."
                     },
-                    "txHash": {
+                    "fixed": {
+                      "description": "Fixed fee component.",
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+                        },
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+                        }
+                      ]
+                    },
+                    "percentage": {
+                      "description": "Percentage fee component as a decimal percentage string, not a ratio. For example, \"0.4\" means 0.4%.",
                       "type": "string"
                     }
                   },
                   "required": [
-                    "status"
+                    "total"
+                  ]
+                },
+                "settlement": {
+                  "description": "Settlement details. Omitted when settlement details cannot be reported yet. When present, `settled` is always included. When `settled` is `false`, no additional settlement fields are returned. When `settled` is `true`, `amount` and `txHash` are always included.",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "settled": {
+                          "type": "boolean",
+                          "const": false,
+                          "description": "Settlement is not complete."
+                        }
+                      },
+                      "required": [
+                        "settled"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "settled": {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "Settlement is complete."
+                        },
+                        "amount": {
+                          "anyOf": [
+                            {
+                              "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+                            },
+                            {
+                              "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+                            }
+                          ],
+                          "description": "Net settlement amount after fees in the settlement unit."
+                        },
+                        "txHash": {
+                          "type": "string",
+                          "description": "Settlement transaction hash."
+                        }
+                      },
+                      "required": [
+                        "settled",
+                        "amount",
+                        "txHash"
+                      ]
+                    }
                   ]
                 },
                 "createdAt": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "ISO 8601 timestamp"
                 },
                 "lastUpdatedAt": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "ISO 8601 timestamp"
                 },
                 "settledAt": {
+                  "description": "ISO 8601 timestamp, present only when `settlement.settled` is `true`",
                   "type": "string"
                 }
               },
@@ -5492,7 +5929,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Cursor for the next page, or null if no more results"
           },
           "stats": {
             "type": "object",
@@ -5503,10 +5941,15 @@
                   "type": "object",
                   "properties": {
                     "amount": {
-                      "type": "number"
+                      "type": "number",
+                      "description": "Revenue amount in currency's standard unit"
                     },
                     "currency": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "ISO 4217 currency code",
+                      "examples": [
+                        "USD"
+                      ]
                     }
                   },
                   "required": [
@@ -5518,19 +5961,22 @@
               "totalTransactions": {
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Total payments matching the query"
               },
               "totalCustomers": {
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Unique buyers matching the query"
               }
             },
             "required": [
               "totalRevenue",
               "totalTransactions",
               "totalCustomers"
-            ]
+            ],
+            "description": "Aggregate statistics for the query"
           }
         },
         "required": [
