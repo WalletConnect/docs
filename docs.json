@@ -1,7 +1,7 @@
 {
   "theme": "aspen",
   "name": "WalletConnect Pay Docs",
-  "description": "Documentation for WalletConnect Pay, integrate secure crypto payments into your app with step-by-step guides, APIs, and best practices.",
+  "description": "Documentation for WalletConnect Pay. Integrate secure crypto payments into your app with step-by-step guides, APIs, and best practices.",
   "colors": {
     "primary": "#0988f0",
     "light": "#0988f0",
