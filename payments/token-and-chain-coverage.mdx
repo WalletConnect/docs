@@ -7,7 +7,7 @@ sidebarTitle: "Token & Chain Coverage"
 This page outlines the tokens and blockchains currently supported in General Availability within WalletConnect Pay. It provides a clear view of:
 
 - **Acceptance** — whether a token on a given chain can be accepted from the buyer.
-- **Settlement** — what the merchant or customer receives after acceptance, either direct crypto or direct crypto plus a fiat offramp.
+- **Settlement** — what the merchant or customer receives after acceptance, either direct crypto or fiat via an offramp, depending on the customer configuration.
 
 This list will be updated over time as assets move from beta into General Availability and as settlement coverage expands.
 
@@ -15,15 +15,15 @@ This list will be updated over time as assets move from beta into General Availa
 
 | Token | Chain    | Acceptance | Settlement                        |
 |-------|----------|:----------:|-----------------------------------|
-| USDC  | Arbitrum | ✅ | Direct Crypto + Fiat (USD, EUR) |
-| USDC  | Base     | ✅ | Direct Crypto + Fiat (USD, EUR) |
-| USDC  | Polygon  | ✅ | Direct Crypto + Fiat (USD, EUR) |
-| USDC  | Ethereum | ✅ | Direct Crypto + Fiat (USD, EUR) |
-| USDC  | Optimism | ✅ | Direct Crypto + Fiat (USD, EUR) |
+| USDC  | Arbitrum | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Base     | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Polygon  | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Ethereum | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Optimism | ✅ | Direct Crypto or Fiat (USD, EUR) |
 | USDC  | BSC      | ✅ | Direct Crypto                   |
 | USDC  | Celo     | ✅ | Direct Crypto                   |
 | USDC  | Monad    | ✅ | Direct Crypto                   |
-| EURC  | Base     | ✅ | Direct Crypto + Fiat (USD, EUR) |
+| EURC  | Base     | ✅ | Direct Crypto or Fiat (USD, EUR) |
 | EURC  | Ethereum | ✅ | Direct Crypto                   |
 | USDT0 | Arbitrum | ✅ | Direct Crypto                   |
 
@@ -58,7 +58,7 @@ WalletConnect Pay accepts the token on the specified chain from the buyer as par
 After acceptance, WalletConnect Pay delivers funds to the merchant or customer in one of the following ways:
 
 - **Direct Crypto** — the accepted token is transferred directly to the merchant's or customer's wallet on the same chain.
-- **Direct Crypto + Fiat (USD, EUR)** — in addition to direct crypto delivery, the accepted token can be converted (offramp) into fiat currency (USD or EUR) via partners, with fiat then delivered to the merchant.
+- **Fiat (USD, EUR)** — the accepted token can be converted (offramp) into fiat currency (USD or EUR) via partners, with fiat then delivered to the merchant.
 
 <Note>
 Fiat settlement availability depends on offramp partner support per token and chain. Over time, fiat coverage will expand as WalletConnect Pay introduces internal swaps, allowing a broader set of tokens to be converted into supported offramp assets before payout.
