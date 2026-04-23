@@ -32,7 +32,8 @@
                 "group": "WalletConnect Pay",
                 "pages": [
                   "payments/overview",
-                  "payments/for-users"
+                  "payments/for-users",
+                  "payments/token-and-chain-coverage"
                 ]
               },
               {
@@ -136,7 +137,8 @@
                 "group": "WalletConnect Pay",
                 "pages": [
                   "payments/overview",
-                  "payments/for-users"
+                  "payments/for-users",
+                  "payments/token-and-chain-coverage"
                 ]
               },
               {
