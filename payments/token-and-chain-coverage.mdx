@@ -1,35 +1,35 @@
 ---
 title: "Token and Chain Coverage"
-description: "Tokens and blockchains supported in General Availability within WalletConnect Pay, across crypto and fiat settlement."
+description: "Tokens and blockchains supported in General Availability within WalletConnect Pay, including acceptance and settlement options."
 sidebarTitle: "Token & Chain Coverage"
 ---
 
-This page outlines the tokens and blockchains currently supported in General Availability within WalletConnect Pay. It provides a clear view of which assets can be used for:
+This page outlines the tokens and blockchains currently supported in General Availability within WalletConnect Pay. It provides a clear view of:
 
-- **Crypto settlement** — direct token transfers to merchants or customers.
-- **Fiat settlement** — conversion to fiat via offramp partners before payout.
+- **Acceptance** — whether a token on a given chain can be accepted from the buyer.
+- **Settlement** — what the merchant or customer receives after acceptance, either direct crypto or fiat via an offramp, depending on the customer configuration.
 
-This list will be updated over time as assets move from beta into General Availability.
+This list will be updated over time as assets move from beta into General Availability and as settlement coverage expands.
 
 ## Supported tokens and chains
 
-| Token | Chain    | Crypto Settlement | Fiat Settlement (EUR & USD) |
-|-------|----------|:-----------------:|:---------------------------:|
-| USDC  | Arbitrum | ✅ | ✅ |
-| USDC  | Base     | ✅ | ✅ |
-| USDC  | Polygon  | ✅ | ✅ |
-| USDC  | Ethereum | ✅ | ✅ |
-| USDC  | Optimism | ✅ | ✅ |
-| USDC  | BSC      | ✅ | ❌ |
-| USDC  | Celo     | ✅ | ❌ |
-| USDC  | Monad    | ✅ | ❌ |
-| EURC  | Base     | ✅ | ✅ |
-| EURC  | Ethereum | ✅ | ❌ |
-| USDT0 | Arbitrum | ✅ | ❌ |
+| Token | Chain    | Acceptance | Settlement                        |
+|-------|----------|:----------:|-----------------------------------|
+| USDC  | Arbitrum | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Base     | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Polygon  | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Ethereum | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Optimism | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | BSC      | ✅ | Direct Crypto                   |
+| USDC  | Celo     | ✅ | Direct Crypto                   |
+| USDC  | Monad    | ✅ | Direct Crypto                   |
+| EURC  | Base     | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| EURC  | Ethereum | ✅ | Direct Crypto                   |
+| USDT0 | Arbitrum | ✅ | Direct Crypto                   |
 
 ## Coming soon
 
-The following token and chain combinations are planned for General Availability and are not yet supported for crypto or fiat settlement.
+The following token and chain combinations are planned for General Availability and are not yet supported for acceptance or settlement.
 
 | Token | Chain    |
 |-------|----------|
@@ -49,13 +49,16 @@ The following token and chain combinations are planned for General Availability 
 
 ## Definitions
 
-### Crypto settlement
+### Acceptance
 
-WalletConnect Pay accepts the token from the buyer and facilitates its transfer to the merchant's or customer's wallet.
+WalletConnect Pay accepts the token on the specified chain from the buyer as part of the payment flow.
 
-### Fiat settlement
+### Settlement
 
-WalletConnect Pay accepts the token from the buyer and facilitates its conversion (offramp) into fiat currency (USD, EUR) via partners, then delivers fiat to the merchant.
+After acceptance, WalletConnect Pay delivers funds to the merchant or customer in one of the following ways:
+
+- **Direct Crypto** — the payment is settled in crypto to the merchant's or customer's wallet. Settlement may involve bridging or swapping before delivery.
+- **Fiat (USD, EUR)** — the accepted token can be converted (offramp) into fiat currency (USD or EUR) via partners, with fiat then delivered to the merchant.
 
 <Note>
 Fiat settlement availability depends on offramp partner support per token and chain. Over time, fiat coverage will expand as WalletConnect Pay introduces internal swaps, allowing a broader set of tokens to be converted into supported offramp assets before payout.
