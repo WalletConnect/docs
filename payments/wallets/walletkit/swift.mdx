@@ -222,7 +222,7 @@ for action in actions {
 ```
 
 <Note>
-Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/usdt-support).
 </Note>
 
 #### Signing Implementation
