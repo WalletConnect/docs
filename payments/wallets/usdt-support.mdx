@@ -4,7 +4,7 @@ sidebarTitle: "USDT support"
 description: "Implement the two-action Permit2 flow your wallet needs to accept USDT and other ERC-20s without native typed-data authorization."
 ---
 
-The simple WalletConnect Pay flow signs an EIP-3009 `transferWithAuthorization` typed-data payload — the gasless transfer used by USDC and similar stablecoins. USDT does not implement EIP-3009, so WalletConnect Pay routes it through Uniswap's [Permit2](https://github.com/Uniswap/permit2) contract instead.
+The simple WalletConnect Pay flow signs an EIP-3009 `transferWithAuthorization` typed-data payload — the gasless transfer used by USDC and similar stablecoins. USDT does not implement EIP-3009, so WalletConnect Pay routes it through the [Permit2](https://github.com/Uniswap/permit2) contract instead.
 
 The first time a user pays a given token on a given chain, the wallet must approve Permit2 on-chain. Subsequent payments on the same token only require the typed-data signature.
 
