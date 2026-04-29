@@ -76,6 +76,12 @@
                 "pages": [
                   "payments/ecommerce/overview"
                 ]
+              },
+              {
+                "group": "WalletConnect AI Agent SDK",
+                "pages": [
+                  "agents/overview"
+                ]
               }
             ]
           },
@@ -192,6 +198,12 @@
                 "group": "Ecommerce and Online Checkout",
                 "pages": [
                   "payments/ecommerce/overview"
+                ]
+              },
+              {
+                "group": "WalletConnect AI Agent SDK",
+                "pages": [
+                  "agents/overview"
                 ]
               }
             ]
