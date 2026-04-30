@@ -12,94 +12,76 @@
   "paths": {
     "/v1/gateway/payment/{id}": {
       "get": {
-        "tags": [
-          "Gateway"
-        ],
-        "summary": "Get a payment",
         "description": "This endpoint returns only basic information to display to the user to begin the payment flow.",
         "operationId": "gatewayGetPayment",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "App-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Client-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
-            "in": "path",
             "description": "Payment ID",
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
@@ -108,145 +90,132 @@
         ],
         "responses": {
           "200": {
-            "description": "Payment status retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetPaymentResponse"
                 }
               }
-            }
+            },
+            "description": "Payment status retrieved successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "summary": "Get a payment",
+        "tags": [
+          "Gateway"
+        ]
       }
     },
     "/v1/gateway/payment/{id}/cancel": {
       "post": {
-        "tags": [
-          "Gateway"
-        ],
         "operationId": "gatewayCancelPayment",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "App-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Client-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
@@ -255,165 +224,148 @@
         ],
         "responses": {
           "200": {
-            "description": "Payment cancelled successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GatewayCancelPaymentResponse"
                 }
               }
-            }
+            },
+            "description": "Payment cancelled successfully"
           },
           "400": {
-            "description": "Payment cannot be cancelled",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment cannot be cancelled"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "tags": [
+          "Gateway"
+        ]
       }
     },
     "/v1/gateway/payment/{id}/confirm": {
       "post": {
-        "tags": [
-          "Gateway"
-        ],
-        "summary": "Confirm a payment",
         "description": "This endpoint confirms a payment and submits it to the blockchain for processing.",
         "operationId": "confirm_payment_handler",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "App-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Client-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
-            "in": "path",
             "description": "Payment ID",
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
             }
           },
           {
-            "name": "maxPollMs",
-            "in": "query",
             "description": "Maximum time to long-poll for payment status, in milliseconds.",
+            "in": "query",
+            "name": "maxPollMs",
             "required": false,
             "schema": {
-              "type": [
-                "integer",
-                "null"
-              ],
               "format": "int64",
-              "minimum": 0
+              "minimum": 0,
+              "nullable": true,
+              "type": "integer"
             }
           }
         ],
@@ -429,148 +381,134 @@
         },
         "responses": {
           "200": {
-            "description": "Payment confirmed successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConfirmPaymentResponse"
                 }
               }
-            }
+            },
+            "description": "Payment confirmed successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "summary": "Confirm a payment",
+        "tags": [
+          "Gateway"
+        ]
       }
     },
     "/v1/gateway/payment/{id}/fetch": {
       "post": {
-        "tags": [
-          "Gateway"
-        ],
-        "summary": "Fetches an action",
         "description": "This endpoint fetches an action for a payment.",
         "operationId": "fetch_handler",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "App-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Client-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
-            "in": "path",
             "description": "Payment ID",
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
@@ -589,163 +527,147 @@
         },
         "responses": {
           "200": {
-            "description": "Action built successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FetchResponse"
                 }
               }
-            }
+            },
+            "description": "Action built successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "summary": "Fetches an action",
+        "tags": [
+          "Gateway"
+        ]
       }
     },
     "/v1/gateway/payment/{id}/options": {
       "post": {
-        "tags": [
-          "Gateway"
-        ],
-        "summary": "Get payment options",
         "description": "This endpoint takes a list of accounts and returns a list of options that can be used to complete the payment.",
         "operationId": "gatewayGetPaymentOptions",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "App-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Client-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
-            "in": "path",
             "description": "Payment ID",
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
             }
           },
           {
-            "name": "includePaymentInfo",
-            "in": "query",
             "description": "Whether to include payment information in the response",
+            "in": "query",
+            "name": "includePaymentInfo",
             "required": false,
             "schema": {
-              "type": [
-                "boolean",
-                "null"
-              ]
+              "nullable": true,
+              "type": "boolean"
             }
           }
         ],
@@ -761,300 +683,274 @@
         },
         "responses": {
           "200": {
-            "description": "Payment options retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetPaymentOptionsResponse"
                 }
               }
-            }
+            },
+            "description": "Payment options retrieved successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "summary": "Get payment options",
+        "tags": [
+          "Gateway"
+        ]
       }
     },
     "/v1/gateway/payment/{id}/status": {
       "get": {
-        "tags": [
-          "Gateway"
-        ],
-        "summary": "Get the payment status",
         "description": "Retrieves the status of a payment by its ID. Returns a polling delay to wait\nbefore checking the status again.",
         "operationId": "gatewayGetPaymentStatus",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "App-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Client-Id",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
-            "in": "path",
             "description": "Payment ID",
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
             }
           },
           {
-            "name": "maxPollMs",
-            "in": "query",
             "description": "Maximum time to long-poll for payment status, in milliseconds.",
+            "in": "query",
+            "name": "maxPollMs",
             "required": false,
             "schema": {
-              "type": [
-                "integer",
-                "null"
-              ],
               "format": "int64",
-              "minimum": 0
+              "minimum": 0,
+              "nullable": true,
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Payment status retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetPaymentStatusResponse"
                 }
               }
-            }
+            },
+            "description": "Payment status retrieved successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "summary": "Get the payment status",
+        "tags": [
+          "Gateway"
+        ]
       }
     },
     "/v1/payments": {
       "post": {
-        "tags": [
-          "Payments"
-        ],
-        "summary": "Create a new payment",
         "description": "Creates a new payment with the provided payment details.",
         "operationId": "paymentsCreatePayment",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Merchant-Id",
-            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "Idempotency-Key",
             "in": "header",
+            "name": "Idempotency-Key",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           }
         ],
@@ -1070,46 +966,50 @@
         },
         "responses": {
           "201": {
-            "description": "Payment created successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreatePaymentResponse"
                 }
               }
-            }
+            },
+            "description": "Payment created successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "summary": "Create a new payment",
+        "tags": [
+          "Payments"
+        ]
       },
       "get": {
         "operationId": "PartnerPayments_list",
@@ -1134,7 +1034,9 @@
               "examples": [
                 "2026-01-06T00:00:00Z"
               ],
-              "type": "string"
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
             },
             "description": "RFC3339 timestamp, inclusive"
           },
@@ -1145,20 +1047,32 @@
               "examples": [
                 "2026-01-07T00:00:00Z"
               ],
-              "type": "string"
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
             },
             "description": "RFC3339 timestamp, exclusive"
           },
           {
             "in": "query",
+            "name": "token_symbol",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "description": "Filter by token symbol (e.g. `USDC`). CAIP-19 identifiers are not supported. Accepts a single value or multiple repeated params:\n\n- Single: `?token_symbol=USDC`\n- Multiple: `?token_symbol=USDC&token_symbol=EURC`"
+          },
+          {
+            "in": "query",
             "name": "asset",
             "schema": {
-              "examples": [
-                "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-              ],
+              "deprecated": true,
               "type": "string"
             },
-            "description": "Filter by [CAIP-19](https://standards.chainagnostic.org/CAIPs/caip-19) asset identifier. Comma-separated for multiple."
+            "description": "Deprecated. This parameter will be removed in a future API version. Use `token_symbol` param instead."
           },
           {
             "in": "query",
@@ -1232,6 +1146,20 @@
               }
             },
             "description": "Filter by payment status. Accepts a single value or multiple repeated params:\n\n- Single: `?status=succeeded`\n- Multiple: `?status=succeeded&status=processing`"
+          },
+          {
+            "in": "query",
+            "name": "referenceId",
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 35,
+              "pattern": "^[A-Za-z0-9 /:.,+-]+$",
+              "examples": [
+                "order-42"
+              ]
+            },
+            "description": "Substring search on the merchant-provided reference ID. Between 3 and 35 characters. Allowed characters: ASCII letters, digits, and ` /-:.,+`."
           },
           {
             "in": "query",
@@ -1399,6 +1327,14 @@
                       ],
                       "description": "Machine-readable error code"
                     },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
                     "issues": {
                       "description": "Field-level validation issues (present on validation errors)",
                       "type": "array",
@@ -1482,6 +1418,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -1523,6 +1467,14 @@
                       "type": "string",
                       "const": "internal_error",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -1557,6 +1509,14 @@
                       "type": "string",
                       "const": "bad_gateway",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -1584,87 +1544,76 @@
         "description": "Retrieve paginated payments with optional filters."
       }
     },
-    "/v1/payments/{id}/cancel": {
-      "post": {
-        "tags": [
-          "Payments"
-        ],
-        "operationId": "paymentsCancelPayment",
+    "/v1/payments/{id}": {
+      "get": {
+        "description": "Retrieves the full details of a payment by its ID, including settlement\ninformation when available.",
+        "operationId": "paymentsGetPayment",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Merchant-Id",
-            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Idempotency-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
+            "description": "Payment ID",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
@@ -1673,189 +1622,551 @@
         ],
         "responses": {
           "200": {
-            "description": "Payment cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentsGetPaymentResponse"
+                }
+              }
+            },
+            "description": "Payment details retrieved successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid API key"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Payment not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Get payment details",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/v1/payments/{id}/cancel": {
+      "post": {
+        "operationId": "paymentsCancelPayment",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Api-Key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Merchant-Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "WCP-Version",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Sdk-Name",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Sdk-Version",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Sdk-Platform",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PaymentId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaymentsCancelPaymentResponse"
                 }
               }
-            }
+            },
+            "description": "Payment cancelled successfully"
           },
           "400": {
-            "description": "Payment cannot be cancelled",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment cannot be cancelled"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid API key"
           },
           "404": {
-            "description": "Payment not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Payment not found"
           },
           "500": {
-            "description": "Internal error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Internal error"
           }
-        }
+        },
+        "tags": [
+          "Payments"
+        ]
       }
     },
     "/v1/payments/{id}/status": {
       "get": {
-        "tags": [
-          "Payments"
-        ],
-        "summary": "Get the payment status",
         "description": "Retrieves the status of a payment by its ID. Returns a polling delay to wait\nbefore checking the status again.",
         "operationId": "paymentsGetPaymentStatus",
         "parameters": [
           {
+            "in": "header",
             "name": "Api-Key",
-            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Merchant-Id",
-            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "WCP-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Name",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Version",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Sdk-Platform",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
+            "in": "header",
             "name": "Idempotency-Key",
-            "in": "header",
             "required": false,
             "schema": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "nullable": true,
+              "type": "string"
             }
           },
           {
-            "name": "id",
-            "in": "path",
             "description": "Payment ID",
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PaymentId"
             }
           },
           {
-            "name": "maxPollMs",
-            "in": "query",
             "description": "Maximum time to long-poll for payment status, in milliseconds.",
+            "in": "query",
+            "name": "maxPollMs",
             "required": false,
             "schema": {
-              "type": [
-                "integer",
-                "null"
-              ],
               "format": "int64",
-              "minimum": 0
+              "minimum": 0,
+              "nullable": true,
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Payment status retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetPaymentStatusResponse"
                 }
               }
-            }
+            },
+            "description": "Payment status retrieved successfully"
           },
           "400": {
-            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Invalid request"
           },
           "401": {
-            "description": "Invalid API key",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid API key"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Payment not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Get the payment status",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/v1/refunds": {
+      "post": {
+        "operationId": "Refunds_create",
+        "parameters": [
+          {
+            "name": "Merchant-Id",
+            "in": "header",
+            "required": true,
+            "description": "Merchant identifier.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "acme-store-1"
+              ]
+            }
+          },
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "2026-02-18",
+                "2026-02-19.preview"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment marked as refunded",
+            "headers": {
+              "WCP-Version": {
+                "description": "WalletConnect Pay API version resolved for this request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "paymentId": {
+                      "type": "string",
+                      "description": "Payment ID that was marked as refunded"
+                    }
+                  },
+                  "required": [
+                    "paymentId"
+                  ]
+                },
+                "example": {
+                  "paymentId": "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "params_validation",
+                        "payment_not_succeeded",
+                        "invalid_api_version",
+                        "unknown_api_version",
+                        "api_version_downgrade"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "payment_not_succeeded": {
+                    "summary": "Payment is not in a refundable state",
+                    "value": {
+                      "code": "payment_not_succeeded",
+                      "message": "Payment is not in a refundable state"
+                    }
+                  },
+                  "invalid_api_version": {
+                    "summary": "Invalid API version",
+                    "value": {
+                      "code": "invalid_api_version",
+                      "message": "Invalid API version"
+                    }
+                  },
+                  "unknown_api_version": {
+                    "summary": "Unknown API version",
+                    "value": {
+                      "code": "unknown_api_version",
+                      "message": "Unknown API version"
+                    }
+                  },
+                  "api_version_downgrade": {
+                    "summary": "Requested API version is older than the partner pin",
+                    "value": {
+                      "code": "api_version_downgrade",
+                      "message": "Requested API version is older than the partner pin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid API key, or missing merchant id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key",
+                        "missing_merchant_id"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  },
+                  "missing_merchant_id": {
+                    "summary": "Missing Merchant ID",
+                    "value": {
+                      "code": "missing_merchant_id",
+                      "message": "Missing Merchant ID"
+                    }
+                  }
                 }
               }
             }
@@ -1865,7 +2176,81 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Payment is already refunded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "already_refunded",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "already_refunded": {
+                    "summary": "Payment is already refunded",
+                    "value": {
+                      "code": "already_refunded",
+                      "message": "Payment is already refunded"
+                    }
+                  }
                 }
               }
             }
@@ -1875,8 +2260,112 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "internal_error",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Internal Server Error",
+                    "value": {
+                      "code": "internal_error",
+                      "message": "Internal Server Error"
+                    }
+                  }
                 }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "bad_gateway",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "bad_gateway": {
+                    "summary": "Bad Gateway",
+                    "value": {
+                      "code": "bad_gateway",
+                      "message": "Bad Gateway"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Refunds"
+        ],
+        "summary": "Mark a payment as refunded",
+        "description": "Request a full refund for a payment. Calling a second time on the same payment returns 409.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^pay_[A-Za-z0-9]+$",
+                    "description": "Payment ID to refund",
+                    "examples": [
+                      "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ"
+                    ]
+                  }
+                },
+                "required": [
+                  "paymentId"
+                ]
               }
             }
           }
@@ -1919,7 +2408,9 @@
               "examples": [
                 "2026-01-06T00:00:00Z"
               ],
-              "type": "string"
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
             },
             "description": "RFC3339 timestamp, inclusive"
           },
@@ -1930,20 +2421,32 @@
               "examples": [
                 "2026-01-07T00:00:00Z"
               ],
-              "type": "string"
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
             },
             "description": "RFC3339 timestamp, exclusive"
           },
           {
             "in": "query",
+            "name": "token_symbol",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "description": "Filter by token symbol (e.g. `USDC`). CAIP-19 identifiers are not supported. Accepts a single value or multiple repeated params:\n\n- Single: `?token_symbol=USDC`\n- Multiple: `?token_symbol=USDC&token_symbol=EURC`"
+          },
+          {
+            "in": "query",
             "name": "asset",
             "schema": {
-              "examples": [
-                "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-              ],
+              "deprecated": true,
               "type": "string"
             },
-            "description": "Filter by [CAIP-19](https://standards.chainagnostic.org/CAIPs/caip-19) asset identifier. Comma-separated for multiple."
+            "description": "Deprecated. This parameter will be removed in a future API version. Use `token_symbol` param instead."
           },
           {
             "in": "query",
@@ -2017,6 +2520,20 @@
               }
             },
             "description": "Filter by payment status. Accepts a single value or multiple repeated params:\n\n- Single: `?status=succeeded`\n- Multiple: `?status=succeeded&status=processing`"
+          },
+          {
+            "in": "query",
+            "name": "referenceId",
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 35,
+              "pattern": "^[A-Za-z0-9 /:.,+-]+$",
+              "examples": [
+                "order-42"
+              ]
+            },
+            "description": "Substring search on the merchant-provided reference ID. Between 3 and 35 characters. Allowed characters: ASCII letters, digits, and ` /-:.,+`."
           }
         ],
         "responses": {
@@ -2163,6 +2680,14 @@
                       ],
                       "description": "Machine-readable error code"
                     },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
                     "issues": {
                       "description": "Field-level validation issues (present on validation errors)",
                       "type": "array",
@@ -2247,6 +2772,14 @@
                         "missing_merchant_id"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2295,6 +2828,14 @@
                       "type": "string",
                       "const": "internal_error",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2329,6 +2870,14 @@
                       "type": "string",
                       "const": "bad_gateway",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2413,23 +2962,14 @@
                         },
                         "status": {
                           "type": "string",
+                          "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                          ],
                           "description": "Current merchant status",
                           "examples": [
                             "active"
-                          ]
-                        },
-                        "iconUrl": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "Merchant logo URL, or null if not set",
-                          "examples": [
-                            "https://imagedelivery.net/example/acme-icon.png"
                           ]
                         },
                         "createdAt": {
@@ -2445,7 +2985,6 @@
                         "name",
                         "email",
                         "status",
-                        "iconUrl",
                         "createdAt"
                       ]
                     }
@@ -2460,7 +2999,6 @@
                     "name": "Acme Store",
                     "email": "billing@acme.store",
                     "status": "active",
-                    "iconUrl": "https://imagedelivery.net/example/acme-icon.png",
                     "createdAt": "2025-06-15T10:30:00.000Z"
                   }
                 }
@@ -2485,6 +3023,14 @@
                         "missing_idempotency_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     },
                     "issues": {
                       "description": "Field-level validation issues (present on validation errors)",
@@ -2548,6 +3094,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2589,6 +3143,14 @@
                       "type": "string",
                       "const": "idempotency_conflict",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2623,6 +3185,14 @@
                       "type": "string",
                       "const": "internal_error",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2657,6 +3227,14 @@
                       "type": "string",
                       "const": "bad_gateway",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -2678,6 +3256,7 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2780,6 +3359,11 @@
                           },
                           "status": {
                             "type": "string",
+                            "enum": [
+                              "active",
+                              "inactive",
+                              "suspended"
+                            ],
                             "description": "Current merchant status",
                             "examples": [
                               "active"
@@ -2885,6 +3469,14 @@
                       ],
                       "description": "Machine-readable error code"
                     },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
                     "issues": {
                       "description": "Field-level validation issues (present on validation errors)",
                       "type": "array",
@@ -2947,6 +3539,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3068,6 +3668,11 @@
                         },
                         "status": {
                           "type": "string",
+                          "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                          ],
                           "description": "Current merchant status",
                           "examples": [
                             "active"
@@ -3102,9 +3707,9 @@
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "configId": {
+                                  "id": {
                                     "type": "string",
-                                    "description": "Settlement config ID"
+                                    "description": "Crypto settlement ID"
                                   },
                                   "asset": {
                                     "type": "string",
@@ -3122,7 +3727,7 @@
                                   }
                                 },
                                 "required": [
-                                  "configId",
+                                  "id",
                                   "asset",
                                   "destination"
                                 ]
@@ -3133,7 +3738,7 @@
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "configId": {
+                                  "id": {
                                     "type": "string",
                                     "description": "Settlement config ID"
                                   },
@@ -3147,7 +3752,7 @@
                                   }
                                 },
                                 "required": [
-                                  "configId",
+                                  "id",
                                   "status",
                                   "bankType"
                                 ]
@@ -3186,14 +3791,14 @@
                     "settlements": {
                       "crypto": [
                         {
-                          "configId": "crypto_Vx9mRp3TwKj7YqNz4",
+                          "id": "crypto_Xk7nWp8XmQj2YrTv6",
                           "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                           "destination": "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
                         }
                       ],
                       "fiat": [
                         {
-                          "configId": "fiat_Bk4nWp8XmQj2YrTv6",
+                          "id": "fiat_Bk4nWp8XmQj2YrTv6",
                           "status": "active",
                           "bankType": "ACH"
                         }
@@ -3222,6 +3827,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3263,6 +3876,14 @@
                       "type": "string",
                       "const": "not_found",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3338,6 +3959,11 @@
                         },
                         "status": {
                           "type": "string",
+                          "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                          ],
                           "description": "Current merchant status",
                           "examples": [
                             "active"
@@ -3408,6 +4034,14 @@
                       "const": "params_validation",
                       "description": "Machine-readable error code"
                     },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
                     "issues": {
                       "description": "Field-level validation issues (present on validation errors)",
                       "type": "array",
@@ -3463,6 +4097,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3504,6 +4146,14 @@
                       "type": "string",
                       "const": "not_found",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3525,6 +4175,7 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3632,6 +4283,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3673,6 +4332,14 @@
                       "type": "string",
                       "const": "not_found",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3694,6 +4361,799 @@
           }
         },
         "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/merchants/{merchantId}/settlements": {
+      "get": {
+        "operationId": "Settlements_list",
+        "tags": [
+          "Settlements"
+        ],
+        "summary": "List settlements",
+        "responses": {
+          "200": {
+            "description": "Settlements list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fiat": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "bankType": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "status",
+                          "bankType"
+                        ]
+                      }
+                    },
+                    "crypto": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "asset": {
+                            "type": "string"
+                          },
+                          "destination": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "asset",
+                          "destination"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "fiat",
+                    "crypto"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/merchants/{merchantId}/settlements/crypto": {
+      "post": {
+        "operationId": "CryptoSettlement_create",
+        "tags": [
+          "Crypto Settlement"
+        ],
+        "summary": "Create crypto settlements",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique key to ensure idempotent request processing. Max 255 characters.",
+            "schema": {
+              "type": "string",
+              "maxLength": 255
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Crypto settlements created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settlements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "asset": {
+                            "type": "string"
+                          },
+                          "destination": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "asset",
+                          "destination"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "settlements"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "params_validation",
+                        "invalid_params",
+                        "missing_idempotency_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  },
+                  "missing_idempotency_key": {
+                    "summary": "Missing Idempotency-Key header",
+                    "value": {
+                      "code": "missing_idempotency_key",
+                      "message": "Missing Idempotency-Key header"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merchant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "idempotency_conflict",
+                        "settlement_asset_conflict"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "idempotency_conflict": {
+                    "summary": "Idempotency key conflict: same key was used with a different request body",
+                    "value": {
+                      "code": "idempotency_conflict",
+                      "message": "Idempotency key conflict: same key was used with a different request body"
+                    }
+                  },
+                  "settlement_asset_conflict": {
+                    "summary": "A settlement already exists for this asset",
+                    "value": {
+                      "code": "settlement_asset_conflict",
+                      "message": "A settlement already exists for this asset"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "settlements": {
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^[-a-zA-Z0-9]{3,8}:[-a-zA-Z0-9]{1,32}\\/[-a-zA-Z0-9]{3,8}:[-a-zA-Z0-9]{1,128}$"
+                        },
+                        "destination": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^[-a-zA-Z0-9]{3,8}:[-a-zA-Z0-9]{1,32}:[-a-zA-Z0-9]{1,128}$"
+                        }
+                      },
+                      "required": [
+                        "asset",
+                        "destination"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "settlements"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/merchants/{merchantId}/settlements/crypto/{id}": {
+      "put": {
+        "operationId": "CryptoSettlement_update",
+        "tags": [
+          "Crypto Settlement"
+        ],
+        "summary": "Update a crypto settlement destination",
+        "responses": {
+          "200": {
+            "description": "Settlement updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "asset": {
+                      "type": "string"
+                    },
+                    "destination": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "asset",
+                    "destination"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "params_validation",
+                        "invalid_params"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Settlement not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "merchantId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destination": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "pattern": "^[-a-zA-Z0-9]{3,8}:[-a-zA-Z0-9]{1,32}:[-a-zA-Z0-9]{1,128}$"
+                  }
+                },
+                "required": [
+                  "destination"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "CryptoSettlement_delete",
+        "tags": [
+          "Crypto Settlement"
+        ],
+        "summary": "Delete a crypto settlement",
+        "responses": {
+          "200": {
+            "description": "Settlement deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "deleted"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Settlement not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_found",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not Found",
+                    "value": {
+                      "code": "not_found",
+                      "message": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "required": true
+          },
           {
             "schema": {
               "type": "string"
@@ -3748,6 +5208,14 @@
                         "params_validation"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     },
                     "issues": {
                       "description": "Field-level validation issues (present on validation errors)",
@@ -3811,6 +5279,14 @@
                         "invalid_api_key"
                       ],
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3852,6 +5328,14 @@
                       "type": "string",
                       "const": "internal_error",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3886,6 +5370,14 @@
                       "type": "string",
                       "const": "bad_gateway",
                       "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
                     }
                   },
                   "required": [
@@ -3919,14 +5411,18 @@
             "in": "query",
             "name": "start_ts",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
             }
           },
           {
             "in": "query",
             "name": "end_ts",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
             }
           },
           {
@@ -4024,54 +5520,21 @@
       "name": "Payments"
     },
     {
+      "name": "Refunds"
+    },
+    {
       "name": "Merchant Management"
+    },
+    {
+      "name": "Settlements"
+    },
+    {
+      "name": "Crypto Settlement"
     }
   ],
   "components": {
     "schemas": {
       "Action": {
-        "oneOf": [
-          {
-            "type": "object",
-            "description": "An action that requires a wallet RPC call to complete",
-            "required": [
-              "data",
-              "type"
-            ],
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/WalletRpcAction",
-                "description": "An action that requires a wallet RPC call to complete"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "walletRpc"
-                ]
-              }
-            }
-          },
-          {
-            "type": "object",
-            "description": "An action that requires building to complete",
-            "required": [
-              "data",
-              "type"
-            ],
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/Build",
-                "description": "An action that requires building to complete"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "build"
-                ]
-              }
-            }
-          }
-        ],
         "example": {
           "data": {
             "chain_id": "eip155:8453",
@@ -4082,29 +5545,51 @@
             ]
           },
           "type": "walletRpc"
-        }
+        },
+        "oneOf": [
+          {
+            "description": "An action that requires a wallet RPC call to complete",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/WalletRpcAction",
+                "description": "An action that requires a wallet RPC call to complete"
+              },
+              "type": {
+                "enum": [
+                  "walletRpc"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "data",
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "An action that requires building to complete",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/Build",
+                "description": "An action that requires building to complete"
+              },
+              "type": {
+                "enum": [
+                  "build"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "data",
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "Amount": {
-        "type": "object",
-        "required": [
-          "unit",
-          "value",
-          "display"
-        ],
-        "properties": {
-          "display": {
-            "$ref": "#/components/schemas/AmountDisplay",
-            "description": "Display information for the amount"
-          },
-          "unit": {
-            "$ref": "#/components/schemas/String",
-            "description": "Currency unit, prefixed with either \"iso4217/\" or \"caip19/\""
-          },
-          "value": {
-            "type": "string",
-            "description": "Amount value, in the currency unit's minor units"
-          }
-        },
         "example": {
           "display": {
             "assetName": "USD Coin",
@@ -4116,52 +5601,29 @@
           },
           "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
           "value": "1000000"
-        }
-      },
-      "AmountDisplay": {
-        "type": "object",
-        "required": [
-          "assetSymbol",
-          "assetName",
-          "decimals"
-        ],
+        },
         "properties": {
-          "assetName": {
-            "type": "string",
-            "description": "Full name of the asset"
+          "display": {
+            "$ref": "#/components/schemas/AmountDisplay",
+            "description": "Display information for the amount"
           },
-          "assetSymbol": {
-            "type": "string",
-            "description": "Ticker/symbol of the asset"
+          "unit": {
+            "$ref": "#/components/schemas/String",
+            "description": "Currency unit, prefixed with either \"iso4217/\" or \"caip19/\""
           },
-          "decimals": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Number of minor decimals of the asset",
-            "minimum": 0
-          },
-          "iconUrl": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "URL of the icon of the asset (if token)"
-          },
-          "networkIconUrl": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "URL of the icon of the network (if token)"
-          },
-          "networkName": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Name of the network of the asset (if token)"
+          "value": {
+            "description": "Amount value, in the currency unit's minor units",
+            "type": "string"
           }
         },
+        "required": [
+          "unit",
+          "value",
+          "display"
+        ],
+        "type": "object"
+      },
+      "AmountDisplay": {
         "example": {
           "assetName": "USD Coin",
           "assetSymbol": "USDC",
@@ -4169,117 +5631,129 @@
           "iconUrl": "https://assets.walletconnect.com/usdc.png",
           "networkIconUrl": "https://assets.walletconnect.com/base.png",
           "networkName": "Base"
-        }
+        },
+        "properties": {
+          "assetName": {
+            "description": "Full name of the asset",
+            "type": "string"
+          },
+          "assetSymbol": {
+            "description": "Ticker/symbol of the asset",
+            "type": "string"
+          },
+          "decimals": {
+            "description": "Number of minor decimals of the asset",
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "iconUrl": {
+            "description": "URL of the icon of the asset (if token)",
+            "nullable": true,
+            "type": "string"
+          },
+          "networkIconUrl": {
+            "description": "URL of the icon of the network (if token)",
+            "nullable": true,
+            "type": "string"
+          },
+          "networkName": {
+            "description": "Name of the network of the asset (if token)",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "assetSymbol",
+          "assetName",
+          "decimals"
+        ],
+        "type": "object"
       },
       "AmountParameter": {
-        "type": "object",
-        "required": [
-          "unit",
-          "value"
-        ],
+        "example": {
+          "unit": "iso4217/USD",
+          "value": "100"
+        },
         "properties": {
           "unit": {
             "$ref": "#/components/schemas/String",
             "description": "Currency unit, prefixed with either \"iso4217/\" or \"caip19/\""
           },
           "value": {
-            "type": "string",
-            "description": "Amount value, in the currency unit's minor units"
+            "description": "Amount value, in the currency unit's minor units",
+            "type": "string"
           }
         },
-        "example": {
-          "unit": "iso4217/USD",
-          "value": "100"
-        }
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object"
       },
       "Build": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
+        "example": {
+          "data": "..."
+        },
         "properties": {
           "data": {
             "type": "string"
           }
         },
-        "example": {
-          "data": "..."
-        }
+        "required": [
+          "data"
+        ],
+        "type": "object"
       },
       "BuyerInfo": {
-        "type": "object",
-        "required": [
-          "accountCaip10",
-          "accountProviderName"
-        ],
-        "properties": {
-          "accountCaip10": {
-            "type": "string",
-            "description": "Account CAIP-10"
-          },
-          "accountProviderIcon": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Account provider icon URL"
-          },
-          "accountProviderName": {
-            "type": "string",
-            "description": "Account provider name"
-          }
-        },
         "example": {
           "accountCaip10": "eip155:1:0x0000000000000000000000000000000000000000",
           "accountProviderIcon": "https://example.com/icon.png",
           "accountProviderName": "Wallet"
-        }
+        },
+        "properties": {
+          "accountCaip10": {
+            "description": "Account CAIP-10",
+            "type": "string"
+          },
+          "accountProviderIcon": {
+            "description": "Account provider icon URL",
+            "nullable": true,
+            "type": "string"
+          },
+          "accountProviderName": {
+            "description": "Account provider name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountCaip10",
+          "accountProviderName"
+        ],
+        "type": "object"
       },
       "CheckoutConfig": {
-        "type": "object",
+        "example": {
+          "errorUrl": "https://example.com/error",
+          "successUrl": "https://example.com/success"
+        },
+        "properties": {
+          "errorUrl": {
+            "description": "HTTPS URL to redirect to on payment error",
+            "type": "string"
+          },
+          "successUrl": {
+            "description": "HTTPS URL to redirect to on successful payment",
+            "type": "string"
+          }
+        },
         "required": [
           "successUrl",
           "errorUrl"
         ],
-        "properties": {
-          "errorUrl": {
-            "type": "string",
-            "description": "HTTPS URL to redirect to on payment error"
-          },
-          "successUrl": {
-            "type": "string",
-            "description": "HTTPS URL to redirect to on successful payment"
-          }
-        },
-        "example": {
-          "errorUrl": "https://example.com/error",
-          "successUrl": "https://example.com/success"
-        }
+        "type": "object"
       },
       "CollectData": {
-        "type": "object",
-        "required": [
-          "fields",
-          "schema",
-          "url"
-        ],
-        "properties": {
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectDataField"
-            },
-            "description": "Deprecated: Use `schema` and `url` fields instead for webview-based data collection",
-            "deprecated": true
-          },
-          "schema": {
-            "description": "JSON Schema for validating IC form data (for webview mode)"
-          },
-          "url": {
-            "type": "string",
-            "description": "URL for webview-based data collection"
-          }
-        },
         "example": {
           "fields": [
             {
@@ -4364,47 +5838,69 @@
             "type": "object"
           },
           "url": "https://data-collection.walletconnect.com/ic/pay_123?accounts=eip155:1:0x123"
-        }
+        },
+        "properties": {
+          "fields": {
+            "deprecated": true,
+            "description": "Deprecated: Use `schema` and `url` fields instead for webview-based data collection",
+            "items": {
+              "$ref": "#/components/schemas/CollectDataField"
+            },
+            "type": "array"
+          },
+          "schema": {
+            "description": "JSON Schema for validating IC form data (for webview mode)"
+          },
+          "url": {
+            "description": "URL for webview-based data collection",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fields",
+          "schema",
+          "url"
+        ],
+        "type": "object"
       },
       "CollectDataField": {
-        "type": "object",
-        "required": [
-          "type",
-          "id",
-          "name",
-          "required"
-        ],
+        "example": {
+          "id": "fullName",
+          "name": "Full name",
+          "required": true,
+          "type": "text"
+        },
         "properties": {
           "id": {
-            "type": "string",
-            "description": "ID of the field for submission"
+            "description": "ID of the field for submission",
+            "type": "string"
           },
           "name": {
-            "type": "string",
-            "description": "Human readable name of the field"
+            "description": "Human readable name of the field",
+            "type": "string"
           },
           "required": {
-            "type": "boolean",
-            "description": "Requiredness of the field"
+            "description": "Requiredness of the field",
+            "type": "boolean"
           },
           "type": {
             "$ref": "#/components/schemas/CollectDataFieldType",
             "description": "Type of the field"
           }
         },
-        "example": {
-          "id": "fullName",
-          "name": "Full name",
-          "required": true,
-          "type": "text"
-        }
+        "required": [
+          "type",
+          "id",
+          "name",
+          "required"
+        ],
+        "type": "object"
       },
       "CollectDataFieldResult": {
-        "type": "object",
-        "required": [
-          "id",
-          "value"
-        ],
+        "example": {
+          "id": "fullName",
+          "value": "John"
+        },
         "properties": {
           "id": {
             "type": "string"
@@ -4413,32 +5909,21 @@
             "type": "string"
           }
         },
-        "example": {
-          "id": "fullName",
-          "value": "John"
-        }
+        "required": [
+          "id",
+          "value"
+        ],
+        "type": "object"
       },
       "CollectDataFieldType": {
-        "type": "string",
         "enum": [
           "text",
           "date",
           "checkbox"
-        ]
+        ],
+        "type": "string"
       },
       "CollectDataResult": {
-        "type": "object",
-        "required": [
-          "fields"
-        ],
-        "properties": {
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CollectDataFieldResult"
-            }
-          }
-        },
         "example": {
           "fields": [
             {
@@ -4462,36 +5947,21 @@
               "value": "New York, NY"
             }
           ]
-        }
-      },
-      "ConfirmPaymentRequest": {
-        "type": "object",
-        "required": [
-          "optionId",
-          "results"
-        ],
+        },
         "properties": {
-          "collectedData": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/CollectDataResult"
-              }
-            ]
-          },
-          "optionId": {
-            "type": "string",
-            "description": "ID of the option to confirm"
-          },
-          "results": {
-            "type": "array",
+          "fields": {
             "items": {
-              "$ref": "#/components/schemas/ConfirmPaymentResult"
-            }
+              "$ref": "#/components/schemas/CollectDataFieldResult"
+            },
+            "type": "array"
           }
         },
+        "required": [
+          "fields"
+        ],
+        "type": "object"
+      },
+      "ConfirmPaymentRequest": {
         "example": {
           "collectedData": {
             "fields": [
@@ -4527,14 +5997,42 @@
               "type": "walletRpc"
             }
           ]
-        }
+        },
+        "properties": {
+          "collectedData": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CollectDataResult"
+              }
+            ]
+          },
+          "optionId": {
+            "description": "ID of the option to confirm",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ConfirmPaymentResult"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "optionId",
+          "results"
+        ],
+        "type": "object"
       },
       "ConfirmPaymentResponse": {
-        "type": "object",
-        "required": [
-          "status",
-          "isFinal"
-        ],
+        "example": {
+          "info": null,
+          "isFinal": true,
+          "pollInMs": null,
+          "status": "succeeded"
+        },
         "properties": {
           "info": {
             "oneOf": [
@@ -4548,65 +6046,66 @@
             ]
           },
           "isFinal": {
-            "type": "boolean",
-            "description": "True if the payment is in a final state and no longer requires polling"
+            "description": "True if the payment is in a final state and no longer requires polling",
+            "type": "boolean"
           },
           "pollInMs": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
             "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
-            "minimum": 0
+            "format": "int64",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
           },
           "status": {
             "$ref": "#/components/schemas/PaymentStatus",
             "description": "Payment status"
           }
         },
-        "example": {
-          "info": null,
-          "isFinal": true,
-          "pollInMs": null,
-          "status": "succeeded"
-        }
+        "required": [
+          "status",
+          "isFinal"
+        ],
+        "type": "object"
       },
       "ConfirmPaymentResult": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "data",
-              "type"
-            ],
-            "properties": {
-              "data": {
-                "type": "array",
-                "items": {}
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "walletRpc"
-                ]
-              }
-            }
-          }
-        ],
         "example": {
           "data": [
             "0x123"
           ],
           "type": "walletRpc"
-        }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "data": {
+                "items": {},
+                "type": "array"
+              },
+              "type": {
+                "enum": [
+                  "walletRpc"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "data",
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "CreatePayment": {
-        "type": "object",
-        "required": [
-          "referenceId",
-          "amount"
-        ],
+        "example": {
+          "amount": {
+            "unit": "iso4217/USD",
+            "value": "100"
+          },
+          "checkout": null,
+          "expiresAt": null,
+          "referenceId": "ORDER-123"
+        },
         "properties": {
           "amount": {
             "$ref": "#/components/schemas/AmountParameter",
@@ -4623,30 +6122,62 @@
             ]
           },
           "expiresAt": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "description": "Optional custom expiration timestamp (Unix seconds since epoch).\nMust be in the future if provided. If not provided, defaults to 5 minutes from now.",
             "format": "int64",
-            "description": "Optional custom expiration timestamp (Unix seconds since epoch).\nMust be in the future if provided. If not provided, defaults to 5 minutes from now."
+            "nullable": true,
+            "type": "integer"
           },
           "referenceId": {
-            "type": "string",
-            "description": "Merchant/PSP order ID"
+            "description": "Merchant/PSP order ID",
+            "type": "string"
           }
         },
-        "example": {
-          "amount": {
-            "unit": "iso4217/USD",
-            "value": "100"
-          },
-          "checkout": null,
-          "expiresAt": null,
-          "referenceId": "ORDER-123"
-        }
+        "required": [
+          "referenceId",
+          "amount"
+        ],
+        "type": "object"
       },
       "CreatePaymentResponse": {
-        "type": "object",
+        "example": {
+          "expiresAt": 1718236800,
+          "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
+          "isFinal": false,
+          "paymentId": "pay_c5a2ecc101KQF2KRZR2FRAAEQ2KJCH4F5H",
+          "pollInMs": 1000,
+          "status": "requires_action"
+        },
+        "properties": {
+          "expiresAt": {
+            "description": "Payment expiration timestamp, in seconds since epoch",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "gatewayUrl": {
+            "description": "Gateway URL to redirect the user to for payment",
+            "type": "string"
+          },
+          "isFinal": {
+            "description": "True if the payment is in a final state and no longer requires polling",
+            "type": "boolean"
+          },
+          "paymentId": {
+            "$ref": "#/components/schemas/PaymentId",
+            "description": "Payment ID"
+          },
+          "pollInMs": {
+            "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
+            "format": "int64",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus",
+            "description": "Payment status"
+          }
+        },
         "required": [
           "paymentId",
           "status",
@@ -4654,50 +6185,9 @@
           "isFinal",
           "gatewayUrl"
         ],
-        "properties": {
-          "expiresAt": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Payment expiration timestamp, in seconds since epoch",
-            "minimum": 0
-          },
-          "gatewayUrl": {
-            "type": "string",
-            "description": "Gateway URL to redirect the user to for payment"
-          },
-          "isFinal": {
-            "type": "boolean",
-            "description": "True if the payment is in a final state and no longer requires polling"
-          },
-          "paymentId": {
-            "$ref": "#/components/schemas/PaymentId",
-            "description": "Payment ID"
-          },
-          "pollInMs": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
-            "minimum": 0
-          },
-          "status": {
-            "$ref": "#/components/schemas/PaymentStatus",
-            "description": "Payment status"
-          }
-        },
-        "example": {
-          "expiresAt": 1718236800,
-          "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
-          "isFinal": false,
-          "paymentId": "pay_dda2ecc101KN47BCZED945D7PRS1QS5RH0",
-          "pollInMs": 1000,
-          "status": "requires_action"
-        }
+        "type": "object"
       },
       "ErrorCode": {
-        "type": "string",
         "description": "Standard error codes for API responses.\n\nThis prevents typos like \"invlaid_params\" from reaching production.",
         "enum": [
           "rate_limited",
@@ -4723,6 +6213,7 @@
           "partner_not_found",
           "customer_not_found",
           "wallet_not_found",
+          "executor_not_found",
           "missing_app_id",
           "missing_client_id",
           "invalid_app_id",
@@ -4731,16 +6222,14 @@
           "invalid_api_version",
           "unknown_api_version",
           "api_version_downgrade",
-          "sanctioned_user"
-        ]
+          "sanctioned_user",
+          "payment_not_succeeded",
+          "already_refunded"
+        ],
+        "type": "string"
       },
       "ErrorResponse": {
-        "type": "object",
         "description": "Standard error response structure for API errors.",
-        "required": [
-          "code",
-          "message"
-        ],
         "properties": {
           "code": {
             "$ref": "#/components/schemas/ErrorCode"
@@ -4748,42 +6237,35 @@
           "message": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
       },
       "FetchRequest": {
-        "type": "object",
+        "example": {
+          "data": "...",
+          "optionId": "opt_123"
+        },
+        "properties": {
+          "data": {
+            "description": "Extra build payload",
+            "type": "string"
+          },
+          "optionId": {
+            "description": "ID of the option to build an action for",
+            "type": "string"
+          }
+        },
         "required": [
           "optionId",
           "data"
         ],
-        "properties": {
-          "data": {
-            "type": "string",
-            "description": "Extra build payload"
-          },
-          "optionId": {
-            "type": "string",
-            "description": "ID of the option to build an action for"
-          }
-        },
-        "example": {
-          "data": "...",
-          "optionId": "opt_123"
-        }
+        "type": "object"
       },
       "FetchResponse": {
-        "type": "object",
-        "required": [
-          "actions"
-        ],
-        "properties": {
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Action"
-            }
-          }
-        },
         "example": {
           "actions": [
             {
@@ -4798,16 +6280,27 @@
               "type": "walletRpc"
             }
           ]
-        }
+        },
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "actions"
+        ],
+        "type": "object"
       },
       "GatewayCancelPaymentResponse": {
-        "type": "object",
-        "required": [
-          "paymentId",
-          "status",
-          "cancelledReason",
-          "cancelledAt"
-        ],
+        "example": {
+          "cancelledAt": "2025-01-14T10:30:00Z",
+          "cancelledReason": "cancelled_by_user",
+          "paymentId": "pay_ada2ecc101KQF2KS00Z727V8TEB74P2N21",
+          "status": "cancelled"
+        },
         "properties": {
           "cancelledAt": {
             "type": "string"
@@ -4822,93 +6315,60 @@
             "$ref": "#/components/schemas/PaymentStatus"
           }
         },
-        "example": {
-          "cancelledAt": "2025-01-14T10:30:00Z",
-          "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_24a2ecc101KN47BCZFXGP1F5M6A4JETXRA",
-          "status": "cancelled"
-        }
+        "required": [
+          "paymentId",
+          "status",
+          "cancelledReason",
+          "cancelledAt"
+        ],
+        "type": "object"
       },
       "GatewayPaymentInformation": {
-        "type": "object",
         "description": "Payment information returned when a gateway payment succeeds.",
-        "required": [
-          "txId",
-          "optionAmount"
-        ],
         "properties": {
           "optionAmount": {
             "$ref": "#/components/schemas/Amount",
             "description": "Amount paid in token units"
           },
           "txId": {
-            "type": "string",
-            "description": "Transaction identifier (hash)"
-          }
-        }
-      },
-      "GetPaymentOptionsRequest": {
-        "type": "object",
-        "required": [
-          "accounts"
-        ],
-        "properties": {
-          "accounts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "refresh": {
-            "type": [
-              "array",
-              "null"
-            ],
-            "items": {
-              "type": "string"
-            }
+            "description": "Transaction identifier (hash)",
+            "type": "string"
           }
         },
+        "required": [
+          "txId",
+          "optionAmount"
+        ],
+        "type": "object"
+      },
+      "GetPaymentOptionsRequest": {
         "example": {
           "accounts": [
             "eip155:8453:0x123"
           ],
           "refresh": null
-        }
-      },
-      "GetPaymentOptionsResponse": {
-        "type": "object",
+        },
         "properties": {
-          "collectData": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/CollectData"
-              }
-            ]
-          },
-          "info": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/GetPaymentResponse"
-              }
-            ]
-          },
-          "options": {
-            "type": [
-              "array",
-              "null"
-            ],
+          "accounts": {
             "items": {
-              "$ref": "#/components/schemas/PaymentOption"
-            }
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "refresh": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
+        "required": [
+          "accounts"
+        ],
+        "type": "object"
+      },
+      "GetPaymentOptionsResponse": {
         "example": {
           "collectData": {
             "fields": [
@@ -5138,42 +6598,39 @@
               "id": "opt_123"
             }
           ]
-        }
-      },
-      "GetPaymentResponse": {
-        "type": "object",
-        "required": [
-          "status",
-          "amount",
-          "expiresAt",
-          "merchant"
-        ],
+        },
         "properties": {
-          "amount": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "buyer": {
+          "collectData": {
             "oneOf": [
               {
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/BuyerInfo"
+                "$ref": "#/components/schemas/CollectData"
               }
             ]
           },
-          "expiresAt": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 0
+          "info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GetPaymentResponse"
+              }
+            ]
           },
-          "merchant": {
-            "$ref": "#/components/schemas/MerchantInfo"
-          },
-          "status": {
-            "$ref": "#/components/schemas/PaymentStatus"
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentOption"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
+        "type": "object"
+      },
+      "GetPaymentResponse": {
         "example": {
           "amount": {
             "display": {
@@ -5198,15 +6655,74 @@
             "name": "Merchant"
           },
           "status": "requires_action"
-        }
-      },
-      "GetPaymentStatusResponse": {
-        "type": "object",
+        },
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "buyer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BuyerInfo"
+              }
+            ]
+          },
+          "expiresAt": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MerchantInfo"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
         "required": [
           "status",
-          "isFinal"
+          "amount",
+          "expiresAt",
+          "merchant"
         ],
+        "type": "object"
+      },
+      "GetPaymentStatusResponse": {
+        "example": {
+          "info": {
+            "optionAmount": {
+              "display": {
+                "assetName": "USD Coin",
+                "assetSymbol": "USDC",
+                "decimals": 6,
+                "iconUrl": "https://assets.walletconnect.com/usdc.png",
+                "networkIconUrl": "https://assets.walletconnect.com/base.png",
+                "networkName": "Base"
+              },
+              "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+              "value": "1000000"
+            },
+            "txId": "0xabc123..."
+          },
+          "isFinal": true,
+          "pollInMs": null,
+          "status": "succeeded"
+        },
         "properties": {
+          "failureCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentFailureCode",
+                "description": "Machine-readable reason identifying why the payment failed. Present\nonly when `status == \"failed\"`."
+              }
+            ]
+          },
           "info": {
             "oneOf": [
               {
@@ -5219,77 +6735,64 @@
             ]
           },
           "isFinal": {
-            "type": "boolean",
-            "description": "True if the payment is in a final state and no longer requires polling"
+            "description": "True if the payment is in a final state and no longer requires polling",
+            "type": "boolean"
           },
           "pollInMs": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
             "description": "Time to poll for payment status, in milliseconds. Not present if the\npayment is in a final state.",
-            "minimum": 0
+            "format": "int64",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
           },
           "status": {
             "$ref": "#/components/schemas/PaymentStatus",
             "description": "Payment status"
           }
         },
-        "example": {
-          "info": null,
-          "isFinal": false,
-          "pollInMs": 1000,
-          "status": "requires_action"
-        }
+        "required": [
+          "status",
+          "isFinal"
+        ],
+        "type": "object"
       },
       "MerchantInfo": {
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "properties": {
-          "iconUrl": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Merchant icon URL"
-          },
-          "name": {
-            "type": "string",
-            "description": "Merchant name"
-          }
-        },
         "example": {
           "iconUrl": "https://example.com/icon.png",
           "name": "Merchant"
-        }
+        },
+        "properties": {
+          "iconUrl": {
+            "description": "Merchant icon URL",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "PaymentFailureCode": {
+        "description": "Machine-readable code identifying why a payment reached `Failed`.\n\nTwo distinct string forms exist per variant:\n- **Strum** (`Display`/`AsRefStr`/`EnumString`): the DynamoDB storage form\n  written to the `failure_reason` column. Preserves the existing on-disk\n  value for rows written before this type existed.\n- **Serde** (`Serialize`/`Deserialize`): the public API form. Deliberately\n  decoupled from the internal term so that compliance-specific wording\n  isn't surfaced to external consumers.",
+        "enum": [
+          "declined_user"
+        ],
+        "type": "string"
       },
       "PaymentId": {
-        "type": "string",
         "description": "Payment ID",
         "examples": [
           "pay_7fa2ecc101ARZ3NDEKTSV4RRFFQ69G5FAV"
-        ]
+        ],
+        "type": "string"
       },
       "PaymentInformation": {
-        "type": "object",
         "description": "Payment information returned when payment succeeds",
-        "required": [
-          "txId",
-          "optionAmount"
-        ],
-        "properties": {
-          "optionAmount": {
-            "$ref": "#/components/schemas/Amount",
-            "description": "Amount paid in token units"
-          },
-          "txId": {
-            "type": "string",
-            "description": "Transaction identifier (hash)"
-          }
-        },
         "example": {
           "optionAmount": {
             "display": {
@@ -5304,64 +6807,24 @@
             "value": "1000000"
           },
           "txId": "0xabc123..."
-        }
-      },
-      "PaymentOption": {
-        "type": "object",
-        "required": [
-          "id",
-          "account",
-          "amount",
-          "etaS",
-          "actions"
-        ],
+        },
         "properties": {
-          "account": {
-            "type": "string",
-            "description": "The account to use for the option"
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Action"
-            },
-            "description": "Actions required to complete the option"
-          },
-          "amount": {
+          "optionAmount": {
             "$ref": "#/components/schemas/Amount",
-            "description": "The option's token and amount"
+            "description": "Amount paid in token units"
           },
-          "collectData": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/CollectData",
-                "description": "Per-option IC data collection info. Present when this option's account requires data collection, null otherwise."
-              }
-            ]
-          },
-          "etaS": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Estimated time to complete the option, in seconds",
-            "minimum": 0
-          },
-          "expiresAt": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "Unix timestamp (seconds) after which this quote is stale and confirm_payment\nwill reject it with `quote_expired`. The wallet should re-fetch options before\nthis deadline. `None` for direct-currency options that don't involve a rate.",
-            "minimum": 0
-          },
-          "id": {
-            "type": "string",
-            "description": "ID of the option to be used to refer to it in other requests. May be up to 2^16 characters."
+          "txId": {
+            "description": "Transaction identifier (hash)",
+            "type": "string"
           }
         },
+        "required": [
+          "txId",
+          "optionAmount"
+        ],
+        "type": "object"
+      },
+      "PaymentOption": {
         "example": {
           "account": "eip155:1:0x0000000000000000000000000000000000000000",
           "actions": [
@@ -5477,10 +6940,62 @@
           "etaS": 5,
           "expiresAt": 1700000300,
           "id": "opt_123"
-        }
+        },
+        "properties": {
+          "account": {
+            "description": "The account to use for the option",
+            "type": "string"
+          },
+          "actions": {
+            "description": "Actions required to complete the option",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "The option's token and amount"
+          },
+          "collectData": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CollectData",
+                "description": "Per-option IC data collection info. Present when this option's account requires data collection, null otherwise."
+              }
+            ]
+          },
+          "etaS": {
+            "description": "Estimated time to complete the option, in seconds",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "expiresAt": {
+            "description": "Unix timestamp (seconds) after which this quote is stale and confirm_payment\nwill reject it with `quote_expired`. The wallet should re-fetch options before\nthis deadline. `None` for direct-currency options that don't involve a rate.",
+            "format": "int64",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "description": "ID of the option to be used to refer to it in other requests. May be up to 2^16 characters.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "account",
+          "amount",
+          "etaS",
+          "actions"
+        ],
+        "type": "object"
       },
       "PaymentStatus": {
-        "type": "string",
         "description": "Payment status representing the lifecycle of a payment.\n\nPayments progress through these states from creation to terminal status.\nSome states are specific to the payment source (pull vs push).",
         "enum": [
           "requires_action",
@@ -5489,16 +7004,16 @@
           "failed",
           "expired",
           "cancelled"
-        ]
+        ],
+        "type": "string"
       },
       "PaymentsCancelPaymentResponse": {
-        "type": "object",
-        "required": [
-          "paymentId",
-          "status",
-          "cancelledReason",
-          "cancelledAt"
-        ],
+        "example": {
+          "cancelledAt": "2025-01-14T10:30:00Z",
+          "cancelledReason": "cancelled_by_merchant",
+          "paymentId": "pay_f7a2ecc101KQF2KRZTGTY1YS5Q7074H458",
+          "status": "cancelled"
+        },
         "properties": {
           "cancelledAt": {
             "type": "string"
@@ -5513,52 +7028,187 @@
             "$ref": "#/components/schemas/PaymentStatus"
           }
         },
+        "required": [
+          "paymentId",
+          "status",
+          "cancelledReason",
+          "cancelledAt"
+        ],
+        "type": "object"
+      },
+      "PaymentsGetPaymentResponse": {
         "example": {
-          "cancelledAt": "2025-01-14T10:30:00Z",
-          "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_97a2ecc101KN47BCZESG2VG66DCHSKVH0G",
-          "status": "cancelled"
-        }
+          "info": {
+            "optionAmount": {
+              "display": {
+                "assetName": "USD Coin",
+                "assetSymbol": "USDC",
+                "decimals": 6,
+                "iconUrl": "https://assets.walletconnect.com/usdc.png",
+                "networkIconUrl": "https://assets.walletconnect.com/base.png",
+                "networkName": "Base"
+              },
+              "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+              "value": "1000000"
+            },
+            "txId": "0xabc123..."
+          },
+          "referenceId": "ORDER-123",
+          "settlement": null,
+          "status": "succeeded"
+        },
+        "properties": {
+          "failureCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentFailureCode",
+                "description": "Machine-readable reason identifying why the payment failed. Present\nonly when `status == \"failed\"`."
+              }
+            ]
+          },
+          "info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentInformation",
+                "description": "Payment information (transaction hash, amount). Present when status is\nSucceeded, null otherwise."
+              }
+            ]
+          },
+          "referenceId": {
+            "description": "Merchant-provided reference ID for this payment, as supplied during\npayment creation",
+            "type": "string"
+          },
+          "settlement": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentsSettlementInformation",
+                "description": "Settlement metadata for the MTA → destination transfer. Null when\nsettlement has not completed yet (pending, non-MTA flows, or\npre-confirmation)."
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus",
+            "description": "Payment status"
+          }
+        },
+        "required": [
+          "status",
+          "referenceId"
+        ],
+        "type": "object"
+      },
+      "PaymentsSettlementAmount": {
+        "description": "Amount information for a successful settlement transfer.",
+        "properties": {
+          "unit": {
+            "$ref": "#/components/schemas/String",
+            "description": "Settlement unit — the asset or currency used in the settlement\ntransfer. Uses the same unit format as payment amounts\n(e.g. \"caip19/eip155:1/erc20:0xA0b86...\" for crypto,\n\"iso4217/USD\" for fiat)."
+          }
+        },
+        "required": [
+          "unit"
+        ],
+        "type": "object"
+      },
+      "PaymentsSettlementInformation": {
+        "description": "Settlement metadata returned for MTA-based payments.\n\nOnly present once the settlement transfer has completed on-chain.",
+        "example": {
+          "successful": {
+            "amount": {
+              "unit": "caip19/eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+            },
+            "txId": "0xabc123def456789abc123def456789abc123def456789abc123def456789abc1"
+          }
+        },
+        "properties": {
+          "successful": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentsSettlementSuccessful",
+                "description": "Settlement success details. Null while settlement is pending,\npopulated once the on-chain transfer completes successfully."
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "PaymentsSettlementSuccessful": {
+        "description": "Details of a successful settlement transfer.",
+        "example": {
+          "amount": {
+            "unit": "caip19/eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+          },
+          "txId": "0xabc123def456789abc123def456789abc123def456789abc123def456789abc1"
+        },
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/PaymentsSettlementAmount",
+            "description": "Settlement amount — the asset/currency and value transferred."
+          },
+          "txId": {
+            "description": "Transaction hash of the MTA → settlement destination transfer.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "txId",
+          "amount"
+        ],
+        "type": "object"
       },
       "String": {
+        "description": "Represents a currency/token unit for payment amounts.\n\nCan be either:\n- A fiat currency (ISO 4217): `\"iso4217/USD\"`, `\"iso4217/EUR\"`\n- A blockchain token (CAIP-19): `\"caip19/eip155:1/erc20:0x...\"`",
+        "example": "iso4217/USD",
         "oneOf": [
           {
-            "type": "object",
             "description": "Fiat currency (ISO 4217 format)",
+            "properties": {
+              "Iso4217": {
+                "description": "Fiat currency (ISO 4217 format)",
+                "type": "string"
+              }
+            },
             "required": [
               "Iso4217"
             ],
-            "properties": {
-              "Iso4217": {
-                "type": "string",
-                "description": "Fiat currency (ISO 4217 format)"
-              }
-            }
+            "type": "object"
           },
           {
-            "type": "object",
             "description": "Blockchain token (CAIP-19 format)",
+            "properties": {
+              "Caip19": {
+                "description": "Blockchain token (CAIP-19 format)",
+                "type": "string"
+              }
+            },
             "required": [
               "Caip19"
             ],
-            "properties": {
-              "Caip19": {
-                "type": "string",
-                "description": "Blockchain token (CAIP-19 format)"
-              }
-            }
+            "type": "object"
           }
-        ],
-        "description": "Represents a currency/token unit for payment amounts.\n\nCan be either:\n- A fiat currency (ISO 4217): `\"iso4217/USD\"`, `\"iso4217/EUR\"`\n- A blockchain token (CAIP-19): `\"caip19/eip155:1/erc20:0x...\"`",
-        "example": "iso4217/USD"
+        ]
       },
       "WalletRpcAction": {
-        "type": "object",
-        "required": [
-          "chain_id",
-          "method",
-          "params"
-        ],
+        "example": {
+          "chain_id": "eip155:8453",
+          "method": "eth_signTypedData_v4",
+          "params": [
+            "0x0000000000000000000000000000000000000000",
+            "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
+          ]
+        },
         "properties": {
           "chain_id": {
             "type": "string"
@@ -5567,18 +7217,16 @@
             "type": "string"
           },
           "params": {
-            "type": "array",
-            "items": {}
+            "items": {},
+            "type": "array"
           }
         },
-        "example": {
-          "chain_id": "eip155:8453",
-          "method": "eth_signTypedData_v4",
-          "params": [
-            "0x0000000000000000000000000000000000000000",
-            "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
-          ]
-        }
+        "required": [
+          "chain_id",
+          "method",
+          "params"
+        ],
+        "type": "object"
       },
       "MerchantApiErrorCode": {
         "type": "string",
@@ -5588,6 +7236,7 @@
           "not_found",
           "internal_error",
           "bad_gateway",
+          "settlement_asset_conflict",
           "missing_api_key",
           "invalid_api_key",
           "missing_merchant_id",
@@ -5596,7 +7245,9 @@
           "api_version_downgrade",
           "idempotency_conflict",
           "version_conflict",
-          "missing_idempotency_key"
+          "missing_idempotency_key",
+          "payment_not_succeeded",
+          "already_refunded"
         ],
         "description": "Machine-readable error code"
       },
@@ -5734,6 +7385,34 @@
           "display"
         ],
         "description": "Token-denominated amount"
+      },
+      "MerchantPaymentSettlement": {
+        "description": "Settlement details. Omitted when settlement details cannot be reported yet. When present, `settled` is always included. When `settled` is `false`, no additional settlement fields are returned. When `settled` is `true`, `amount` and `txHash` are always included.",
+        "type": "object",
+        "properties": {
+          "settled": {
+            "type": "boolean",
+            "description": "Whether settlement is complete."
+          },
+          "amount": {
+            "description": "Net settlement amount after fees in the settlement unit. Present only when `settled` is `true`.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+              },
+              {
+                "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+              }
+            ]
+          },
+          "txHash": {
+            "description": "Settlement transaction hash. Present only when `settled` is `true`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "settled"
+        ]
       },
       "MerchantPaymentsResponse": {
         "type": "object",
@@ -5888,52 +7567,7 @@
                   ]
                 },
                 "settlement": {
-                  "description": "Settlement details. Omitted when settlement details cannot be reported yet. When present, `settled` is always included. When `settled` is `false`, no additional settlement fields are returned. When `settled` is `true`, `amount` and `txHash` are always included.",
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "settled": {
-                          "type": "boolean",
-                          "const": false,
-                          "description": "Settlement is not complete."
-                        }
-                      },
-                      "required": [
-                        "settled"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "settled": {
-                          "type": "boolean",
-                          "const": true,
-                          "description": "Settlement is complete."
-                        },
-                        "amount": {
-                          "anyOf": [
-                            {
-                              "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
-                            },
-                            {
-                              "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
-                            }
-                          ],
-                          "description": "Net settlement amount after fees in the settlement unit."
-                        },
-                        "txHash": {
-                          "type": "string",
-                          "description": "Settlement transaction hash."
-                        }
-                      },
-                      "required": [
-                        "settled",
-                        "amount",
-                        "txHash"
-                      ]
-                    }
-                  ]
+                  "$ref": "#/components/schemas/MerchantPaymentSettlement"
                 },
                 "createdAt": {
                   "type": "string",
@@ -6201,9 +7835,16 @@
                   ]
                 },
                 "token_decimals": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "token_logo": {
                   "anyOf": [
@@ -6305,21 +7946,21 @@
     },
     "securitySchemes": {
       "API Key": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Api-Key"
-      },
-      "ApiKey": {
-        "type": "apiKey",
         "in": "header",
         "name": "Api-Key",
-        "description": "Private API key for wallet authentication"
+        "type": "apiKey"
+      },
+      "ApiKey": {
+        "description": "Private API key for wallet authentication",
+        "in": "header",
+        "name": "Api-Key",
+        "type": "apiKey"
       },
       "AppId": {
-        "type": "apiKey",
+        "description": "Public App ID for wallet authentication. When using this auth mode, the Client-Id header is also required.",
         "in": "header",
         "name": "App-Id",
-        "description": "Public App ID for wallet authentication. When using this auth mode, the Client-Id header is also required."
+        "type": "apiKey"
       },
       "apiKey": {
         "type": "apiKey",
