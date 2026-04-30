@@ -92,18 +92,28 @@ WalletConnect Pay currently supports the following tokens and networks:
 
 | Token | Network | Chain ID | CAIP-2 Format |
 |-------|---------|----------|---------------|
-| USDC | Ethereum | 1 | `eip155:1` |
-| USDC | Base | 8453 | `eip155:8453` |
-| USDC | Optimism | 10 | `eip155:10` |
-| USDC | Polygon | 137 | `eip155:137` |
 | USDC | Arbitrum | 42161 | `eip155:42161` |
+| USDC | Base | 8453 | `eip155:8453` |
+| USDC | Polygon | 137 | `eip155:137` |
+| USDC | Ethereum | 1 | `eip155:1` |
+| USDC | Optimism | 10 | `eip155:10` |
+| USDC | Monad | 143 | `eip155:143` |
+| USDC | Celo | 42220 | `eip155:42220` |
+| USDC | BSC | 56 | `eip155:56` |
 | EURC | Ethereum | 1 | `eip155:1` |
 | EURC | Base | 8453 | `eip155:8453` |
+| USDT0 | Arbitrum | 42161 | `eip155:42161` |
+| PYUSD | Ethereum | 1 | `eip155:1` |
+| PYUSD | Arbitrum | 42161 | `eip155:42161` |
+| USDG | Ethereum | 1 | `eip155:1` |
+| USDT | Ethereum | 1 | `eip155:1` |
+| USDT | Polygon | 137 | `eip155:137` |
+| USDT | BSC | 56 | `eip155:56` |
 
 All account addresses must be provided in CAIP-10 format: `eip155:<chainId>:<address>`
 
 <Note>
-Support for all EVM chains, Solana, and additional native and non-native assets is coming soon. Include accounts for all supported networks to maximize payment options for your users.
+Include accounts for all supported networks to maximize payment options for your users.
 </Note>
 
 ## Payment Flow
@@ -258,7 +268,7 @@ val signatures = actions.map { action ->
 ```
 
 <Note>
-Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler.
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `rpc.method` (or `action.action.method`) and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/usdt-support).
 </Note>
 
 <Warning>

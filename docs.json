@@ -67,7 +67,8 @@
                       "payments/wallets/walletkit/web"
                     ]
                   },
-                  "payments/wallets/api-first"
+                  "payments/wallets/api-first",
+                  "payments/wallets/usdt-support"
                 ]
               },
               {
@@ -183,7 +184,8 @@
                       "payments/wallets/walletkit/web"
                     ]
                   },
-                  "payments/wallets/api-first"
+                  "payments/wallets/api-first",
+                  "payments/wallets/usdt-support"
                 ]
               },
               {
