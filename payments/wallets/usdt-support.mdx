@@ -44,13 +44,14 @@ sequenceDiagram
 
 ## Detecting an approval-required option
 
-Inspect `option.actions` for an `eth_sendTransaction` entry. If one is present, the option is a Permit2 flow and your wallet should prepare for an on-chain step.
+Inspect the action list for an `eth_sendTransaction` entry. In standalone SDK flows, this means `option.actions`; in WalletKit flows, this means the actions returned by `getRequiredPaymentActions`. If one is present, the option is a Permit2 flow and your wallet should prepare for an on-chain step.
 
 <Tabs>
 <Tab title="Kotlin">
 ```kotlin
-fun requiresApproval(actions: List<Wallet.Model.RequiredAction>?): Boolean =
-    actions
+// WalletKit: inspect the actions returned by getRequiredPaymentActions
+fun requiresApproval(requiredActions: List<Wallet.Model.RequiredAction>?): Boolean =
+    requiredActions
         ?.filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()
         ?.any { it.action.method == "eth_sendTransaction" }
         ?: false
