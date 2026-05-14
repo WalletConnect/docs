@@ -58,7 +58,7 @@ sequenceDiagram
     ```typescript
     // Server-side only
     const response = await fetch(
-      "https://api.pay.walletconnect.org/v1/merchant/payment",
+      "https://api.pay.walletconnect.com/v1/merchant/payment",
       {
         method: "POST",
         headers: {
@@ -129,7 +129,7 @@ sequenceDiagram
     ```typescript
     // Server-side: verify payment status
     const response = await fetch(
-      `https://api.pay.walletconnect.org/v1/merchant/payment/${paymentId}/status`,
+      `https://api.pay.walletconnect.com/v1/merchant/payment/${paymentId}/status`,
       {
         headers: {
           "Api-Key": process.env.WCP_API_KEY,
@@ -189,8 +189,8 @@ Use the staging environment to test your integration before going live:
 
 | Environment | API Base URL |
 |-------------|-------------|
-| Production | `https://api.pay.walletconnect.org` |
-| Staging | `https://staging.api.pay.walletconnect.org` |
+| Production | `https://api.pay.walletconnect.com` |
+| Staging | `https://staging.api.pay.walletconnect.com` |
 
 Contact the WalletConnect team to obtain staging credentials.
 
@@ -198,7 +198,10 @@ Contact the WalletConnect team to obtain staging credentials.
 
 A complete working reference implementation is available in the WalletConnect buyer-experience repository:
 
-<CardGroup cols={1}>
+<CardGroup cols={2}>
+  <Card title="Live Demo" icon="cart-shopping" href="https://demo-checkout.walletconnect.com">
+    Try the checkout flow end-to-end with a live demo store.
+  </Card>
   <Card title="Ecommerce Example (Next.js)" icon="github" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/ecommerce-poc">
     Full-stack example showing payment creation, checkout redirect, and order verification.
   </Card>
