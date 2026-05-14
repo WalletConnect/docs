@@ -11,9 +11,9 @@ Integrate WalletConnect Pay into your online checkout so buyers can pay with cry
 Before you begin, make sure you have:
 
 - **Completed merchant onboarding** — sign up and complete KYB verification on the [Merchant Dashboard](/payments/merchant/onboarding)
-- **Partner API Key** — available in your Merchant Dashboard after onboarding
+- **API Key** — available in your Merchant Dashboard after onboarding (used as the `Api-Key` header)
 - **Merchant ID** — your merchant identifier from the Merchant Dashboard
-- **A backend server** — all API calls must be made server-side to keep your API key secure
+- **A backend server** — all API calls must be made server-side to keep your API Key secure
 
 ## How It Works
 
@@ -37,13 +37,13 @@ sequenceDiagram
     Note over BX,B: Buyer connects wallet,<br>selects payment option,<br>and signs the transaction
 
     alt Payment succeeds
-        BX->>MF: Redirect to successUrl?payment_id=id
+        BX->>MF: Redirect to successUrl?payment_id={paymentId}
     else Payment fails
-        BX->>MF: Redirect to errorUrl?payment_id=id
+        BX->>MF: Redirect to errorUrl?payment_id={paymentId}
     end
 
     MF->>MB: Verify payment status
-    MB->>API: GET /v1/merchant/payment/{id}/status
+    MB->>API: GET /v1/merchant/payment/{paymentId}/status
     API-->>MB: { status: "succeeded" }
     MB-->>MF: Order confirmed
     MF->>B: Show order confirmation
@@ -110,16 +110,18 @@ sequenceDiagram
     The redirect happens automatically after a 3-second countdown on the checkout portal.
 
     ```typescript
-    // Extract the payment ID from the redirect URL
     const url = new URL(window.location.href);
     const paymentId = url.searchParams.get("payment_id");
 
-    // Verify the payment status from your backend (next step)
+    if (!paymentId) {
+      throw new Error("Missing payment_id in redirect URL");
+    }
+
     const status = await verifyPayment(paymentId);
     ```
 
     <Warning>
-    **Never trust the redirect URL alone.** The redirect can be spoofed by a buyer navigating directly to your success URL. Always verify the payment status server-side before fulfilling an order.
+    **Never trust the redirect URL alone.** Always look up the expected `paymentId` for the order from your own database and verify it matches the redirect parameter. Verify the payment status server-side before fulfilling any order.
     </Warning>
   </Step>
 
@@ -127,7 +129,8 @@ sequenceDiagram
     From your backend, call the status endpoint to get the authoritative payment result.
 
     ```typescript
-    // Server-side: verify payment status
+    const order = await getOrderByPaymentId(paymentId);
+
     const response = await fetch(
       `https://api.pay.walletconnect.com/v1/merchant/payment/${paymentId}/status`,
       {
@@ -141,7 +144,7 @@ sequenceDiagram
     const { status, isFinal } = await response.json();
 
     if (status === "succeeded") {
-      await fulfillOrder(orderId);
+      await fulfillOrder(order.id);
     } else if (status === "processing") {
       // Transaction submitted but not yet confirmed — check again shortly
     } else {
