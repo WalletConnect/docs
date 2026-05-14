@@ -1,12 +1,22 @@
 ---
 title: "Merchant logo specification"
-description: "Required dimensions, formats, and validation rules for the iconUrl field on the Merchant API."
+description: "Required dimensions, formats, and file size for the iconUrl field on the Merchant API."
 sidebarTitle: "Logo specification"
 ---
 
-The `iconUrl` field on the Merchant API accepts a public HTTPS URL pointing to a merchant logo. WalletConnect Pay imports the image to Cloudflare Images and serves it at checkout across all integrated wallets — the logo renders at the moment of payment, so dimensions and format matter as a trust signal.
+The `iconUrl` field on the Merchant API accepts a public HTTPS URL pointing to a merchant logo. WalletConnect Pay imports the image to Cloudflare Images and serves it across every wallet integrated with WalletConnect Pay. The logo renders at the moment of payment, so dimensions and format are a direct trust signal — a stretched or pixelated logo undermines buyer confidence at the exact step where confidence matters most.
 
-This page documents the validation rules applied to `iconUrl` on [`POST /v1/merchants`](/api-reference/2026-02-18/post-v1-merchants) (create) and [`PATCH /v1/merchants/{merchantId}`](/api-reference/2026-02-18/patch-v1-merchants-merchantid) (update).
+This guide covers the recommended specification for the `iconUrl` field used by [`POST /v1/merchants`](/api-reference/2026-02-18/post-v1-merchants) (create) and [`PATCH /v1/merchants/{merchantId}`](/api-reference/2026-02-18/patch-v1-merchants-merchantid) (update).
+
+## Where the logo appears
+
+The merchant logo is surfaced at every step of the buyer's payment flow:
+
+- **Wallet payment sheet** — when the buyer scans the WalletConnect QR code, the wallet displays the payment intent with the merchant logo as the primary visual anchor.
+- **Confirmation screens** — both the pre-approval and post-approval screens in the wallet render the logo alongside the merchant name and amount.
+- **Transaction history** — the logo persists in the wallet's history list so the buyer can recognise the payee later.
+
+Because the logo renders inside different container shapes across wallets (circular avatars, rounded squares, full-bleed cards), the asset needs to work across all of them. The specification below is designed for that.
 
 ## Specification
 
@@ -25,38 +35,15 @@ This page documents the validation rules applied to `iconUrl` on [`POST /v1/merc
 - **PNG** or **WebP** for logos with transparent backgrounds.
 - **JPEG** for flat photographic logos with no transparency.
 - **AVIF** if your asset pipeline already produces it; otherwise prefer PNG.
-- **1024 × 1024 px** is the recommended size: it gives retina headroom across wallet sizes while staying well under the 2 MB cap.
+- **1024 × 1024 px** is the recommended size: it gives retina headroom across wallet surfaces while staying well under the 2 MB cap.
 
 ### Why square
 
-Logos render inside circular and rounded-square containers across wallets. Non-square images get center-cropped, and the result is unpredictable across surfaces — a tall rectangle that looks fine in one wallet may have its bottom half clipped in another. The ±5% tolerance covers small rendering quirks while keeping the visual contract consistent.
-
-## Validation
-
-Validation runs server-side on `POST` and `PATCH` requests that include `iconUrl`. If the image at the supplied URL fails any rule, the API returns **HTTP 400** with one of the typed error codes below in the standard error envelope:
-
-```json
-{
-  "code": "logo_not_square",
-  "message": "Merchant logo must be square (±5% tolerance)."
-}
-```
-
-| Code | Meaning |
-|------|---------|
-| `logo_too_small` | Dimensions are below 500 × 500 px. |
-| `logo_too_large` | Dimensions exceed 4096 × 4096 px. |
-| `logo_not_square` | Aspect ratio is outside the ±5% tolerance. |
-| `logo_file_too_big` | File size exceeds 2 MB. |
-| `logo_invalid_mime` | Format is not one of JPEG, PNG, WebP, AVIF. |
-
-<Note>
-Validation applies to writes only. Merchants whose logos were uploaded before these rules shipped are not retroactively rejected — partners only see these codes when creating a new merchant or updating an existing one with a non-conforming logo.
-</Note>
+Logos render inside circular and rounded-square containers across wallets. Non-square images get center-cropped, and the result is unpredictable — a tall rectangle that looks fine in one wallet may have its bottom half clipped in another. Square assets with the ±5% tolerance render consistently everywhere.
 
 ## Worked example
 
-### Valid request
+Create a merchant with a logo hosted on your own CDN:
 
 ```http
 POST /v1/merchants HTTP/1.1
@@ -87,30 +74,4 @@ Content-Type: application/json
 }
 ```
 
-### Non-square logo
-
-```http
-POST /v1/merchants HTTP/1.1
-Host: api.pay.walletconnect.com
-Authorization: Bearer <API_KEY>
-Idempotency-Key: 9f1c2e8a-3b6d-4e2a-b1d4-2f0a7c5e8e11
-Content-Type: application/json
-
-{
-  "merchantName": "Acme Store",
-  "merchantEmail": "billing@acme.store",
-  "iconUrl": "https://cdn.acme.store/brand/banner-1920x1080.png"
-}
-```
-
-```http
-HTTP/1.1 400 Bad Request
-Content-Type: application/json
-
-{
-  "code": "logo_not_square",
-  "message": "Merchant logo must be square (±5% tolerance). Received 1920 × 1080 px."
-}
-```
-
-To recover, re-export the asset at a 1:1 ratio (1024 × 1024 px recommended) and retry the request with the same `Idempotency-Key` — the merchant has not been created yet, so the retry will proceed normally.
+The URL must be publicly reachable over HTTPS at the time of the call — WalletConnect Pay fetches the image during processing and imports it into Cloudflare Images. Once imported, the original URL is no longer used; updating your CDN-hosted asset will not change the rendered logo. To swap the logo, call `PATCH /v1/merchants/{merchantId}` with a new `iconUrl`.
