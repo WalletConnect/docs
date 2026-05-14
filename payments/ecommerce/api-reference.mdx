@@ -1,0 +1,221 @@
+---
+title: "Merchant API Reference"
+description: "API reference for the WalletConnect Pay Merchant API used in ecommerce checkout integrations."
+sidebarTitle: "API Reference"
+---
+
+## Authentication
+
+Every request to the Merchant API requires the following headers:
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `Content-Type` | Conditional | Must be `application/json` for requests with a JSON body |
+| `Api-Key` | Yes | Partner API key from the [Merchant Dashboard](/payments/merchant/onboarding) |
+| `Merchant-Id` | Yes | Merchant identifier from the [Merchant Dashboard](/payments/merchant/onboarding) |
+
+<Warning>
+Keep your `Api-Key` secret. Never expose it in client-side code — all API calls should be made from your backend server.
+</Warning>
+
+## Base URLs
+
+| Environment | URL |
+|-------------|-----|
+| Production | `https://api.pay.walletconnect.com` |
+| Staging | `https://staging.api.pay.walletconnect.com` |
+
+---
+
+## Create Payment
+
+Creates a new payment for the buyer to complete on the WalletConnect Pay checkout portal.
+
+```
+POST /v1/merchant/payment
+```
+
+### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `amount` | object | Yes | The payment amount |
+| `amount.unit` | string | Yes | Currency in `iso4217/{CODE}` format (e.g., `iso4217/USD`) |
+| `amount.value` | string | Yes | Amount in minor units as a string (e.g., `"5000"` for $50.00) |
+| `referenceId` | string | Yes | Your internal order or reference identifier |
+| `checkout` | object | No | Checkout redirect configuration |
+| `checkout.successUrl` | string | No | HTTPS URL to redirect the buyer after a successful payment |
+| `checkout.errorUrl` | string | No | HTTPS URL to redirect the buyer after a failed payment |
+
+<Info>
+The `amount.value` is expressed in the currency's **minor units**. For USD, `"5000"` equals $50.00 (5000 cents). For JPY (which has no minor unit), `"5000"` equals ¥5,000.
+</Info>
+
+<Warning>
+Both `successUrl` and `errorUrl` must be valid HTTPS URLs. If either is missing or invalid, the redirect feature is disabled entirely for that payment — the checkout portal will show generic terminal views instead.
+</Warning>
+
+### Request Example
+
+```json
+{
+  "amount": {
+    "unit": "iso4217/USD",
+    "value": "5000"
+  },
+  "referenceId": "order_abc123",
+  "checkout": {
+    "successUrl": "https://yourstore.com/order/abc123/success",
+    "errorUrl": "https://yourstore.com/order/abc123/failed"
+  }
+}
+```
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `paymentId` | string | Unique payment identifier (e.g., `pay_xxx`) |
+| `gatewayUrl` | string | URL to the checkout portal for this payment — use this to redirect the buyer |
+| `status` | string | Initial payment status (typically `pending`) |
+| `expiresAt` | integer | Unix timestamp (seconds) when the payment expires |
+| `isFinal` | boolean | Whether the payment is already in a terminal state |
+| `pollInMs` | integer | Suggested polling interval in milliseconds for status checks |
+
+### Response Example
+
+```json
+{
+  "paymentId": "pay_abc123def456",
+  "gatewayUrl": "https://pay.walletconnect.com/?pid=pay_abc123def456",
+  "status": "pending",
+  "expiresAt": 1709831400,
+  "isFinal": false,
+  "pollInMs": 1000
+}
+```
+
+### Code Examples
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.pay.walletconnect.com/v1/merchant/payment \
+  -H "Content-Type: application/json" \
+  -H "Api-Key: YOUR_API_KEY" \
+  -H "Merchant-Id: YOUR_MERCHANT_ID" \
+  -d '{
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "5000"
+    },
+    "referenceId": "order_abc123",
+    "checkout": {
+      "successUrl": "https://yourstore.com/order/abc123/success",
+      "errorUrl": "https://yourstore.com/order/abc123/failed"
+    }
+  }'
+```
+
+```typescript TypeScript
+const response = await fetch(
+  "https://api.pay.walletconnect.com/v1/merchant/payment",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Api-Key": process.env.WCP_API_KEY,
+      "Merchant-Id": process.env.WCP_MERCHANT_ID,
+    },
+    body: JSON.stringify({
+      amount: {
+        unit: "iso4217/USD",
+        value: String(order.totalCents),
+      },
+      referenceId: order.id,
+      checkout: {
+        successUrl: `${process.env.BASE_URL}/order/${order.id}/success`,
+        errorUrl: `${process.env.BASE_URL}/order/${order.id}/failed`,
+      },
+    }),
+  }
+);
+
+const { paymentId, gatewayUrl } = await response.json();
+```
+</CodeGroup>
+
+### Error Responses
+
+| Status Code | Description |
+|-------------|-------------|
+| `400` | Invalid request — check required fields and format |
+| `401` | Invalid or missing API key |
+| `404` | Merchant not found for the given `Merchant-Id` |
+| `500` | Internal server error |
+
+---
+
+## Verify Payment Status
+
+After the buyer completes (or abandons) the checkout, verify the payment status from your backend.
+
+```
+GET /v1/merchant/payment/{id}/status
+```
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | The `paymentId` returned when creating the payment |
+
+### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `Api-Key` | Yes | Partner API key |
+| `Merchant-Id` | Yes | Merchant identifier |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Payment status (see below) |
+| `isFinal` | boolean | Whether the payment has reached a terminal state |
+
+### Payment Statuses
+
+| Status | Terminal | Description |
+|--------|----------|-------------|
+| `pending` | No | Payment created, waiting for buyer action |
+| `processing` | No | Transaction submitted, awaiting on-chain confirmation |
+| `succeeded` | Yes | Payment completed successfully |
+| `failed` | Yes | Payment failed or was rejected |
+| `expired` | Yes | Payment window closed without completion |
+
+### Code Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.pay.walletconnect.com/v1/merchant/payment/pay_abc123def456/status \
+  -H "Api-Key: YOUR_API_KEY" \
+  -H "Merchant-Id: YOUR_MERCHANT_ID"
+```
+
+```typescript TypeScript
+async function verifyPaymentStatus(paymentId: string): Promise<string> {
+  const response = await fetch(
+    `https://api.pay.walletconnect.com/v1/merchant/payment/${paymentId}/status`,
+    {
+      headers: {
+        "Api-Key": process.env.WCP_API_KEY,
+        "Merchant-Id": process.env.WCP_MERCHANT_ID,
+      },
+    }
+  );
+
+  const { status, isFinal } = await response.json();
+  return status;
+}
+```
+</CodeGroup>
