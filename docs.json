@@ -44,6 +44,12 @@
                 ]
               },
               {
+                "group": "Merchant API",
+                "pages": [
+                  "payments/merchant-api/logo-specification"
+                ]
+              },
+              {
                 "group": "WalletConnect Pay for Wallets",
                 "pages": [
                   "payments/wallets/overview",
@@ -164,6 +170,12 @@
                 "group": "Merchant Dashboard",
                 "pages": [
                   "payments/merchant/onboarding"
+                ]
+              },
+              {
+                "group": "Merchant API",
+                "pages": [
+                  "payments/merchant-api/logo-specification"
                 ]
               },
               {
