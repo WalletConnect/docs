@@ -4,7 +4,7 @@ description: "Required dimensions, formats, and file size for the iconUrl field 
 sidebarTitle: "Logo specification"
 ---
 
-The `iconUrl` field on the Merchant API accepts a public HTTPS URL pointing to a merchant logo. The logo renders at the moment of payment, so dimensions and format are a direct trust signal — a stretched or pixelated logo undermines buyer confidence at the exact step where confidence matters most.
+The `iconUrl` field on the Merchant API accepts a public HTTPS URL pointing to a merchant logo. The logo renders at the moment of payment, so dimensions and format are a direct trust signal. A stretched or pixelated logo undermines buyer confidence at the exact step where confidence matters most.
 
 This guide covers the recommended specification for the `iconUrl` field used by [`POST /v1/merchants`](/api-reference/2026-02-18/post-v1-merchants) (create) and [`PATCH /v1/merchants/{merchantId}`](/api-reference/2026-02-18/patch-v1-merchants-merchantid) (update).
 
@@ -22,7 +22,7 @@ When the buyer scans the WalletConnect QR code, the wallet opens a payment scree
 
 ### Buyer checkout
 
-On the WalletConnect Pay buyer checkout page — opened when a buyer scans the payment QR with a generic camera or QR scanner — the merchant logo anchors the "Pay X to &lt;Merchant&gt;" headline above the payment options.
+On the WalletConnect Pay buyer checkout page (opened when a buyer scans the payment QR with a generic camera or QR scanner), the merchant logo anchors the "Pay X to &lt;Merchant&gt;" headline above the payment options.
 
 <img src="/images/payments/merchant-logo/buyer-checkout.png" alt="WalletConnect Pay buyer checkout page showing the merchant logo above the amount and the Pay button" style={{ maxWidth: "640px", display: "block", margin: "0 auto" }} />
 
@@ -34,7 +34,7 @@ Because the logo renders inside different container shapes across surfaces (squa
 
 | Field | Value |
 |-------|-------|
-| Aspect ratio | 1:1 (square) — tolerance ±5% |
+| Aspect ratio | 1:1 (square), ±5% tolerance |
 | Minimum dimensions | 500 × 500 px |
 | Recommended dimensions | 1024 × 1024 px |
 | Maximum dimensions | 4096 × 4096 px |
@@ -51,9 +51,7 @@ Because the logo renders inside different container shapes across surfaces (squa
 
 ### Why square
 
-Logos render inside square and rounded-square containers across surfaces. Non-square images get center-cropped, and the result is unpredictable — a tall rectangle that looks fine in one wallet may have its bottom half clipped in another. Square assets with the ±5% tolerance render consistently everywhere.
-
-## Worked example
+Logos render inside square and rounded-square containers across surfaces. Non-square images get center-cropped, and the result is unpredictable: a tall rectangle that looks fine in one wallet may have its bottom half clipped in another. Square assets with the ±5% tolerance render consistently everywhere.
 
 Create a merchant with a logo hosted on your own CDN:
 
@@ -86,4 +84,4 @@ Content-Type: application/json
 }
 ```
 
-The URL must be publicly reachable over HTTPS at the time of the call. To change the logo later, call `PATCH /v1/merchants/{merchantId}` with a new `iconUrl` — simply swapping the asset at your CDN URL will not update what buyers see at checkout.
+The URL must be publicly reachable over HTTPS at the time of the call. To change the logo later, call `PATCH /v1/merchants/{merchantId}` with a new `iconUrl`. Simply swapping the asset at your CDN URL will not update what buyers see at checkout.
