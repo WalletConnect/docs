@@ -1,15 +1,16 @@
 ---
 title: "Quickstart"
 sidebarTitle: "Quickstart"
-description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in four steps."
+description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in five steps."
 ---
 
-This guide takes you from zero to a live payment in four steps:
+This guide takes you from zero to a live payment in five steps:
 
 1. **Create an API key** in the dashboard.
 2. **Authenticate** your requests with the key.
 3. **Create your first merchant** via `POST /v1/merchants`.
 4. **Create your first payment** via `POST /v1/payments`.
+5. **Check the payment status** via `GET /v1/payments/{id}/status`.
 
 <Info>
 Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s) to get started.
@@ -23,8 +24,6 @@ Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.co
 2. Navigate to **API Keys** in the sidebar.
 3. Click **Create key**. Copy the key — it is shown only once.
 4. Store it in a secret manager. Anyone with this key can act on behalf of your account.
-
-If you lose a key, regenerate it from the same page. The previous value stops working immediately.
 
 </Step>
 
@@ -113,7 +112,44 @@ curl -X POST "$WCP_BASE/v1/payments" \
 
 The response includes the payment `id` and a link your buyer can open in any WalletConnect-compatible wallet. Hand that link to your checkout, share it directly, or render it as a QR code.
 
-To check status without polling the buyer flow, call [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status).
+```bash
+export WCP_PAYMENT_ID="pay_…"        # from the response above
+```
+
+</Step>
+
+<Step title="Check the payment status" stepNumber="5">
+
+Poll the status endpoint to know when the payment has completed:
+
+```bash
+curl "$WCP_BASE/v1/payments/$WCP_PAYMENT_ID/status" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Merchant-Id: $WCP_MERCHANT_ID"
+```
+
+```json
+{
+  "status": "succeeded",
+  "isFinal": true,
+  "pollInMs": null,
+  "info": {
+    "txId": "0xabc123…",
+    "optionAmount": {
+      "unit": "caip19/eip155:8453/erc20:0x...",
+      "value": "1000000"
+    }
+  }
+}
+```
+
+Use `isFinal` to decide when to stop polling. While the payment is still in flight, the response returns `isFinal: false` and a `pollInMs` hint for how long to wait before polling again. Once `isFinal` is `true`, `status` is one of `succeeded`, `failed`, `cancelled`, or `expired` and `pollInMs` is `null`.
+
+<Tip>
+Prefer webhooks for production — they remove the need to poll. The status endpoint is the right tool for one-off checks, scripts, and debugging.
+</Tip>
+
+See the full response schema in [Get the payment status](/api-reference/latest/get-v1-payments-id-status).
 
 </Step>
 
