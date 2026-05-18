@@ -204,6 +204,27 @@ async function buildNavigation(
   };
 }
 
+function buildManagedRedirects(latestStableVersion) {
+  if (!latestStableVersion) return [];
+  return [
+    {
+      source: "/api-reference/latest/:slug*",
+      destination: `/api-reference/${latestStableVersion}/:slug*`,
+    },
+  ];
+}
+
+const MANAGED_REDIRECT_SOURCES = new Set([
+  "/api-reference/latest/:slug*",
+]);
+
+function mergeRedirects(existing, latestStableVersion) {
+  const preserved = (existing || []).filter(
+    (r) => !MANAGED_REDIRECT_SOURCES.has(r.source)
+  );
+  return [...preserved, ...buildManagedRedirects(latestStableVersion)];
+}
+
 async function main() {
   const { stable, preview } = await fetchJson(VERSIONS_URL);
   console.log(`Versions — stable: [${stable}], preview: [${preview}]`);
@@ -245,6 +266,7 @@ async function main() {
     preview,
     versionSpecs
   );
+  updated.redirects = mergeRedirects(currentConfig.redirects, stable[0]);
 
   await writeFile(
     docsJsonPath,
