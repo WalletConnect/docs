@@ -1,0 +1,124 @@
+---
+title: "Quick Start"
+sidebarTitle: "Quick Start"
+description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in four steps."
+---
+
+This guide takes you from zero to a live payment in four steps:
+
+1. **Create an API key** in the Merchant Dashboard.
+2. **Authenticate** your requests with the key.
+3. **Create your first merchant** via `POST /v1/merchants`.
+4. **Create your first payment** via `POST /v1/payments`.
+
+Before you start, make sure you have a Merchant Dashboard account. KYB is handled in the dashboard and must be approved before payments can settle — but you can create the merchant and call the API in test conditions while approval is in progress.
+
+<Steps>
+
+<Step title="Create an API key" stepNumber="1">
+
+1. Open the [Merchant Dashboard](https://merchant.pay.walletconnect.com) and sign in.
+2. Navigate to **API Keys** in the sidebar.
+3. Click **Create key**. Copy the key — it is shown only once.
+4. Store it in a secret manager. Anyone with this key can act on behalf of your account.
+
+If you lose a key, regenerate it from the same page. The previous value stops working immediately.
+
+</Step>
+
+<Step title="Authenticate" stepNumber="2">
+
+Every request to the Merchant API uses the `Api-Key` header.
+
+```bash
+export WCP_API_KEY="wcp_…"           # the key you just created
+export WCP_BASE="https://api.pay.walletconnect.com"
+```
+
+A quick sanity check — list your merchants:
+
+```bash
+curl "$WCP_BASE/v1/merchants" \
+  -H "Api-Key: $WCP_API_KEY"
+```
+
+A `200 OK` with a (possibly empty) `data` array confirms the key works. A `401` means the key is wrong; a `403` means the key is valid but lacks permission for this account.
+
+<Tip>
+Pin requests to a specific API version with the `WCP-Version` header (for example, `WCP-Version: 2026-02-18`). Without it, your account's default version is used. See [Versioning](/api-reference/versioning) for the full policy.
+</Tip>
+
+</Step>
+
+<Step title="Create your first merchant" stepNumber="3">
+
+A **merchant** is the entity that receives payments. One account can hold many merchants — typically one per brand, storefront, or legal entity.
+
+```bash
+curl -X POST "$WCP_BASE/v1/merchants" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantName": "Acme Store",
+    "merchantEmail": "billing@acme.store"
+  }'
+```
+
+The response includes the merchant `id` — save it, you'll need it for every payment.
+
+```json
+{
+  "merchant": {
+    "id": "mrch_7kBz2qR9xPvLmN4Yw",
+    "name": "Acme Store",
+    "email": "billing@acme.store",
+    "status": "active",
+    "createdAt": "2026-02-18T10:30:00.000Z"
+  }
+}
+```
+
+```bash
+export WCP_MERCHANT_ID="mrch_7kBz2qR9xPvLmN4Yw"
+```
+
+<Note>
+`Idempotency-Key` is required on this endpoint. Use a fresh UUID per merchant — replays with the same key return the original result instead of creating a duplicate.
+</Note>
+
+See the full schema and field reference in [Create a merchant](/api-reference/latest/post-v1-merchants).
+
+</Step>
+
+<Step title="Create your first payment" stepNumber="4">
+
+A **payment** is a request for funds against one of your merchants. You pass the merchant via the `Merchant-Id` header and your own order identifier as `referenceId`.
+
+```bash
+curl -X POST "$WCP_BASE/v1/payments" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Merchant-Id: $WCP_MERCHANT_ID" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "ORDER-123",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "100"
+    }
+  }'
+```
+
+The response includes the payment `id` and a link your buyer can open in any WalletConnect-compatible wallet. Hand that link to your checkout, share it directly, or render it as a QR code.
+
+To check status without polling the buyer flow, call [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status).
+
+</Step>
+
+</Steps>
+
+## What's next
+
+- **Receive webhooks** so you don't have to poll for payment status updates.
+- **Wire up settlements** in the [Merchant Dashboard](https://merchant.pay.walletconnect.com) to receive funds in crypto or fiat.
+- **Browse the [API reference](/api-reference/latest/post-v1-merchants)** for the full set of merchant, payment, refund, and settlement endpoints.
