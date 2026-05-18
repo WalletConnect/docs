@@ -1,0 +1,155 @@
+---
+title: "Quickstart"
+sidebarTitle: "Quickstart"
+description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in five steps."
+---
+
+This guide takes you from zero to a live payment in five steps:
+
+1. **Create an API key** in the dashboard.
+2. **Authenticate** your requests with the key.
+3. **Create your first merchant** via `POST /v1/merchants`.
+4. **Create your first payment** via `POST /v1/payments`.
+5. **Check the payment status** via `GET /v1/payments/{id}/status`.
+
+<Info>
+Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s) to get started.
+</Info>
+
+<Steps>
+
+<Step title="Create an API key" stepNumber="1">
+
+1. Open [**API Keys**](https://merchant.pay.walletconnect.com/en/api-keys) in the dashboard and sign in if prompted.
+2. Click **Create key**. Copy the key — it is shown only once.
+3. Store it in a secret manager. Anyone with this key can act on behalf of your account.
+
+</Step>
+
+<Step title="Authenticate" stepNumber="2">
+
+Every request to the Merchant API uses the `Api-Key` header.
+
+```bash
+export WCP_API_KEY="wcp_…"           # the key you just created
+export WCP_BASE="https://api.pay.walletconnect.com"
+```
+
+A quick sanity check — list your merchants:
+
+```bash
+curl "$WCP_BASE/v1/merchants" \
+  -H "Api-Key: $WCP_API_KEY"
+```
+
+A `200 OK` with a (possibly empty) `data` array confirms the key works. A `401` means the key is wrong; a `403` means the key is valid but lacks permission for this account.
+
+<Tip>
+Pin requests to a specific API version with the `WCP-Version` header (for example, `WCP-Version: 2026-02-18`). Without it, your account's default version is used. See [Versioning](/api-reference/versioning) for the full policy.
+</Tip>
+
+</Step>
+
+<Step title="Create your first merchant" stepNumber="3">
+
+A **merchant** is the entity that receives payments. One account can hold many merchants — typically one per brand, storefront, or legal entity.
+
+```bash
+curl -X POST "$WCP_BASE/v1/merchants" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantName": "Acme Store",
+    "merchantEmail": "billing@acme.store"
+  }'
+```
+
+The response includes the merchant `id` — save it, you'll need it for every payment.
+
+```json
+{
+  "merchant": {
+    "id": "mrch_7kBz2qR9xPvLmN4Yw",
+    "name": "Acme Store",
+    "email": "billing@acme.store",
+    "status": "active",
+    "createdAt": "2026-02-18T10:30:00.000Z"
+  }
+}
+```
+
+```bash
+export WCP_MERCHANT_ID="mrch_7kBz2qR9xPvLmN4Yw"
+```
+
+<Note>
+`Idempotency-Key` is required on this endpoint. Use a fresh UUID per merchant — replays with the same key return the original result instead of creating a duplicate.
+</Note>
+
+See the full schema and field reference in [Create a merchant](/api-reference/latest/post-v1-merchants).
+
+</Step>
+
+<Step title="Create your first payment" stepNumber="4">
+
+A **payment** is a request for funds against one of your merchants. You pass the merchant via the `Merchant-Id` header and your own order identifier as `referenceId`.
+
+```bash
+curl -X POST "$WCP_BASE/v1/payments" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Merchant-Id: $WCP_MERCHANT_ID" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "ORDER-123",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "100"
+    }
+  }'
+```
+
+The response includes the payment `id` and a link your buyer can open in any WalletConnect-compatible wallet. Hand that link to your checkout, share it directly, or render it as a QR code.
+
+```bash
+export WCP_PAYMENT_ID="pay_…"        # from the response above
+```
+
+</Step>
+
+<Step title="Check the payment status" stepNumber="5">
+
+Poll the status endpoint to know when the payment has completed:
+
+```bash
+curl "$WCP_BASE/v1/payments/$WCP_PAYMENT_ID/status" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Merchant-Id: $WCP_MERCHANT_ID"
+```
+
+```json
+{
+  "status": "succeeded",
+  "isFinal": true,
+  "pollInMs": null,
+  "info": {
+    "txId": "0xabc123…",
+    "optionAmount": {
+      "unit": "caip19/eip155:8453/erc20:0x...",
+      "value": "1000000"
+    }
+  }
+}
+```
+
+Use `isFinal` to decide when to stop polling. While the payment is still in flight, the response returns `isFinal: false` and a `pollInMs` hint for how long to wait before polling again. Once `isFinal` is `true`, `status` is one of `succeeded`, `failed`, `cancelled`, or `expired` and `pollInMs` is `null`.
+
+<Tip>
+Prefer webhooks for production — they remove the need to poll. The status endpoint is the right tool for one-off checks, scripts, and debugging.
+</Tip>
+
+See the full response schema in [Get the payment status](/api-reference/latest/get-v1-payments-id-status).
+
+</Step>
+
+</Steps>

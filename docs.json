@@ -13,6 +13,10 @@
       "destination": "/custodians/**"
     },
     {
+      "source": "/payments/merchant/onboarding",
+      "destination": "/payments/merchant/quickstart"
+    },
+    {
       "source": "/api-reference/latest/:slug*",
       "destination": "/api-reference/2026-02-18/:slug*"
     }
@@ -42,9 +46,9 @@
                 ]
               },
               {
-                "group": "Merchant Dashboard",
+                "group": "WalletConnect Pay for Merchants",
                 "pages": [
-                  "payments/merchant/onboarding"
+                  "payments/merchant/quickstart"
                 ]
               },
               {
@@ -172,9 +176,9 @@
                 ]
               },
               {
-                "group": "Merchant Dashboard",
+                "group": "WalletConnect Pay for Merchants",
                 "pages": [
-                  "payments/merchant/onboarding"
+                  "payments/merchant/quickstart"
                 ]
               },
               {
