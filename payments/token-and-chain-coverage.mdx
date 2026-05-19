@@ -13,22 +13,26 @@ This list will be updated over time as assets move from beta into General Availa
 
 ## Supported tokens and chains
 
-| Token | Chain    | Acceptance | Settlement                        |
-|-------|----------|:----------:|-----------------------------------|
-| USDC  | Arbitrum | ✅ | Direct Crypto or Fiat (USD, EUR) |
-| USDC  | Base     | ✅ | Direct Crypto or Fiat (USD, EUR) |
-| USDC  | Polygon  | ✅ | Direct Crypto or Fiat (USD, EUR) |
-| USDC  | Ethereum | ✅ | Direct Crypto or Fiat (USD, EUR) |
-| USDC  | Optimism | ✅ | Direct Crypto or Fiat (USD, EUR) |
-| USDC  | BSC      | ✅ | Direct Crypto                   |
-| USDC  | Celo     | ✅ | Direct Crypto                   |
-| USDC  | Monad    | ✅ | Direct Crypto                   |
-| EURC  | Base     | ✅ | Direct Crypto or Fiat (USD, EUR) |
-| EURC  | Ethereum | ✅ | Direct Crypto                   |
-| USDT0 | Arbitrum | ✅ | Direct Crypto                   |
-| USDG  | Ethereum | ✅ | Direct Crypto                   |
-| PYUSD | Ethereum | ✅ | Direct Crypto                   |
-| PYUSD | Arbitrum | ✅ | Direct Crypto                   |
+<Note>
+When creating crypto settlements, use the CAIP-19 token identifier below when specifying the settlement token contract. See the [Create crypto settlements](/api-reference/2026-02-18/post-v1-merchants-merchantid-settlements-crypto) endpoint for details.
+</Note>
+
+| Token | Chain    | CAIP-19 | Acceptance | Settlement                        |
+|-------|----------|---------|:----------:|-----------------------------------|
+| USDC  | Arbitrum | `eip155:42161/erc20:0xaf88d065e77c8cC2239327C5EDb3A432268e5831` | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Base     | `eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Polygon  | `eip155:137/erc20:0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Ethereum | `eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48` | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | Optimism | `eip155:10/erc20:0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85` | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| USDC  | BSC      | `eip155:56/erc20:0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d` | ✅ | Direct Crypto                   |
+| USDC  | Celo     | `eip155:42220/erc20:0xcebA9300f2b948710d2653dD7B07f33A8B32118C` | ✅ | Direct Crypto                   |
+| USDC  | Monad    | `eip155:143/erc20:0x754704Bc059F8C67012fEd69BC8a327a5aafb603` | ✅ | Direct Crypto                   |
+| EURC  | Base     | `eip155:8453/erc20:0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42` | ✅ | Direct Crypto or Fiat (USD, EUR) |
+| EURC  | Ethereum | `eip155:1/erc20:0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c` | ✅ | Direct Crypto                   |
+| USDT0 | Arbitrum | `eip155:42161/erc20:0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` | ✅ | Direct Crypto                   |
+| USDG  | Ethereum | `eip155:1/erc20:0xe343167631d89B6Ffc58B88d6b7fB0228795491D` | ✅ | Direct Crypto                   |
+| PYUSD | Ethereum | `eip155:1/erc20:0x6c3ea9036406852006290770bedfcaba0e23a0e8` | ✅ | Direct Crypto                   |
+| PYUSD | Arbitrum | `eip155:42161/erc20:0x46850ad61c2b7d64d08c9c754f45254596696984` | ✅ | Direct Crypto                   |
 
 ## Coming soon
 
