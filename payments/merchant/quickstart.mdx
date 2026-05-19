@@ -1,16 +1,17 @@
 ---
 title: "Quickstart"
 sidebarTitle: "Quickstart"
-description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in five steps."
+description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in six steps."
 ---
 
-This guide takes you from zero to a live payment in five steps:
+This guide takes you from zero to a live payment in six steps:
 
 1. **Create an API key** in the dashboard.
 2. **Authenticate** your requests with the key.
 3. **Create your first merchant** via `POST /v1/merchants`.
-4. **Create your first payment** via `POST /v1/payments`.
-5. **Check the payment status** via `GET /v1/payments/{id}/status`.
+4. **Configure crypto settlement** via `POST /v1/merchants/{merchantId}/settlements/crypto`.
+5. **Create your first payment** via `POST /v1/payments`.
+6. **Check the payment status** via `GET /v1/payments/{id}/status`.
 
 <Info>
 Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s) to get started.
@@ -91,7 +92,36 @@ See the full schema and field reference in [Create a merchant](/api-reference/la
 
 </Step>
 
-<Step title="Create your first payment" stepNumber="4">
+<Step title="Configure crypto settlement" stepNumber="4">
+
+Before you can accept payments, tell us where to deliver settled funds. Each settlement entry pairs a [CAIP-19](https://chainagnostic.org/CAIPs/caip-19) `asset` (the token you want to settle in) with a [CAIP-10](https://chainagnostic.org/CAIPs/caip-10) `destination` wallet on the same chain.
+
+```bash
+curl -X POST "$WCP_BASE/v1/merchants/$WCP_MERCHANT_ID/settlements/crypto" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "settlements": [
+      {
+        "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "destination": "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
+      }
+    ]
+  }'
+```
+
+The example above registers USDC on Base. For the full list of supported `asset` values and the chains we settle to, see [Token & Chain Coverage](/payments/token-and-chain-coverage).
+
+<Note>
+Each `(merchant, asset)` pair must be unique — registering the same asset twice returns `settlement_asset_conflict`. To change a destination, use [Update a crypto settlement](/api-reference/latest/put-v1-merchants-merchantid-settlements-crypto-id) instead.
+</Note>
+
+See the full schema in [Create crypto settlements](/api-reference/latest/post-v1-merchants-merchantid-settlements-crypto).
+
+</Step>
+
+<Step title="Create your first payment" stepNumber="5">
 
 A **payment** is a request for funds against one of your merchants. You pass the merchant via the `Merchant-Id` header and your own order identifier as `referenceId`.
 
@@ -117,7 +147,7 @@ export WCP_PAYMENT_ID="pay_…"        # from the response above
 
 </Step>
 
-<Step title="Check the payment status" stepNumber="5">
+<Step title="Check the payment status" stepNumber="6">
 
 Poll the status endpoint to know when the payment has completed:
 
