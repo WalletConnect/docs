@@ -42,7 +42,8 @@
                 "pages": [
                   "payments/overview",
                   "payments/for-users",
-                  "payments/token-and-chain-coverage"
+                  "payments/token-and-chain-coverage",
+                  "payments/wallet-coverage"
                 ]
               },
               {
@@ -172,7 +173,8 @@
                 "pages": [
                   "payments/overview",
                   "payments/for-users",
-                  "payments/token-and-chain-coverage"
+                  "payments/token-and-chain-coverage",
+                  "payments/wallet-coverage"
                 ]
               },
               {
