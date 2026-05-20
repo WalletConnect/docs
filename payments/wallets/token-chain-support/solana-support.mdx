@@ -1,0 +1,386 @@
+---
+title: "Solana Support"
+sidebarTitle: "Solana Support"
+description: "Implement Solana payment capabilities in your wallet including native SOL transactions and mixed-chain payment options."
+---
+
+WalletConnect Pay supports Solana payments, enabling users to pay with native SOL and SPL tokens. This guide covers how to extend your wallet's WalletConnect Pay integration to support Solana payments end-to-end.
+
+## Key capabilities
+
+Implementing Solana support enables three primary features:
+
+1. **Native SOL transactions** — Users can initiate Solana payments through Pay links when merchants support the network
+2. **Mixed-chain options** — Single payment links can present both EVM and Solana choices simultaneously
+3. **Namespace-based routing** — Individual actions route to appropriate signers based on CAIP-2 namespace identifiers
+
+## Implementation requirements
+
+Follow these requirements to correctly implement Solana payment support in your wallet.
+
+### Advertise Solana accounts
+
+Include Solana accounts when calling `getPaymentOptions` using the CAIP-10 format:
+
+```
+solana:<chainReference>:<base58Pubkey>
+```
+
+For example, a Solana mainnet account would be formatted as:
+
+```
+solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp:7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+```
+
+<Tabs>
+<Tab title="TypeScript">
+```typescript
+const evmAccounts = evmChains.map(
+  (chain) => `eip155:${chain.id}:${evmAddress}`
+);
+const solanaAccounts = solanaChains.map(
+  (chain) => `solana:${chain.reference}:${solanaPublicKey.toBase58()}`
+);
+
+const options = await pay.getPaymentOptions({
+  paymentId,
+  accounts: [...evmAccounts, ...solanaAccounts],
+});
+```
+</Tab>
+<Tab title="Kotlin">
+```kotlin
+val evmAccounts = evmChains.map { chain ->
+    "eip155:${chain.id}:${evmAddress}"
+}
+val solanaAccounts = solanaChains.map { chain ->
+    "solana:${chain.reference}:${solanaPublicKey}"
+}
+
+val options = pay.getPaymentOptions(
+    paymentId = paymentId,
+    accounts = evmAccounts + solanaAccounts
+)
+```
+</Tab>
+<Tab title="Swift">
+```swift
+let evmAccounts = evmChains.map { chain in
+    "eip155:\(chain.id):\(evmAddress)"
+}
+let solanaAccounts = solanaChains.map { chain in
+    "solana:\(chain.reference):\(solanaPublicKey)"
+}
+
+let options = try await pay.getPaymentOptions(
+    paymentId: paymentId,
+    accounts: evmAccounts + solanaAccounts
+)
+```
+</Tab>
+</Tabs>
+
+<Note>
+Only advertise Solana accounts if your wallet has Solana keys available. Wallets without Solana support should not include Solana accounts in the request.
+</Note>
+
+### Route actions by namespace
+
+Determine the signing wallet for each action using the namespace from the chain ID. Extract the namespace from `actions[i].walletRpc.chainId` rather than assuming a single wallet type for all actions.
+
+<Tabs>
+<Tab title="TypeScript">
+```typescript
+function getNamespace(chainId: string): string {
+  return chainId.split(':')[0];
+}
+
+for (const action of actions) {
+  const namespace = getNamespace(action.walletRpc.chainId);
+  
+  switch (namespace) {
+    case 'eip155':
+      // Route to EVM wallet
+      await handleEvmAction(action);
+      break;
+    case 'solana':
+      // Route to Solana wallet
+      await handleSolanaAction(action);
+      break;
+    default:
+      throw new Error(`Unsupported namespace: ${namespace}`);
+  }
+}
+```
+</Tab>
+<Tab title="Kotlin">
+```kotlin
+fun getNamespace(chainId: String): String = chainId.split(':')[0]
+
+for (action in actions) {
+    val namespace = getNamespace(action.walletRpc.chainId)
+    
+    when (namespace) {
+        "eip155" -> handleEvmAction(action)
+        "solana" -> handleSolanaAction(action)
+        else -> error("Unsupported namespace: $namespace")
+    }
+}
+```
+</Tab>
+<Tab title="Swift">
+```swift
+func getNamespace(_ chainId: String) -> String {
+    chainId.split(separator: ":").first.map(String.init) ?? ""
+}
+
+for action in actions {
+    let namespace = getNamespace(action.walletRpc.chainId)
+    
+    switch namespace {
+    case "eip155":
+        try await handleEvmAction(action)
+    case "solana":
+        try await handleSolanaAction(action)
+    default:
+        throw PaymentError.unsupportedNamespace(namespace)
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### Implement Solana signing
+
+For Solana actions, implement the `solana_signTransaction` method. Sign the transaction and append the **signed transaction blob, base64-encoded** to the signatures array.
+
+<Tabs>
+<Tab title="TypeScript">
+```typescript
+async function handleSolanaAction(action: Action): Promise<string> {
+  const { method, params } = action.walletRpc;
+  
+  if (method !== 'solana_signTransaction') {
+    throw new Error(`Unsupported Solana method: ${method}`);
+  }
+  
+  // Params are array-wrapped: [{ transaction }]
+  const [{ transaction }] = JSON.parse(params);
+  
+  // Decode the base64 transaction
+  const txBuffer = Buffer.from(transaction, 'base64');
+  const tx = Transaction.from(txBuffer);
+  
+  // Sign the transaction
+  tx.sign(solanaKeypair);
+  
+  // Return the signed transaction as base64
+  return tx.serialize().toString('base64');
+}
+```
+</Tab>
+<Tab title="Kotlin">
+```kotlin
+suspend fun handleSolanaAction(action: Action): String {
+    val method = action.walletRpc.method
+    
+    require(method == "solana_signTransaction") {
+        "Unsupported Solana method: $method"
+    }
+    
+    // Params are array-wrapped: [{ transaction }]
+    val params = JSONArray(action.walletRpc.params)
+    val txData = params.getJSONObject(0).getString("transaction")
+    
+    // Decode and sign the transaction
+    val txBytes = Base64.decode(txData, Base64.DEFAULT)
+    val signedTx = solanaWallet.signTransaction(txBytes)
+    
+    // Return the signed transaction as base64
+    return Base64.encodeToString(signedTx, Base64.NO_WRAP)
+}
+```
+</Tab>
+<Tab title="Swift">
+```swift
+func handleSolanaAction(_ action: Action) async throws -> String {
+    let method = action.walletRpc.method
+    
+    guard method == "solana_signTransaction" else {
+        throw PaymentError.unsupportedMethod(method)
+    }
+    
+    // Params are array-wrapped: [{ transaction }]
+    let params = try JSONDecoder().decode(
+        [[String: String]].self,
+        from: action.walletRpc.params.data(using: .utf8)!
+    )
+    let txData = params[0]["transaction"]!
+    
+    // Decode and sign the transaction
+    let txBytes = Data(base64Encoded: txData)!
+    let signedTx = try solanaWallet.signTransaction(txBytes)
+    
+    // Return the signed transaction as base64
+    return signedTx.base64EncodedString()
+}
+```
+</Tab>
+</Tabs>
+
+<Warning>
+**Return the signed transaction, not the signature.** Solana signer libraries may return both a detached bs58 signature and the signed transaction blob. WalletConnect Pay expects the complete base64-encoded signed transaction, not the detached signature.
+</Warning>
+
+### Do not send transactions
+
+Do not implement `solana_signAndSendTransaction` for Pay flows. The WalletConnect Pay backend handles broadcasting the signed transaction. Your wallet should only sign and return the signed transaction blob.
+
+### Handle array-wrapped params
+
+The Pay backend provides params in an array-wrapped structure: `[{ transaction }]`. Make sure to unwrap this structure when parsing the transaction data.
+
+```typescript
+// Correct: unwrap the array
+const [{ transaction }] = JSON.parse(params);
+
+// Incorrect: accessing params directly
+const { transaction } = JSON.parse(params); // This will fail
+```
+
+### Validate signers at runtime
+
+Guard action handlers against missing signers at execution time. If your wallet doesn't have a Solana signer available when a Solana action is encountered, raise an error rather than silently skipping the action.
+
+```typescript
+if (namespace === 'solana' && !solanaWallet) {
+  throw new Error('Solana wallet not available');
+}
+```
+
+### Reject unknown methods
+
+Reject unknown wallet-RPC methods instead of silently omitting them from result arrays. The signatures array must match the actions array in order and length.
+
+```typescript
+default:
+  throw new Error(`Unknown method: ${method}`);
+// Never silently skip or return undefined
+```
+
+## Complete action handler
+
+Here's a complete example showing how to handle both EVM and Solana actions in a single payment flow:
+
+<Tabs>
+<Tab title="TypeScript">
+```typescript
+async function approvePayment(actions: Action[]): Promise<string[]> {
+  const signatures: string[] = [];
+  
+  for (const action of actions) {
+    const { chainId, method, params } = action.walletRpc;
+    const namespace = chainId.split(':')[0];
+    
+    let signature: string;
+    
+    switch (namespace) {
+      case 'eip155':
+        signature = await handleEvmAction(method, chainId, params);
+        break;
+      case 'solana':
+        signature = await handleSolanaAction(method, params);
+        break;
+      default:
+        throw new Error(`Unsupported namespace: ${namespace}`);
+    }
+    
+    signatures.push(signature);
+  }
+  
+  return signatures;
+}
+
+async function handleEvmAction(
+  method: string,
+  chainId: string,
+  params: string
+): Promise<string> {
+  const parsed = JSON.parse(params);
+  
+  switch (method) {
+    case 'eth_sendTransaction': {
+      const tx = await evmWallet.sendTransaction(chainId, parsed[0]);
+      await tx.wait();
+      return tx.hash;
+    }
+    case 'eth_signTypedData_v4':
+      return await evmWallet.signTypedData(chainId, parsed);
+    default:
+      throw new Error(`Unsupported EVM method: ${method}`);
+  }
+}
+
+async function handleSolanaAction(
+  method: string,
+  params: string
+): Promise<string> {
+  if (method !== 'solana_signTransaction') {
+    throw new Error(`Unsupported Solana method: ${method}`);
+  }
+  
+  const [{ transaction }] = JSON.parse(params);
+  const txBuffer = Buffer.from(transaction, 'base64');
+  const tx = Transaction.from(txBuffer);
+  
+  tx.sign(solanaKeypair);
+  
+  return tx.serialize().toString('base64');
+}
+```
+</Tab>
+</Tabs>
+
+## Validate your integration
+
+Before shipping your Solana support implementation, verify these scenarios work correctly:
+
+<Steps>
+<Step title="SOL-only payment">
+Test a payment link that only offers Solana options. Verify that:
+- The Solana option is presented to the user
+- The transaction is signed correctly
+- The base64-encoded signed transaction is submitted
+- The payment completes successfully
+</Step>
+
+<Step title="Mixed EVM and Solana payment">
+Test a payment link that offers both EVM and Solana options. Verify that:
+- Both option types are presented
+- Users can select either network
+- The correct signer is used for the selected option
+- Payment completes regardless of which option is chosen
+</Step>
+
+<Step title="EVM flow regression">
+After adding Solana support, verify that existing EVM flows still work:
+- USDC payments with EIP-3009
+- USDT payments with Permit2
+- Native token payments
+</Step>
+
+<Step title="Missing Solana wallet">
+Test behavior when Solana keys are not available:
+- Solana options should not be advertised to users
+- No errors should occur during option fetching
+- EVM options should work normally
+</Step>
+</Steps>
+
+## Sample implementation
+
+The React Native reference wallet demonstrates Solana support implementation:
+
+<Card title="React Native" icon="github" href="https://github.com/reown-com/react-native-examples/tree/main/wallets/rn_cli_wallet">
+  `wallets/rn_cli_wallet` — see `PaymentStore.approvePayment` for namespace dispatch logic and `usePairing.handlePaymentLink` for account concatenation.
+</Card>
