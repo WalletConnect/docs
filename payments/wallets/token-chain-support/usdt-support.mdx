@@ -1,6 +1,6 @@
 ---
-title: "USDT support"
-sidebarTitle: "USDT support"
+title: "USDT Support"
+sidebarTitle: "USDT Support"
 description: "Implement the two-action Permit2 flow your wallet needs to accept USDT and other ERC-20s without native typed-data authorization."
 ---
 
@@ -267,9 +267,76 @@ The two-action flow has two distinct user-visible steps that can each take sever
 
 Show different loader copy for each step so the user understands what is happening — especially during the on-chain wait, which is much slower than a typed-data signature on its own. Pick whatever wording fits your wallet's voice.
 
+## Recommended UX
+
+Follow these patterns to provide the best user experience when implementing USDT and Permit2-based payments:
+
+### Pre-load fee estimates
+
+Preload per-option fee estimates before user selection. This allows users to make informed decisions by comparing realistic gas costs across different payment options.
+
+### Display one-time setup messaging
+
+When approval actions are present (first-time Permit2 setup), clearly communicate to users that this is a one-time on-chain approval. Subsequent payments with the same token will only require a signature.
+
+### Separate gas cost display
+
+Explain native-token gas costs separately from the token amounts being paid. Users should understand that:
+- The token amount goes to the merchant
+- The gas fee (in the chain's native token) goes to network validators
+
+### Remember user preferences
+
+Retain and auto-select the last-paid token when it's available in future payments. This reduces friction for repeat users who prefer specific payment methods.
+
+### Guard against stale data
+
+Implement safeguards against stale data from rapid option switching and expired payment sessions. Always validate that payment data is current before executing actions.
+
+## Validate your integration
+
+Before shipping your USDT support implementation, verify these scenarios work correctly:
+
+<Steps>
+<Step title="First-time ERC-20 with Permit2">
+Test a payment with a token requiring Permit2 approval for the first time. The flow should:
+- Present the approval transaction first
+- Wait for on-chain confirmation
+- Then prompt for the Permit2 signature
+- Complete successfully with both results in `signatures[]`
+</Step>
+
+<Step title="Repeat ERC-20 payment">
+After completing the first-time flow, make another payment with the same token. This should:
+- Skip the approval transaction entirely
+- Only require a single Permit2 signature
+- Complete faster than the first-time flow
+</Step>
+
+<Step title="Native token payment">
+Test a payment using the chain's native token (e.g., ETH on Base). Verify that:
+- The transaction hash is correctly included in `signatures[]`
+- The payment completes successfully
+</Step>
+
+<Step title="Rapid option switching">
+Quickly switch between payment options and verify:
+- No stale data leaks between options
+- Fee estimates update correctly for each option
+- The correct actions execute for the final selected option
+</Step>
+
+<Step title="Expired payment handling">
+Test behavior when a payment session expires:
+- Before any signatures are submitted
+- The wallet should handle expiration gracefully
+- Users should receive clear feedback about the expiration
+</Step>
+</Steps>
+
 ## Sample wallets
 
-The four reference wallets below all just shipped this two-action flow and are good starting points to copy from.
+The four reference wallets below all implement this two-action flow and are good starting points to copy from.
 
 <CardGroup cols={2}>
   <Card title="React Native" icon="github" href="https://github.com/reown-com/react-native-examples/tree/main/wallets/rn_cli_wallet">

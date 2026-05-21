@@ -82,7 +82,14 @@
                     ]
                   },
                   "payments/wallets/api-first",
-                  "payments/wallets/usdt-support",
+                  {
+                    "group": "Token & Chain Support",
+                    "pages": [
+                      "payments/wallets/token-chain-support",
+                      "payments/wallets/token-chain-support/usdt-support",
+                      "payments/wallets/token-chain-support/solana-support"
+                    ]
+                  },
                   "payments/wallets/tap-to-pay"
                 ]
               },
@@ -212,7 +219,14 @@
                     ]
                   },
                   "payments/wallets/api-first",
-                  "payments/wallets/usdt-support",
+                  {
+                    "group": "Token & Chain Support",
+                    "pages": [
+                      "payments/wallets/token-chain-support",
+                      "payments/wallets/token-chain-support/usdt-support",
+                      "payments/wallets/token-chain-support/solana-support"
+                    ]
+                  },
                   "payments/wallets/tap-to-pay"
                 ]
               },
