@@ -44,7 +44,8 @@
                   "payments/for-users",
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
-                  "payments/wallet-coverage"
+                  "payments/wallet-coverage",
+                  "payments/cex-coverage"
                 ]
               },
               {
@@ -183,7 +184,8 @@
                   "payments/for-users",
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
-                  "payments/wallet-coverage"
+                  "payments/wallet-coverage",
+                  "payments/cex-coverage"
                 ]
               },
               {
