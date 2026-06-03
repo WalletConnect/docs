@@ -99,7 +99,9 @@
               {
                 "group": "Ecommerce and Online Checkout",
                 "pages": [
-                  "payments/ecommerce/overview"
+                  "payments/ecommerce/overview",
+                  "payments/ecommerce/integration",
+                  "payments/ecommerce/api-reference"
                 ]
               },
               {
@@ -239,7 +241,9 @@
               {
                 "group": "Ecommerce and Online Checkout",
                 "pages": [
-                  "payments/ecommerce/overview"
+                  "payments/ecommerce/overview",
+                  "payments/ecommerce/integration",
+                  "payments/ecommerce/api-reference"
                 ]
               },
               {
