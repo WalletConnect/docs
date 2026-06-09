@@ -1216,7 +1216,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
+            "description": "Opaque pagination cursor \u2014 use the value from `nextCursor` in the previous response."
           },
           {
             "in": "query",
@@ -1405,7 +1405,7 @@
             }
           },
           "400": {
-            "description": "Bad request — invalid parameters or API version",
+            "description": "Bad request \u2014 invalid parameters or API version",
             "content": {
               "application/json": {
                 "schema": {
@@ -1500,7 +1500,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized — missing or invalid partner API key",
+            "description": "Unauthorized \u2014 missing or invalid partner API key",
             "content": {
               "application/json": {
                 "schema": {
@@ -1594,7 +1594,7 @@
             }
           },
           "502": {
-            "description": "Bad gateway — upstream service returned an error",
+            "description": "Bad gateway \u2014 upstream service returned an error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2243,7 +2243,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized — missing or invalid API key, or missing merchant id",
+            "description": "Unauthorized \u2014 missing or invalid API key, or missing merchant id",
             "content": {
               "application/json": {
                 "schema": {
@@ -2621,7 +2621,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
+            "description": "Opaque pagination cursor \u2014 use the value from `nextCursor` in the previous response."
           },
           {
             "in": "query",
@@ -2789,7 +2789,7 @@
             }
           },
           "400": {
-            "description": "Bad request — invalid parameters or API version",
+            "description": "Bad request \u2014 invalid parameters or API version",
             "content": {
               "application/json": {
                 "schema": {
@@ -2884,7 +2884,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized — missing or invalid API key, or missing merchant id",
+            "description": "Unauthorized \u2014 missing or invalid API key, or missing merchant id",
             "content": {
               "application/json": {
                 "schema": {
@@ -2986,7 +2986,7 @@
             }
           },
           "502": {
-            "description": "Bad gateway — upstream service returned an error",
+            "description": "Bad gateway \u2014 upstream service returned an error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3739,7 +3739,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
+            "description": "Opaque pagination cursor \u2014 use the value from `nextCursor` in the previous response."
           },
           {
             "in": "query",
@@ -4732,7 +4732,7 @@
           "Crypto Settlement"
         ],
         "summary": "Create crypto settlements",
-        "description": "Register one or more crypto settlement destinations for the merchant. Each entry pairs a [CAIP-19](https://chainagnostic.org/CAIPs/caip-19) `asset` with a [CAIP-10](https://chainagnostic.org/CAIPs/caip-10) `destination` wallet on the same chain. Each `(merchant, asset)` pair must be unique — registering the same asset twice returns `settlement_asset_conflict`.",
+        "description": "Register one or more crypto settlement destinations for the merchant. Each entry pairs a [CAIP-19](https://chainagnostic.org/CAIPs/caip-19) `asset` with a [CAIP-10](https://chainagnostic.org/CAIPs/caip-10) `destination` wallet on the same chain. Each `(merchant, asset)` pair must be unique \u2014 registering the same asset twice returns `settlement_asset_conflict`.",
         "parameters": [
           {
             "name": "Idempotency-Key",
@@ -5468,7 +5468,7 @@
             }
           },
           "400": {
-            "description": "Bad request — invalid parameters",
+            "description": "Bad request \u2014 invalid parameters",
             "content": {
               "application/json": {
                 "schema": {
@@ -5539,7 +5539,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized — missing or invalid API key",
+            "description": "Unauthorized \u2014 missing or invalid API key",
             "content": {
               "application/json": {
                 "schema": {
@@ -5633,7 +5633,7 @@
             }
           },
           "502": {
-            "description": "Bad gateway — upstream service returned an error",
+            "description": "Bad gateway \u2014 upstream service returned an error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6379,7 +6379,8 @@
               "integer",
               "null"
             ],
-            "format": "int64"
+            "format": "int64",
+            "description": "Optional custom expiration timestamp (Unix seconds since epoch). Must be in the future if provided. If not provided, defaults to 5 minutes from now.\n\n**Must be seconds, not milliseconds.** Validation only rejects timestamps in the past \u2014 a milliseconds-epoch value (e.g. `1780928041736`) passes validation but sets the expiration years in the future."
           },
           "referenceId": {
             "type": "string"
@@ -7344,7 +7345,7 @@
               },
               {
                 "$ref": "#/components/schemas/PaymentsSettlementInformation",
-                "description": "Settlement metadata for the MTA → destination transfer. Null when\nsettlement has not completed yet (pending, non-MTA flows, or\npre-confirmation)."
+                "description": "Settlement metadata for the MTA \u2192 destination transfer. Null when\nsettlement has not completed yet (pending, non-MTA flows, or\npre-confirmation)."
               }
             ]
           },
@@ -7383,7 +7384,7 @@
         "properties": {
           "unit": {
             "type": "string",
-            "description": "Settlement unit — the asset or currency used in the settlement\ntransfer. Uses the same unit format as payment amounts\n(e.g. \"caip19/eip155:1/erc20:0xA0b86...\" for crypto,\n\"iso4217/USD\" for fiat).",
+            "description": "Settlement unit \u2014 the asset or currency used in the settlement\ntransfer. Uses the same unit format as payment amounts\n(e.g. \"caip19/eip155:1/erc20:0xA0b86...\" for crypto,\n\"iso4217/USD\" for fiat).",
             "example": "iso4217/USD"
           }
         }
@@ -7423,11 +7424,11 @@
         "properties": {
           "amount": {
             "$ref": "#/components/schemas/PaymentsSettlementAmount",
-            "description": "Settlement amount — the asset/currency and value transferred."
+            "description": "Settlement amount \u2014 the asset/currency and value transferred."
           },
           "txId": {
             "type": "string",
-            "description": "Transaction hash of the MTA → settlement destination transfer."
+            "description": "Transaction hash of the MTA \u2192 settlement destination transfer."
           }
         },
         "example": {
