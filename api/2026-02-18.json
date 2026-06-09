@@ -6380,7 +6380,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Optional custom expiration timestamp (Unix seconds since epoch). Must be in the future if provided. If not provided, defaults to 5 minutes from now.\n\n**Must be seconds, not milliseconds.** Validation only rejects timestamps in the past \u2014 a milliseconds-epoch value (e.g. `1780928041736`) passes validation but sets the expiration years in the future."
+            "description": "Optional custom expiration timestamp (Unix seconds since epoch). Must be in the future if provided. If not provided, defaults to 5 minutes from now."
           },
           "referenceId": {
             "type": "string"
