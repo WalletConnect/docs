@@ -6380,7 +6380,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Optional custom expiration timestamp (Unix seconds since epoch). Must be in the future if provided. If not provided, defaults to 5 minutes from now."
+            "description": "Optional custom expiration timestamp (Unix seconds since epoch). Must be in the future if provided. If not provided, defaults to 15 minutes from now."
           },
           "referenceId": {
             "type": "string"
