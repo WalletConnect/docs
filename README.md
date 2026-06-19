@@ -22,3 +22,4 @@ View your local preview at `http://localhost:3000`.
 
 ### Resources
 - [WalletConnect SDK and Network Docs](https://docs.walletconnect.network/)
+- [WalletConnect GitHub](https://github.com/WalletConnect)
