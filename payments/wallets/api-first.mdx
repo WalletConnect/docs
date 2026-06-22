@@ -160,6 +160,10 @@ Execute each action in order using your wallet's signing or transaction implemen
 Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient token allowance for Permit2 returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check each action's `method` field and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/token-chain-support/usdt-support).
 </Note>
 
+<Note>
+Actions are not limited to the `eip155` (EVM) namespace. **Solana** actions arrive as `walletRpc` actions with `chain_id` in the `solana:` namespace and `method: solana_signTransaction`. Route each action by the namespace in its `chain_id`, sign with the matching wallet, and return the **base64-encoded signed transaction** (not a detached signature) in `results[]`. Do not broadcast — the backend submits the transaction. For full implementation guidance, see [Solana support](/payments/wallets/token-chain-support/solana-support).
+</Note>
+
 ### Submitting results
 
 When calling **Confirm a payment**, wrap each signature as a `walletRpc` result:
