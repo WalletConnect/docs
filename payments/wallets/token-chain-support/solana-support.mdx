@@ -6,6 +6,57 @@ description: "Implement Solana payment capabilities in your wallet including nat
 
 WalletConnect Pay supports Solana payments, enabling users to pay with native SOL and SPL tokens. This guide covers how to extend your wallet's WalletConnect Pay integration to support Solana payments end-to-end.
 
+<Info>
+This guide applies whether you integrate with the **Wallet Pay SDK** or directly with the **Gateway API** ([API-first](/payments/wallets/api-first)). The signing requirements are identical — Solana actions arrive as `walletRpc` actions, and the signed transaction is returned in the results array. The code samples below use SDK method names; if you are integrating API-first, the equivalents are:
+
+| SDK | Gateway API |
+|-----|-------------|
+| `getPaymentOptions({ accounts })` | `POST /v1/gateway/payment/{id}/options` with `accounts[]` |
+| `option.actions` / `getRequiredPaymentActions` | the option's `actions[]`, resolved via `POST /v1/gateway/payment/{id}/fetch` when an action is type `build` |
+| `confirmPayment(signatures)` | `POST /v1/gateway/payment/{id}/confirm` with `results[]` |
+
+Everything else in this guide — advertising Solana accounts, routing by namespace, the `solana_signTransaction` payload, and returning the signed transaction blob — is the same in both integrations.
+</Info>
+
+## Solana payment flow
+
+A Solana payment follows the same three-call flow as any other WalletConnect Pay payment. The only Solana-specific parts are the signing method (`solana_signTransaction`) and that your wallet **signs but never broadcasts** — the WalletConnect Pay backend submits the signed transaction to the network.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Wallet
+    participant Gateway as WalletConnect Pay (Gateway API / SDK)
+    participant Chain as Solana RPC / Chain
+
+    User->>Wallet: Scan QR / Open payment link
+    Wallet->>Gateway: Get payment options (incl. solana:… accounts)
+    Gateway-->>Wallet: options[] (some with solana_signTransaction actions)
+    Wallet->>User: Display payment options
+
+    User->>Wallet: Select Solana option
+
+    alt Option includes a build action
+        Wallet->>Gateway: Fetch action (optionId, data)
+        Gateway-->>Wallet: walletRpc actions (solana_signTransaction)
+    end
+
+    Wallet->>User: Request signature
+    User-->>Wallet: Approve
+    Wallet->>Wallet: Sign transaction (solana_signTransaction)
+    Note over Wallet: Return signed tx blob (base64)<br/>Do NOT broadcast
+
+    Wallet->>Gateway: Confirm payment (results: [signed tx blob])
+    Gateway->>Chain: Broadcast signed transaction
+    Chain-->>Gateway: Confirmation
+    Gateway-->>Wallet: status + isFinal
+    Wallet->>User: Show result / status
+```
+
+<Warning>
+The `results[]` (or `signatures[]`) you submit on confirm must match the option's `actions[]` in **order and length** — including any EVM actions that precede a Solana action in a mixed-chain option.
+</Warning>
+
 ## Key capabilities
 
 Implementing Solana support enables three primary features:
