@@ -184,8 +184,8 @@ if (selectedOption.collectData?.url != null) {
     'dob': '1990-01-15',
     'pobAddress': '123 Main St, New York, NY 10001',
   };
-  // Encode prefill as base64url
-  final prefillBase64 = base64Url.encode(utf8.encode(jsonEncode(prefillData)));
+  // Encode prefill as base64url (no padding, consistent with the other SDKs)
+  final prefillBase64 = base64Url.encode(utf8.encode(jsonEncode(prefillData))).replaceAll('=', '');
   final uri = Uri.parse(selectedOption.collectData!.url);
   final webViewUrl = uri.replace(
     queryParameters: {

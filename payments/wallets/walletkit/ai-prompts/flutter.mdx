@@ -247,7 +247,7 @@ String buildFormUrl(
   final uri = Uri.parse(baseUrl);
   final params = {...uri.queryParameters};
   if (prefillData.isNotEmpty) {
-    params['prefill'] = base64Url.encode(utf8.encode(jsonEncode(prefillData)));
+    params['prefill'] = base64Url.encode(utf8.encode(jsonEncode(prefillData))).replaceAll('=', '');
   }
   if (theme != null) params['theme'] = theme;
   if (themeVariables != null) params['themeVariables'] = themeVariables;
