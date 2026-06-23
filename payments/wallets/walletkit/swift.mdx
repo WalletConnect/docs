@@ -285,10 +285,18 @@ if let collectData = selectedOption.collectData, let url = collectData.url {
         "pobAddress": "123 Main St, New York, NY 10001"
     ]
     let jsonData = try JSONSerialization.data(withJSONObject: prefillData)
+    // Encode prefill as base64url (URL-safe, no padding)
     let prefillBase64 = jsonData.base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
     var components = URLComponents(string: url)!
     var queryItems = components.queryItems ?? []
     queryItems.append(URLQueryItem(name: "prefill", value: prefillBase64))
+    // Optional appearance params (see "Form URL parameters"):
+    queryItems.append(URLQueryItem(name: "theme", value: "dark")) // "light" | "dark"
+    // themeVariables is a base64url string exported from the WalletConnect Pay Dashboard:
+    // queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
     components.queryItems = queryItems
     let webViewUrl = components.string!
 
@@ -336,7 +344,9 @@ case .cancelled:
 
 ## WebView Implementation
 
-When a selected option has `collectData.url` present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices />
 
 ```swift
 import WebKit

@@ -169,9 +169,11 @@ if (response.info != null) {
   print('Merchant: ${response.info!.merchant.name}');
 }
 
-// Check if data collection is required
-if (response.collectData != null) {
-  print('Data collection required: ${response.collectData!.fields.length} fields');
+// Check which options require data collection (per-option)
+for (final option in response.options) {
+  if (option.collectData != null) {
+    print('Option ${option.id} requires info capture');
+  }
 }
 ```
 
@@ -214,18 +216,25 @@ Some payments may require additional user data. Check for `collectData` in the p
 <WebViewOverview />
 
 ```dart
-if (response.collectData?.url != null) {
-  // Use the "required" list from response.collectData.schema to determine which fields to prefill
+if (selectedOption.collectData?.url != null) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
   final prefillData = {
     'fullName': 'John Doe',
     'dob': '1990-01-15',
     'pobAddress': '123 Main St, New York, NY 10001',
   };
-  final prefillJson = jsonEncode(prefillData);
-  final prefillBase64 = base64Url.encode(utf8.encode(prefillJson));
-  final uri = Uri.parse(response.collectData!.url);
+  // Encode prefill as base64url
+  final prefillBase64 = base64Url.encode(utf8.encode(jsonEncode(prefillData)));
+  final uri = Uri.parse(selectedOption.collectData!.url);
   final webViewUrl = uri.replace(
-    queryParameters: {...uri.queryParameters, 'prefill': prefillBase64},
+    queryParameters: {
+      ...uri.queryParameters,
+      'prefill': prefillBase64,
+      // Optional appearance params (see "Form URL parameters"):
+      'theme': 'dark', // "light" | "dark"
+      // themeVariables is a base64url string exported from the Pay Dashboard:
+      // 'themeVariables': themeVariables,
+    },
   ).toString();
 
   // Show WebView — see WebView Implementation section below
@@ -277,13 +286,15 @@ if (!confirmResponse.isFinal && confirmResponse.pollInMs != null) {
 
 ## WebView Implementation
 
-When `collectData.url` is present, display the URL in a WebView using the `webview_flutter` package (v4.10.0+). Add it to your `pubspec.yaml`:
+When `selectedOption.collectData.url` is present, display the URL in a WebView using the `webview_flutter` package (v4.10.0+). Add it to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
   webview_flutter: ^4.10.0
   url_launcher: ^6.1.0
 ```
+
+<WebViewBestPractices />
 
 ```dart
 import 'dart:convert';
@@ -370,14 +381,20 @@ class _PayDataCollectionWebViewState extends State<PayDataCollectionWebView> {
   }
 }
 
-String buildPrefillUrl(String baseUrl, Map<String, String> prefillData) {
-  if (prefillData.isEmpty) return baseUrl;
-  final json = jsonEncode(prefillData);
-  final base64 = base64Url.encode(utf8.encode(json));
+String buildFormUrl(
+  String baseUrl, {
+  Map<String, String> prefillData = const {},
+  String? theme,           // "light" or "dark"
+  String? themeVariables,  // base64url string exported from the Pay Dashboard
+}) {
   final uri = Uri.parse(baseUrl);
-  return uri.replace(
-    queryParameters: {...uri.queryParameters, 'prefill': base64},
-  ).toString();
+  final params = {...uri.queryParameters};
+  if (prefillData.isNotEmpty) {
+    params['prefill'] = base64Url.encode(utf8.encode(jsonEncode(prefillData)));
+  }
+  if (theme != null) params['theme'] = theme;
+  if (themeVariables != null) params['themeVariables'] = themeVariables;
+  return uri.replace(queryParameters: params).toString();
 }
 ```
 
@@ -433,10 +450,10 @@ class PaymentService {
       signatures.add(signature);
     }
 
-    // Step 5: Collect data via WebView if required
-    if (optionsResponse.collectData?.url != null) {
+    // Step 5: Collect data via WebView if required for selected option
+    if (selectedOption.collectData?.url != null) {
       // Show WebView and wait for IC_COMPLETE
-      await showDataCollectionWebView(optionsResponse.collectData!.url);
+      await showDataCollectionWebView(selectedOption.collectData!.url);
     }
 
     // Step 6: Confirm payment
@@ -561,6 +578,7 @@ PaymentOption({
   required PayAmount amount,
   @JsonKey(name: 'etaS') required int etaSeconds,
   required List<Action> actions,
+  CollectDataAction? collectData,  // Per-option data collection (null if not required)
 })
 ```
 
@@ -689,7 +707,7 @@ try {
 
 8. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-9. **WebView Data Collection**: When `collectData.url` is present, display the URL in a WebView using `webview_flutter` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+9. **WebView Data Collection**: When `selectedOption.collectData.url` is present, display the URL in a WebView using `webview_flutter` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
 
 ## Examples
 

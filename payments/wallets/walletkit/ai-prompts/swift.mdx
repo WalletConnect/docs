@@ -435,7 +435,39 @@ func confirmPayment(
 
 ## WebView Data Collection
 
-When `collectData.url` is present, display the URL in a `WKWebView`. The hosted form handles rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a `WKWebView`. The hosted form handles rendering, validation, and T&C acceptance.
+
+The form URL accepts optional query parameters — append them to `selectedOption.collectData.url` before loading, preserving existing query parameters:
+- `prefill` — base64url-encoded JSON of known user fields. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`).
+- `theme` — `light` or `dark`, to match your wallet's color mode.
+- `themeVariables` — a base64url string exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) that overrides design tokens (font, font size, some colors, button/input border radius). Append it verbatim.
+
+```swift
+func buildFormUrl(
+    baseUrl: String,
+    prefillData: [String: String] = [:],
+    theme: String? = nil,            // "light" or "dark"
+    themeVariables: String? = nil    // base64url string exported from the Pay Dashboard
+) -> String {
+    guard var components = URLComponents(string: baseUrl) else { return baseUrl }
+    var queryItems = components.queryItems ?? []
+    if !prefillData.isEmpty,
+       let jsonData = try? JSONSerialization.data(withJSONObject: prefillData) {
+        // base64url: URL-safe, no padding
+        let prefill = jsonData.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        queryItems.append(URLQueryItem(name: "prefill", value: prefill))
+    }
+    if let theme = theme { queryItems.append(URLQueryItem(name: "theme", value: theme)) }
+    if let themeVariables = themeVariables {
+        queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
+    }
+    components.queryItems = queryItems
+    return components.string ?? baseUrl
+}
+```
 
 ```swift
 import WebKit

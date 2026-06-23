@@ -1,18 +1,20 @@
-## WebView-Based Data Collection
+## Embedded Data Collection Form
 
 When a payment requires user information (e.g., for Travel Rule compliance), the SDK returns a `collectData` field on individual payment options. Each option may independently require data collection — some options may require it while others don't.
 
-### Recommended Flow (Per-Option)
+The form is loaded from `selectedOption.collectData.url` and embedded in your wallet (a WebView on mobile, an iframe on web). It handles field rendering, validation, Terms & Conditions and Privacy Policy acceptance, and submits data directly to the backend.
+
+### Recommended Flow
 
 The recommended approach is to display all payment options upfront, then handle data collection only when the user selects an option that requires it:
 
 1. Call `getPaymentOptions` and display all available options to the user
 2. Show a visual indicator (e.g., "Info required" badge) on options where `option.collectData` is present
 3. When the user selects an option, check `selectedOption.collectData`
-4. If present, open `selectedOption.collectData.url` in a WebView within your wallet
-5. Optionally append a `prefill=<base64-json>` query parameter with known user data (e.g., name, date of birth, address). Use proper URL building to handle existing query parameters.
-6. Listen for JS bridge messages: `IC_COMPLETE` (success) or `IC_ERROR` (failure)
-7. On `IC_COMPLETE`, proceed to `confirmPayment()` **without** passing `collectedData` — the WebView submits data directly to the backend
+4. If present, load `selectedOption.collectData.url` in the embedded form
+5. Optionally append query parameters to the form URL — `prefill` (known user data), `theme`, and `themeVariables` (appearance). See [Form URL parameters](#form-url-parameters) below. Use proper URL building so existing query parameters are preserved.
+6. Listen for completion messages: `IC_COMPLETE` (success) or `IC_ERROR` (failure)
+7. On `IC_COMPLETE`, proceed to `confirmPayment()` **without** passing `collectedData` — the form submits data directly to the backend
 
 ### Decision Matrix
 
@@ -22,14 +24,31 @@ The recommended approach is to display all payment options upfront, then handle 
 | present | `null` | Option does NOT require IC (others might) — skip IC for this option |
 | `null` | `null` | No IC needed for any option |
 
+### Form URL parameters
+
+The form URL accepts the following optional query parameters. Append them to `selectedOption.collectData.url` before loading it, preserving any existing query parameters.
+
+| Parameter | Format | Description |
+|---|---|---|
+| `prefill` | base64url-encoded JSON | Pre-populates known user fields so the user doesn't re-enter them. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`). |
+| `theme` | `light` or `dark` | Sets the form's base color mode. |
+| `themeVariables` | base64url-encoded JSON | Overrides design tokens to match your brand — font, font size, select colors, button border radius, and input border radius. Generate and export this value from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com). |
+
 <Info>
-The `collectData` also includes a `schema` field — a JSON schema string describing the required fields. The `required` list in this schema tells you which fields the form expects. Wallets can use these field names as keys when building the prefill JSON object. For example, if the schema's `required` array contains `["fullName", "dob", "pobAddress"]`, you can prefill with `{"fullName": "...", "dob": "...", "pobAddress": "..."}`.
+`collectData.schema` is a JSON schema **string** — parse it and read its `required` array to discover the field keys for `prefill`. For example, a `required` array of `["fullName", "dob", "pobAddress"]` maps to a prefill object of `{"fullName": "...", "dob": "...", "pobAddress": "..."}`.
 </Info>
+
+#### Customizing the form appearance
+
+`theme` and `themeVariables` are optional and independent — pass either, both, or neither:
+
+- **`theme`** switches the form between `light` and `dark` base color modes. Match it to your wallet's active mode for a seamless transition.
+- **`themeVariables`** applies brand-level overrides (font, font size, select colors, button border radius, and input border radius). Generate the theme in the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com), export it as a base64url string, and append it to the form URL verbatim — you don't need to encode it at runtime.
 
 <Note>
 The top-level `collectData` on the payment options response is still available for backward compatibility. However, the per-option `collectData` is the recommended approach as it provides more granular control over the flow.
 </Note>
 
 <Warning>
-When using the WebView approach, do **not** pass `collectedData` to `confirmPayment()`. The WebView handles data submission directly.
+Do **not** pass `collectedData` to `confirmPayment()` when using the embedded form. The form handles data submission directly.
 </Warning>

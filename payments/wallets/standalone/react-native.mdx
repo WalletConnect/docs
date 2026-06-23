@@ -266,9 +266,17 @@ if (selectedOption.collectData?.url) {
     dob: "1990-01-15",
     pobAddress: "123 Main St, New York, NY 10001",
   };
-  const prefillBase64 = btoa(JSON.stringify(prefillData));
+  // Encode prefill as base64url (URL-safe, no padding)
+  const prefill = btoa(JSON.stringify(prefillData))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  // Optional appearance params (see "Form URL parameters"):
+  //   theme=light|dark — base color mode
+  //   themeVariables=<base64url> — exported from the WalletConnect Pay Dashboard
+  const themeVariables = "<base64url-exported-from-dashboard>";
+  const query = `prefill=${prefill}&theme=dark&themeVariables=${themeVariables}`;
   const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
-  const webViewUrl = `${selectedOption.collectData.url}${separator}prefill=${prefillBase64}`;
+  const webViewUrl = `${selectedOption.collectData.url}${separator}${query}`;
 
   // Show WebView for this specific option — see WebView Implementation section below
   showDataCollectionWebView(webViewUrl);
@@ -306,11 +314,13 @@ if (result.status === "succeeded") {
 
 ## WebView Implementation
 
-When a selected option has `collectData.url` present, display the URL in a WebView using `react-native-webview`. Install the dependency:
+When `selectedOption.collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
 
 ```bash
 npm install react-native-webview@13.16.0
 ```
+
+<WebViewBestPractices />
 
 ```tsx
 import React, { useCallback } from "react";
@@ -376,14 +386,26 @@ function PayDataCollectionWebView({
   );
 }
 
-function buildPrefillUrl(
+function buildFormUrl(
   baseUrl: string,
-  prefillData: Record<string, string>
+  options: {
+    prefill?: Record<string, string>;
+    theme?: "light" | "dark";
+    themeVariables?: string; // base64url string exported from the Pay Dashboard
+  } = {}
 ): string {
-  if (Object.keys(prefillData).length === 0) return baseUrl;
-  const base64 = btoa(JSON.stringify(prefillData));
+  const params: string[] = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
   const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}prefill=${base64}`;
+  return `${baseUrl}${separator}${params.join("&")}`;
 }
 ```
 

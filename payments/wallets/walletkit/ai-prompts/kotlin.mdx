@@ -226,7 +226,12 @@ fun processPaymentOptionsResponse(response: Wallet.Model.PaymentOptionsResponse)
 }
 ```
 
-When a selected option has `collectData?.url`, display the URL in a WebView before proceeding with signing. The hosted form handles rendering, validation, and Terms & Conditions acceptance. The WebView communicates completion via JavaScript bridge messages (`IC_COMPLETE` / `IC_ERROR`).
+When `selectedOption.collectData?.url` is present, display the URL in a WebView before proceeding with signing. The hosted form handles rendering, validation, and Terms & Conditions acceptance. The WebView communicates completion via JavaScript bridge messages (`IC_COMPLETE` / `IC_ERROR`).
+
+The form URL accepts optional query parameters (append them with `buildFormUrl` before loading):
+- `prefill` — base64url-encoded JSON of known user fields. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`).
+- `theme` — `light` or `dark`, to match your wallet's color mode.
+- `themeVariables` — a base64url string exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) that overrides design tokens (font, font size, some colors, button/input border radius). Append it verbatim.
 
 > **Important:** When using the WebView approach, do **not** pass `collectedData` to `confirmPayment()`. The WebView submits data directly to the backend.
 
@@ -291,16 +296,23 @@ fun PayDataCollectionWebView(
     })
 }
 
-fun buildPrefillUrl(baseUrl: String, prefillData: Map<String, String>): String {
-    if (prefillData.isEmpty()) return baseUrl
-    val json = JSONObject(prefillData).toString()
-    val base64 = Base64.encodeToString(
-        json.toByteArray(),
-        Base64.NO_WRAP or Base64.URL_SAFE
-    )
-    return Uri.parse(baseUrl).buildUpon()
-        .appendQueryParameter("prefill", base64)
-        .build().toString()
+fun buildFormUrl(
+    baseUrl: String,
+    prefillData: Map<String, String> = emptyMap(),
+    theme: String? = null,            // "light" or "dark"
+    themeVariables: String? = null    // base64url string exported from the Pay Dashboard
+): String {
+    val builder = Uri.parse(baseUrl).buildUpon()
+    if (prefillData.isNotEmpty()) {
+        val prefill = Base64.encodeToString(
+            JSONObject(prefillData).toString().toByteArray(),
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
+        )
+        builder.appendQueryParameter("prefill", prefill)
+    }
+    theme?.let { builder.appendQueryParameter("theme", it) }
+    themeVariables?.let { builder.appendQueryParameter("themeVariables", it) }
+    return builder.build().toString()
 }
 ```
 

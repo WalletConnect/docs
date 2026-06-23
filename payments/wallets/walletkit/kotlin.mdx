@@ -311,12 +311,17 @@ selectedOption.collectData?.let { collectAction ->
             put("dob", "1990-01-15")
             put("pobAddress", "123 Main St, New York, NY 10001")
         }.toString()
+        // Encode prefill as base64url (URL-safe, no padding)
         val prefillBase64 = Base64.encodeToString(
             prefillJson.toByteArray(),
-            Base64.NO_WRAP or Base64.URL_SAFE
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
         )
         val webViewUrl = Uri.parse(url).buildUpon()
             .appendQueryParameter("prefill", prefillBase64)
+            // Optional appearance params (see "Form URL parameters"):
+            .appendQueryParameter("theme", "dark") // "light" | "dark"
+            // themeVariables is a base64url string exported from the Pay Dashboard:
+            // .appendQueryParameter("themeVariables", themeVariables)
             .build().toString()
 
         // Show WebView for this specific option and wait for IC_COMPLETE message
@@ -375,7 +380,9 @@ confirmResult.onSuccess { response ->
 
 ## WebView Implementation
 
-When a selected option has `collectData.url` present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices />
 
 ```kotlin
 import android.webkit.JavascriptInterface
