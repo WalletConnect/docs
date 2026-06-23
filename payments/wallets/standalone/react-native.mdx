@@ -119,9 +119,9 @@ Include accounts for all supported networks to maximize payment options for your
 
 ## Payment Flow
 
-The payment flow consists of four main steps:
+The payment flow consists of five main steps:
 
-**Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
+**Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -139,13 +139,6 @@ sequenceDiagram
     Wallet->>User: Display payment options
 
     User->>Wallet: Select payment option
-    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
-    PaySDK->>Backend: Get signing actions
-    Backend-->>PaySDK: Required wallet RPC actions
-    PaySDK-->>Wallet: List of actions to sign
-
-    Wallet->>User: Request signature(s)
-    User->>Wallet: Approve & sign
 
     alt Selected option requires data collection
         Wallet->>WebView: Load selectedOption.collectData.url
@@ -154,7 +147,15 @@ sequenceDiagram
         WebView-->>Wallet: IC_COMPLETE message
     end
 
-    Wallet->>PaySDK: confirmPayment(signatures, collectedData)
+    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
+    PaySDK->>Backend: Get signing actions
+    Backend-->>PaySDK: Required wallet RPC actions
+    PaySDK-->>Wallet: List of actions to sign
+
+    Wallet->>User: Request signature(s)
+    User->>Wallet: Approve & sign
+
+    Wallet->>PaySDK: confirmPayment(signatures)
     PaySDK->>Backend: Submit payment
     Backend-->>PaySDK: Payment status
     PaySDK-->>Wallet: ConfirmPaymentResponse
@@ -193,6 +194,34 @@ for (const option of options.options) {
   }
 }
 ```
+
+</Step>
+
+<Step title="Collect User Data (If Required)" titleSize="h3">
+
+Some payments may require additional user data. Check for `collectData` on the selected payment option. If present, complete data collection **before** fetching the required actions — the backend rejects the actions request unless the information has been captured first:
+
+<WebViewOverview />
+
+```typescript
+// Check per-option data collection requirement after user selects an option
+if (selectedOption.collectData?.url) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
+  const prefillData = {
+    fullName: "John Doe",
+    dob: "1990-01-15",
+    pobAddress: "123 Main St, New York, NY 10001",
+  };
+  const prefillBase64 = btoa(JSON.stringify(prefillData));
+  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
+  const webViewUrl = `${selectedOption.collectData.url}${separator}prefill=${prefillBase64}`;
+
+  // Show WebView for this specific option — see WebView Implementation section below
+  showDataCollectionWebView(webViewUrl);
+}
+```
+
+<WebViewMessageTypes />
 
 </Step>
 
@@ -248,34 +277,6 @@ Payment options may include multiple actions with different RPC methods. For exa
 <Warning>
 Signatures must be in the same order as the actions array.
 </Warning>
-
-</Step>
-
-<Step title="Collect User Data (If Required)" titleSize="h3">
-
-Some payments may require additional user data. Check for `collectData` on the selected payment option:
-
-<WebViewOverview />
-
-```typescript
-// Check per-option data collection requirement after user selects an option
-if (selectedOption.collectData?.url) {
-  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
-  const prefillData = {
-    fullName: "John Doe",
-    dob: "1990-01-15",
-    pobAddress: "123 Main St, New York, NY 10001",
-  };
-  const prefillBase64 = btoa(JSON.stringify(prefillData));
-  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
-  const webViewUrl = `${selectedOption.collectData.url}${separator}prefill=${prefillBase64}`;
-
-  // Show WebView for this specific option — see WebView Implementation section below
-  showDataCollectionWebView(webViewUrl);
-}
-```
-
-<WebViewMessageTypes />
 
 </Step>
 
@@ -423,24 +424,26 @@ class PaymentManager {
       // Step 2: Let user select an option (simplified - use first option)
       const selectedOption = options.options[0];
 
-      // Step 3: Get required actions
+      // Step 3: Collect data via WebView if required for selected option —
+      // must happen BEFORE fetching the required actions, otherwise the
+      // backend rejects the request
+      if (selectedOption.collectData?.url) {
+        // Show WebView and wait for IC_COMPLETE
+        await this.showDataCollectionWebView(selectedOption.collectData.url);
+      }
+
+      // Step 4: Get required actions
       const actions = await this.client.getRequiredPaymentActions({
         paymentId: options.paymentId,
         optionId: selectedOption.id,
       });
 
-      // Step 4: Sign all actions
+      // Step 5: Sign all actions
       const signatures = await Promise.all(
         actions.map((action) =>
           this.signAction(action, walletAddress)
         )
       );
-
-      // Step 5: Collect data via WebView if required for selected option
-      if (selectedOption.collectData?.url) {
-        // Show WebView and wait for IC_COMPLETE
-        await this.showDataCollectionWebView(selectedOption.collectData.url);
-      }
 
       // Step 6: Confirm payment
       const result = await this.client.confirmPayment({

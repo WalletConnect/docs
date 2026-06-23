@@ -94,9 +94,9 @@ if (walletKit.isPaymentLink(uri)) {
 
 ## Payment Flow
 
-The payment flow consists of five main steps:
+The payment flow consists of six main steps:
 
-**Detect Payment Link -> Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
+**Detect Payment Link -> Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -116,6 +116,14 @@ sequenceDiagram
     Wallet->>User: Display payment options
     
     User->>Wallet: Select payment option
+
+    alt Data collection required
+        Wallet->>WebView: Load collectDataAction.url in WebView
+        WebView->>User: Display data collection form
+        User->>WebView: Fill form & accept T&C
+        WebView-->>Wallet: IC_COMPLETE message
+    end
+
     Wallet->>WalletKit: getRequiredPaymentActions(request)
     WalletKit->>Backend: Get signing actions
     Backend-->>WalletKit: Required wallet RPC actions
@@ -123,13 +131,6 @@ sequenceDiagram
     
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
-    
-    alt Data collection required
-        Wallet->>WebView: Load collectDataAction.url in WebView
-        WebView->>User: Display data collection form
-        User->>WebView: Fill form & accept T&C
-        WebView-->>Wallet: IC_COMPLETE message
-    end
     
     Wallet->>WalletKit: confirmPayment(request)
     WalletKit->>Backend: Submit payment
@@ -169,6 +170,38 @@ if (response.collectData != null) {
 
 </Step>
 
+<Step title="Collect User Data (If Required)" titleSize="h3">
+
+Some payments may require additional user data. After the user selects an option, check for `collectData` on the response and run this step **before** fetching the required payment actions — the backend rejects the actions request with `400 IC data required` for options needing Information Capture if data has not yet been collected:
+
+<WebViewOverview />
+
+```dart
+if (response.collectData?.url != null) {
+  // Use the "required" list from response.collectData.schema to determine which fields to prefill
+  final prefillData = {
+    'fullName': 'John Doe',
+    'dob': '1990-01-15',
+    'pobAddress': '123 Main St, New York, NY 10001',
+  };
+  final prefillJson = jsonEncode(prefillData);
+  final prefillBase64 = base64Url.encode(utf8.encode(prefillJson));
+  final uri = Uri.parse(response.collectData!.url);
+  final webViewUrl = uri.replace(
+    queryParameters: {...uri.queryParameters, 'prefill': prefillBase64},
+  ).toString();
+
+  // Show WebView and wait for IC_COMPLETE message
+  showDataCollectionWebView(webViewUrl);
+}
+```
+
+<WebViewMessageTypes />
+
+The WebView submits the collected data directly to the backend, so you do **not** pass `collectedData` to `confirmPayment` later.
+
+</Step>
+
 <Step title="Get Required Payment Actions" titleSize="h3">
 
 Get the required wallet actions for a selected payment option:
@@ -197,39 +230,9 @@ Payment options may include multiple actions with different RPC methods. For exa
 
 </Step>
 
-<Step title="Collect User Data (If Required)" titleSize="h3">
-
-Some payments may require additional user data:
-
-<WebViewOverview />
-
-```dart
-if (response.collectData?.url != null) {
-  // Use the "required" list from response.collectData.schema to determine which fields to prefill
-  final prefillData = {
-    'fullName': 'John Doe',
-    'dob': '1990-01-15',
-    'pobAddress': '123 Main St, New York, NY 10001',
-  };
-  final prefillJson = jsonEncode(prefillData);
-  final prefillBase64 = base64Url.encode(utf8.encode(prefillJson));
-  final uri = Uri.parse(response.collectData!.url);
-  final webViewUrl = uri.replace(
-    queryParameters: {...uri.queryParameters, 'prefill': prefillBase64},
-  ).toString();
-
-  // Show WebView and wait for IC_COMPLETE message
-  showDataCollectionWebView(webViewUrl);
-}
-```
-
-<WebViewMessageTypes />
-
-</Step>
-
 <Step title="Confirm Payment" titleSize="h3">
 
-Confirm the payment with signatures and optional collected data:
+Confirm the payment with the collected signatures:
 
 ```dart
 final confirmResponse = await walletKit.confirmPayment(
@@ -237,10 +240,6 @@ final confirmResponse = await walletKit.confirmPayment(
     paymentId: 'payment-id',
     optionId: 'option-id',
     signatures: ['0x...', '0x...'], // Signatures from wallet actions
-    collectedData: [
-      CollectDataFieldResult(id: 'fullName', value: 'John Doe'),
-      CollectDataFieldResult(id: 'dob', value: '1990-01-01'),
-    ], // Optional: if data collection was required
     maxPollMs: 60000, // Maximum polling time in milliseconds
   ),
 );
@@ -248,6 +247,10 @@ final confirmResponse = await walletKit.confirmPayment(
 print('Payment Status: ${confirmResponse.status}');
 print('Is Final: ${confirmResponse.isFinal}');
 ```
+
+<Note>
+When using the WebView data-collection approach, you do **not** pass `collectedData` to `confirmPayment`. The WebView submits the collected data directly to the backend during the earlier Collect User Data step.
+</Note>
 
 </Step>
 
@@ -367,15 +370,20 @@ class PaymentService {
         throw Exception('No payment options available');
       }
 
-      // Step 2: Collect data via WebView if required
-      if (optionsResponse.collectData?.url != null) {
-        await showDataCollectionWebView(optionsResponse.collectData!.url);
-      }
-
-      // Step 3: Select payment option (or let user choose)
+      // Step 2: Select payment option (or let user choose)
       PaymentOption selectedOption = optionsResponse.options.first;
       final paymentId = optionsResponse.paymentId;
       final optionId = selectedOption.id;
+
+      // Step 3: Collect data via WebView if required.
+      // This must happen BEFORE fetching the required payment actions —
+      // the backend rejects the actions request with 400 "IC data required"
+      // for options needing Information Capture if data wasn't collected first.
+      // The WebView submits the data directly to the backend, so it is NOT
+      // passed to confirmPayment later.
+      if (optionsResponse.collectData?.url != null) {
+        await showDataCollectionWebView(optionsResponse.collectData!.url);
+      }
 
       // Step 4: Get required payment actions (if not already in the option)
       List<Action> actions = selectedOption.actions;

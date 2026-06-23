@@ -116,9 +116,9 @@ fun handleScannedUri(uri: String, accounts: List<String>) {
 
 ## Payment Flow
 
-The payment flow consists of five main steps:
+The payment flow consists of six main steps:
 
-**Detect Payment Link -> Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
+**Detect Payment Link -> Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -138,6 +138,14 @@ sequenceDiagram
     Wallet->>User: Display payment options
     
     User->>Wallet: Select payment option
+
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
+        WebView->>User: Display data collection form
+        User->>WebView: Fill form & accept T&C
+        WebView-->>Wallet: IC_COMPLETE message
+    end
+
     Wallet->>WalletKit: getRequiredPaymentActions(params)
     WalletKit->>Backend: Get signing actions
     Backend-->>WalletKit: Required wallet RPC actions
@@ -145,13 +153,6 @@ sequenceDiagram
     
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
-    
-    alt Selected option requires data collection
-        Wallet->>WebView: Load selectedOption.collectData.url
-        WebView->>User: Display data collection form
-        User->>WebView: Fill form & accept T&C
-        WebView-->>Wallet: IC_COMPLETE message
-    end
 
     Wallet->>WalletKit: confirmPayment(params)
     WalletKit->>Backend: Submit payment
@@ -203,9 +204,49 @@ viewModelScope.launch {
 
 </Step>
 
+<Step title="Collect User Data (If Required)" titleSize="h3">
+
+Some payments require additional user information. After the user selects an option, check for `collectData` on that option and complete data collection **before** fetching the required actions — the backend rejects the actions request if data collection is required but not yet captured:
+
+<WebViewOverview />
+
+```kotlin
+// Check per-option data collection requirement after user selects an option
+selectedOption.collectData?.let { collectAction ->
+    val url = collectAction.url
+    if (url != null) {
+        // Build prefill URL with known user data
+        // Use the "required" list from collectAction.schema to determine which fields to prefill
+        val prefillJson = JSONObject().apply {
+            put("fullName", "John Doe")
+            put("dob", "1990-01-15")
+            put("pobAddress", "123 Main St, New York, NY 10001")
+        }.toString()
+        val prefillBase64 = Base64.encodeToString(
+            prefillJson.toByteArray(),
+            Base64.NO_WRAP or Base64.URL_SAFE
+        )
+        val webViewUrl = Uri.parse(url).buildUpon()
+            .appendQueryParameter("prefill", prefillBase64)
+            .build().toString()
+
+        // Show WebView for this specific option and wait for IC_COMPLETE message
+        showWebView(webViewUrl)
+    }
+}
+```
+
+<WebViewMessageTypes />
+
+<Note>
+The WebView submits the collected data directly to the backend. You only receive an `IC_COMPLETE`/`IC_ERROR` signal — you do **not** pass `collectedData` to `confirmPayment`.
+</Note>
+
+</Step>
+
 <Step title="Get Required Actions" titleSize="h3">
 
-Get the wallet RPC actions needed to complete the payment:
+Get the wallet RPC actions needed to complete the payment. Make sure any required data collection has already completed before calling this:
 
 ```kotlin
 val actionsResult = WalletKit.Pay.getRequiredPaymentActions(
@@ -293,42 +334,6 @@ Signatures must be in the same order as the actions array.
 
 </Step>
 
-<Step title="Collect User Data (If Required)" titleSize="h3">
-
-Some payments require additional user information:
-
-<WebViewOverview />
-
-```kotlin
-// Check per-option data collection requirement after user selects an option
-selectedOption.collectData?.let { collectAction ->
-    val url = collectAction.url
-    if (url != null) {
-        // Build prefill URL with known user data
-        // Use the "required" list from collectAction.schema to determine which fields to prefill
-        val prefillJson = JSONObject().apply {
-            put("fullName", "John Doe")
-            put("dob", "1990-01-15")
-            put("pobAddress", "123 Main St, New York, NY 10001")
-        }.toString()
-        val prefillBase64 = Base64.encodeToString(
-            prefillJson.toByteArray(),
-            Base64.NO_WRAP or Base64.URL_SAFE
-        )
-        val webViewUrl = Uri.parse(url).buildUpon()
-            .appendQueryParameter("prefill", prefillBase64)
-            .build().toString()
-
-        // Show WebView for this specific option and wait for IC_COMPLETE message
-        showWebView(webViewUrl)
-    }
-}
-```
-
-<WebViewMessageTypes />
-
-</Step>
-
 <Step title="Confirm Payment" titleSize="h3">
 
 Submit signatures and finalize the payment:
@@ -338,8 +343,7 @@ val confirmResult = WalletKit.Pay.confirmPayment(
     Wallet.Params.ConfirmPayment(
         paymentId = paymentId,
         optionId = selectedOption.id,
-        signatures = signatures,
-        collectedData = collectedData // Optional
+        signatures = signatures
     )
 )
 
@@ -475,7 +479,15 @@ class PaymentViewModel : ViewModel() {
                 val paymentId = response.paymentId
                 val selectedOption = response.options.first()
 
-                // Step 2: Get required actions
+                // Step 2: Collect data via WebView if required for selected option.
+                // IC must happen BEFORE fetching the required actions — the WebView
+                // submits the data directly to the backend.
+                selectedOption.collectData?.url?.let { webViewUrl ->
+                    showDataCollectionWebView(webViewUrl)
+                    return@launch // Resume after WebView reports IC_COMPLETE
+                }
+
+                // Step 3: Get required actions
                 val actionsResult = WalletKit.Pay.getRequiredPaymentActions(
                     Wallet.Params.RequiredPaymentActions(
                         paymentId = paymentId,
@@ -484,14 +496,8 @@ class PaymentViewModel : ViewModel() {
                 )
 
                 actionsResult.onSuccess { actions ->
-                    // Step 3: Sign actions
+                    // Step 4: Sign actions
                     val signatures = signActions(actions)
-
-                    // Step 4: Collect data via WebView if required for selected option
-                    selectedOption.collectData?.url?.let { webViewUrl ->
-                        showDataCollectionWebView(webViewUrl)
-                        return@launch
-                    }
 
                     // Step 5: Confirm payment
                     val confirmResult = WalletKit.Pay.confirmPayment(

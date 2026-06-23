@@ -210,23 +210,62 @@ const handlePaymentLink = async (paymentLink: string) => {
 };
 ```
 
-### 3.2 Get Required Actions for Selected Option
+### 3.2 Collect User Data via WebView (Information Capture)
+
+**IMPORTANT - ORDERING**: After the user selects an option, check whether that option requires Information Capture. If `selectedOption.collectData?.url` is present, you MUST collect the data via the WebView **before** calling `getRequiredPaymentActions`. The WebView submits the captured data directly to the backend, and `getRequiredPaymentActions` (which triggers `POST /payment/{id}/fetch`) now requires any IC to already be submitted. Do not fetch actions or sign until the WebView signals completion.
+
+If the selected option has no `collectData?.url`, skip this step and go straight to fetching the required actions.
+
+```typescript
+// Called when the user selects a payment option.
+// Runs the WebView IC step (if needed) BEFORE fetching the required actions.
+const onOptionSelected = async (option: PaymentOption) => {
+  setSelectedOption(option);
+
+  if (option.collectData?.url) {
+    // Step into the WebView; fetchPaymentActions runs in its onComplete.
+    setWebViewUrl(option.collectData.url);
+    setStep('webviewDataCollection');
+    return;
+  }
+
+  // No Information Capture needed - fetch actions directly.
+  await fetchPaymentActions(option);
+};
+
+// Called by the WebView's onComplete callback once IC is submitted to the backend.
+const onDataCollectionComplete = async () => {
+  if (selectedOption) {
+    await fetchPaymentActions(selectedOption);
+  }
+};
+```
+
+See [section 3.6](#3-6-webview-data-collection) for the `PayDataCollectionWebView` component implementation.
+
+### 3.3 Get Required Actions for Selected Option
+
+Only call this AFTER the WebView Information Capture step has completed (when the selected option requires it).
 
 ```typescript
 const fetchPaymentActions = async (option: PaymentOption) => {
   const payClient = walletKit?.pay;
   if (!payClient || !paymentData) return;
 
+  // Triggers POST /payment/{id}/fetch on the backend.
+  // Any required Information Capture must already be submitted via the WebView.
   const actions = await payClient.getRequiredPaymentActions({
     paymentId: paymentData.paymentId,
     optionId: option.id,
   });
 
+  setPaymentActions(actions);
+  setStep('confirming');
   return actions;
 };
 ```
 
-### 3.3 Sign and Confirm Payment
+### 3.4 Sign and Confirm Payment
 
 **IMPORTANT**: Always try passing the raw JSON string first. This is the safest approach.
 
@@ -276,7 +315,7 @@ const confirmPayment = async () => {
 };
 ```
 
-### 3.4 Signing API Variations
+### 3.5 Signing API Variations
 
 Different wallet libraries have different signing APIs. The key insight is that `parsedParams[1]` is already a complete, correctly-formatted JSON string. **Try the simplest approach first.**
 
@@ -341,10 +380,12 @@ If you must parse the typed data, be aware of these issues:
 
 ### State Machine
 
+The WebView data-collection step (Information Capture) runs AFTER the user selects an option but BEFORE fetching the required actions. `getRequiredPaymentActions` triggers the backend `POST /payment/{id}/fetch`, which now expects any required IC to already be submitted by the WebView.
+
 ```
 LOADING → ERROR (if failed)
-        → CONFIRM (show options) → WEBVIEW (if selected option needs IC) → CONFIRMING → SUCCESS
-        → CONFIRM (show options) → CONFIRMING → SUCCESS
+        → CONFIRM (show options) → WEBVIEW (if selected option needs IC) → GET ACTIONS (getRequiredPaymentActions) → CONFIRMING (sign + confirmPayment) → SUCCESS
+        → CONFIRM (show options) → GET ACTIONS (getRequiredPaymentActions) → CONFIRMING (sign + confirmPayment) → SUCCESS
 ```
 
 ### State Definition
@@ -578,9 +619,11 @@ const signature = await wallet.signTypedData({ domain, types, primaryType, messa
 const signature = await web3.eth.signTypedData(address, typedData);
 ```
 
-### 3.5 WebView Data Collection
+### 3.6 WebView Data Collection
 
-When `selectedOption.collectData?.url` is present, display the URL in a WebView. The URL comes from the selected option's `collectData.url`, which is already scoped to that option's account. The hosted form handles rendering, validation, and T&C acceptance.
+When `selectedOption.collectData?.url` is present, display the URL in a WebView. This happens immediately after the user selects an option and **before** `getRequiredPaymentActions` is called (see [section 3.2](#3-2-collect-user-data-via-webview-information-capture)). The URL comes from the selected option's `collectData.url`, which is already scoped to that option's account. The hosted form handles rendering, validation, and T&C acceptance.
+
+Wire `onComplete` to your `onDataCollectionComplete` handler (which then calls `fetchPaymentActions`), so action fetching only happens once the WebView has submitted the Information Capture data to the backend.
 
 Install `react-native-webview`:
 
