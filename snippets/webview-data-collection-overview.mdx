@@ -4,6 +4,8 @@ When a payment requires user information (e.g., for Travel Rule compliance), the
 
 The form is loaded from `selectedOption.collectData.url` and embedded in your wallet (a WebView on mobile, an iframe on web). It handles field rendering, validation, Terms & Conditions and Privacy Policy acceptance, and submits data directly to the backend.
 
+Collect this data **before** fetching the required actions. For an option that requires Information Capture, `getRequiredPaymentActions` fails with `400 IC data required` until the data has been submitted.
+
 ### Recommended Flow
 
 The recommended approach is to display all payment options upfront, then handle data collection only when the user selects an option that requires it:
@@ -14,7 +16,7 @@ The recommended approach is to display all payment options upfront, then handle 
 4. If present, load `selectedOption.collectData.url` in the embedded form
 5. Optionally append query parameters to the form URL — `prefill` (known user data), `theme`, and `themeVariables` (appearance). See [Form URL parameters](#form-url-parameters) below. Use proper URL building so existing query parameters are preserved.
 6. Listen for completion messages: `IC_COMPLETE` (success) or `IC_ERROR` (failure)
-7. On `IC_COMPLETE`, proceed to `confirmPayment()` **without** passing `collectedData` — the form submits data directly to the backend
+7. On `IC_COMPLETE`, continue the flow — fetch the required actions, sign, and confirm the payment. Don't pass `collectedData` to `confirmPayment()`; the form submits data directly to the backend
 
 ### Decision Matrix
 

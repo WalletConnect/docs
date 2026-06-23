@@ -102,9 +102,9 @@ Include accounts for all supported networks to maximize payment options for your
 
 ## Payment Flow
 
-The payment flow consists of four main steps:
+The payment flow consists of five main steps:
 
-**Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
+**Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -122,13 +122,6 @@ sequenceDiagram
     Wallet->>User: Display payment options
 
     User->>Wallet: Select payment option
-    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
-    PaySDK->>Backend: Get signing actions
-    Backend-->>PaySDK: Required wallet RPC actions
-    PaySDK-->>Wallet: List of actions to sign
-
-    Wallet->>User: Request signature(s)
-    User->>Wallet: Approve & sign
 
     alt Data collection required
         Wallet->>WebView: Load collectDataAction.url in WebView
@@ -137,7 +130,15 @@ sequenceDiagram
         WebView-->>Wallet: IC_COMPLETE message
     end
 
-    Wallet->>PaySDK: confirmPayment(signatures, collectedData)
+    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
+    PaySDK->>Backend: Get signing actions
+    Backend-->>PaySDK: Required wallet RPC actions
+    PaySDK-->>Wallet: List of actions to sign
+
+    Wallet->>User: Request signature(s)
+    User->>Wallet: Approve & sign
+
+    Wallet->>PaySDK: confirmPayment(signatures)
     PaySDK->>Backend: Submit payment
     Backend-->>PaySDK: Payment status
     PaySDK-->>Wallet: ConfirmPaymentResponse
@@ -176,6 +177,43 @@ for (final option in response.options) {
   }
 }
 ```
+
+</Step>
+
+<Step title="Collect User Data (If Required)" titleSize="h3">
+
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
+
+<WebViewOverview />
+
+```dart
+if (selectedOption.collectData?.url != null) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
+  final prefillData = {
+    'fullName': 'John Doe',
+    'dob': '1990-01-15',
+    'pobAddress': '123 Main St, New York, NY 10001',
+  };
+  // Encode prefill as base64url
+  final prefillBase64 = base64Url.encode(utf8.encode(jsonEncode(prefillData)));
+  final uri = Uri.parse(selectedOption.collectData!.url);
+  final webViewUrl = uri.replace(
+    queryParameters: {
+      ...uri.queryParameters,
+      'prefill': prefillBase64,
+      // Optional appearance params (see "Form URL parameters"):
+      'theme': 'dark', // "light" | "dark"
+      // themeVariables is a base64url string exported from the Pay Dashboard:
+      // 'themeVariables': themeVariables,
+    },
+  ).toString();
+
+  // Show WebView — see Data Collection Implementation section below
+  showDataCollectionWebView(webViewUrl);
+}
+```
+
+<WebViewMessageTypes />
 
 </Step>
 
@@ -240,62 +278,15 @@ Signatures must be in the same order as the actions array.
 
 </Step>
 
-<Step title="Collect User Data (If Required)" titleSize="h3">
-
-Some payments may require additional user data. Check for `collectData` in the payment options response:
-
-<WebViewOverview />
-
-```dart
-if (selectedOption.collectData?.url != null) {
-  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
-  final prefillData = {
-    'fullName': 'John Doe',
-    'dob': '1990-01-15',
-    'pobAddress': '123 Main St, New York, NY 10001',
-  };
-  // Encode prefill as base64url
-  final prefillBase64 = base64Url.encode(utf8.encode(jsonEncode(prefillData)));
-  final uri = Uri.parse(selectedOption.collectData!.url);
-  final webViewUrl = uri.replace(
-    queryParameters: {
-      ...uri.queryParameters,
-      'prefill': prefillBase64,
-      // Optional appearance params (see "Form URL parameters"):
-      'theme': 'dark', // "light" | "dark"
-      // themeVariables is a base64url string exported from the Pay Dashboard:
-      // 'themeVariables': themeVariables,
-    },
-  ).toString();
-
-  // Show WebView — see Data Collection Implementation section below
-  showDataCollectionWebView(webViewUrl);
-}
-```
-
-<WebViewMessageTypes />
-
-</Step>
-
 <Step title="Confirm Payment" titleSize="h3">
 
-Confirm a payment with signatures and optional collected data:
+Confirm a payment with the collected signatures:
 
 ```dart
 final confirmRequest = ConfirmPaymentRequest(
   paymentId: response.paymentId,
   optionId: response.options.first.id,
   signatures: ['0x...', '0x...'], // Signatures from wallet actions
-  collectedData: [
-    CollectDataFieldResult(
-      id: 'fullName',
-      value: 'John Doe',
-    ),
-    CollectDataFieldResult(
-      id: 'dob',
-      value: '1990-01-01',
-    ),
-  ], // Optional: if data collection was required
   maxPollMs: 60000, // Optional: max polling time in milliseconds
 );
 
@@ -310,6 +301,10 @@ if (!confirmResponse.isFinal && confirmResponse.pollInMs != null) {
   // Re-confirm or check status
 }
 ```
+
+<Note>
+When using the WebView data-collection approach, you do **not** pass `collectedData` to `confirmPayment`. The WebView submits the collected data directly to the backend during the earlier Collect User Data step.
+</Note>
 
 </Step>
 
@@ -466,7 +461,18 @@ class PaymentService {
     // Step 2: Select payment option (simplified - use first option)
     final selectedOption = optionsResponse.options.first;
 
-    // Step 3: Get required payment actions
+    // Step 3: Collect data via WebView if required.
+    // This must happen BEFORE fetching the required payment actions —
+    // the backend rejects the actions request with 400 "IC data required"
+    // for options needing Information Capture if data wasn't collected first.
+    // The WebView submits the data directly to the backend, so it is NOT
+    // passed to confirmPayment later.
+    if (selectedOption.collectData?.url != null) {
+      // Show WebView and wait for IC_COMPLETE
+      await showDataCollectionWebView(selectedOption.collectData!.url);
+    }
+
+    // Step 4: Get required payment actions
     final actions = await _payClient.getRequiredPaymentActions(
       request: GetRequiredPaymentActionsRequest(
         optionId: selectedOption.id,
@@ -474,17 +480,11 @@ class PaymentService {
       ),
     );
 
-    // Step 4: Sign all actions
+    // Step 5: Sign all actions
     final signatures = <String>[];
     for (final action in actions) {
       final signature = await signAction(action.walletRpc);
       signatures.add(signature);
-    }
-
-    // Step 5: Collect data via WebView if required for selected option
-    if (selectedOption.collectData?.url != null) {
-      // Show WebView and wait for IC_COMPLETE
-      await showDataCollectionWebView(selectedOption.collectData!.url);
     }
 
     // Step 6: Confirm payment

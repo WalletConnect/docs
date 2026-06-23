@@ -152,9 +152,9 @@ func handleScannedQR(_ content: String) {
 
 ## Payment Flow
 
-The payment flow consists of four main steps:
+The payment flow consists of five main steps:
 
-**Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
+**Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -172,13 +172,6 @@ sequenceDiagram
     Wallet->>User: Display payment options
 
     User->>Wallet: Select payment option
-    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
-    PaySDK->>Backend: Get signing actions
-    Backend-->>PaySDK: Required wallet RPC actions
-    PaySDK-->>Wallet: List of actions to sign
-
-    Wallet->>User: Request signature(s)
-    User->>Wallet: Approve & sign
 
     alt Selected option requires data collection
         Wallet->>WebView: Load selectedOption.collectData.url
@@ -187,7 +180,15 @@ sequenceDiagram
         WebView-->>Wallet: IC_COMPLETE message
     end
 
-    Wallet->>PaySDK: confirmPayment(signatures, collectedData)
+    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
+    PaySDK->>Backend: Get signing actions
+    Backend-->>PaySDK: Required wallet RPC actions
+    PaySDK-->>Wallet: List of actions to sign
+
+    Wallet->>User: Request signature(s)
+    User->>Wallet: Approve & sign
+
+    Wallet->>PaySDK: confirmPayment(signatures)
     PaySDK->>Backend: Submit payment
     Backend-->>PaySDK: Payment status
     PaySDK-->>Wallet: ConfirmPaymentResponse
@@ -239,6 +240,47 @@ do {
     print("Failed to get payment options: \(error)")
 }
 ```
+
+</Step>
+
+<Step title="Collect User Data (If Required)" titleSize="h3">
+
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
+
+<WebViewOverview />
+
+```swift
+// Check per-option data collection requirement after user selects an option
+if let collectData = selectedOption.collectData, let url = collectData.url {
+    // Build prefill URL with known user data
+    // Use the "required" list from collectData.schema to determine which fields to prefill
+    let prefillData: [String: String] = [
+        "fullName": "John Doe",
+        "dob": "1990-01-15",
+        "pobAddress": "123 Main St, New York, NY 10001"
+    ]
+    let jsonData = try JSONSerialization.data(withJSONObject: prefillData)
+    // Encode prefill as base64url (URL-safe, no padding)
+    let prefillBase64 = jsonData.base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
+    var components = URLComponents(string: url)!
+    var queryItems = components.queryItems ?? []
+    queryItems.append(URLQueryItem(name: "prefill", value: prefillBase64))
+    // Optional appearance params (see "Form URL parameters"):
+    queryItems.append(URLQueryItem(name: "theme", value: "dark")) // "light" | "dark"
+    // themeVariables is a base64url string exported from the WalletConnect Pay Dashboard:
+    // queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
+    components.queryItems = queryItems
+    let webViewUrl = components.string!
+
+    // Show WebView for this specific option — see Data Collection Implementation section below
+    showWebView(url: webViewUrl)
+}
+```
+
+<WebViewMessageTypes />
 
 </Step>
 
@@ -308,57 +350,19 @@ Signatures must be in the same order as the actions array.
 
 </Step>
 
-<Step title="Collect User Data (If Required)" titleSize="h3">
-
-If the selected option has `collectData` set, you must collect user information before confirming:
-
-<WebViewOverview />
-
-```swift
-// Check per-option data collection requirement after user selects an option
-if let collectData = selectedOption.collectData, let url = collectData.url {
-    // Build prefill URL with known user data
-    // Use the "required" list from collectData.schema to determine which fields to prefill
-    let prefillData: [String: String] = [
-        "fullName": "John Doe",
-        "dob": "1990-01-15",
-        "pobAddress": "123 Main St, New York, NY 10001"
-    ]
-    let jsonData = try JSONSerialization.data(withJSONObject: prefillData)
-    // Encode prefill as base64url (URL-safe, no padding)
-    let prefillBase64 = jsonData.base64EncodedString()
-        .replacingOccurrences(of: "+", with: "-")
-        .replacingOccurrences(of: "/", with: "_")
-        .replacingOccurrences(of: "=", with: "")
-    var components = URLComponents(string: url)!
-    var queryItems = components.queryItems ?? []
-    queryItems.append(URLQueryItem(name: "prefill", value: prefillBase64))
-    // Optional appearance params (see "Form URL parameters"):
-    queryItems.append(URLQueryItem(name: "theme", value: "dark")) // "light" | "dark"
-    // themeVariables is a base64url string exported from the WalletConnect Pay Dashboard:
-    // queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
-    components.queryItems = queryItems
-    let webViewUrl = components.string!
-
-    // Show WebView for this specific option — see Data Collection Implementation section below
-    showWebView(url: webViewUrl)
-}
-```
-
-<WebViewMessageTypes />
-
-</Step>
-
 <Step title="Confirm Payment" titleSize="h3">
 
-Submit the signatures and collected data to complete the payment:
+Submit the signatures to complete the payment:
+
+<Note>
+When using the WebView approach for data collection, the WebView submits the captured data directly to the backend, so you do **not** pass `collectedData` to `confirmPayment`.
+</Note>
 
 ```swift
 let result = try await WalletConnectPay.instance.confirmPayment(
     paymentId: response.paymentId,
     optionId: selectedOption.id,
     signatures: signatures,
-    collectedData: collectedData,
     maxPollMs: 60000  // Wait up to 60 seconds for confirmation
 )
 
@@ -528,14 +532,20 @@ class PaymentManager {
         
         // 2. Let user select an option (simplified - use first option)
         let selectedOption = optionsResponse.options[0]
-        
-        // 3. Get required actions
+
+        // 3. Collect data via WebView if required (before fetching actions)
+        if let collectData = selectedOption.collectData, let url = collectData.url {
+            // Show WebView and wait for IC_COMPLETE message
+            try await showDataCollectionWebView(url: url)
+        }
+
+        // 4. Get required actions
         let actions = try await WalletConnectPay.instance.getRequiredPaymentActions(
             paymentId: optionsResponse.paymentId,
             optionId: selectedOption.id
         )
         
-        // 4. Sign all actions
+        // 5. Sign all actions
         var signatures: [String] = []
         for action in actions {
             let signature = try await signAction(
@@ -544,12 +554,6 @@ class PaymentManager {
                 signer: signer
             )
             signatures.append(signature)
-        }
-        
-        // 5. Collect data via WebView if required for selected option
-        if let collectData = selectedOption.collectData, let url = collectData.url {
-            // Show WebView and wait for IC_COMPLETE message
-            try await showDataCollectionWebView(url: url)
         }
 
         // 6. Confirm payment

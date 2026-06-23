@@ -95,9 +95,9 @@ Regardless of which integration approach you choose, the payment flow follows th
 
 1. **Detect Payment Link**: Identify when a user scans or opens a WalletConnect Pay link
 2. **Get Payment Options**: Fetch available payment options based on user's accounts
-3. **Get Required Actions**: Retrieve the signing actions for the selected payment option
-4. **Sign Actions**: Sign the required permits/transactions using your wallet's signing infrastructure
-5. **Collect User Data** (if required for selected option): If the selected payment option requires compliance information, display a WebView for the user to provide it
+3. **Collect User Data** (if required for selected option): If the selected payment option requires compliance information, display a WebView for the user to provide it. This must happen **before** fetching the required actions — the WebView submits the data directly to the backend
+4. **Get Required Actions**: Retrieve the signing actions for the selected payment option
+5. **Sign Actions**: Sign the required permits/transactions using your wallet's signing infrastructure
 6. **Confirm Payment**: Submit signatures and complete the payment
 
 ## Recommended Implementation

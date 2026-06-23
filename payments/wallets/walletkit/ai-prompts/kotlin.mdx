@@ -44,9 +44,9 @@ dependencies {
 WalletConnect Pay enables crypto payments through payment links. The flow works as follows:
 
 ```
-Payment Link → Get Options → Select Option → [WebView Data Collection]* → Sign Actions → Confirm Payment
-       ↓             ↓            ↓                    ↓                        ↓              ↓
-   Detection    API call    User picks       Per-option IC (if needed)     Wallet signs    Backend confirms
+Payment Link → Get Options → Select Option → [WebView Data Collection]* → Get Actions → Sign Actions → Confirm Payment
+       ↓             ↓            ↓                    ↓                         ↓             ↓              ↓
+   Detection    API call    User picks       Per-option IC (if needed)    Fetch actions  Wallet signs   Backend confirms
 ```
 
 ### WalletKit Integration
@@ -429,7 +429,7 @@ fun String.hexToByteArray(): ByteArray = chunked(2).map { it.toInt(16).toByte() 
 
 #### 2.5 Confirm Payment
 
-Submit signatures and collected data to confirm the payment:
+Submit the signatures to confirm the payment (data collection, if any, was already submitted by the WebView):
 
 ```kotlin
 suspend fun confirmPayment(

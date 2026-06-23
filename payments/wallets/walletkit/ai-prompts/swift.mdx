@@ -101,17 +101,17 @@ dependencies: [
        │                                                               │
        │  3. User selects payment option                               │
        │                                                               │
-       │  4. getRequiredPaymentActions(paymentId, optionId)            │
+       │  4. Collect user data via WebView (if required)               │
+       │                                                               │
+       │  5. getRequiredPaymentActions(paymentId, optionId)            │
        │──────────────────────▶┌─────────────┐                         │
        │◀──────────────────────│  Pay API    │                         │
        │  Actions[] (walletRpc — method varies)                             │
        │                       └─────────────┘                         │
        │                                                               │
-       │  5. Sign typed data (wallet's EIP-712 signer)                 │
+       │  6. Sign typed data (wallet's EIP-712 signer)                 │
        │                                                               │
-       │  6. Collect user data (if travel rule required)               │
-       │                                                               │
-       │  7. confirmPayment(signatures, collectedData)                 │
+       │  7. confirmPayment(signatures)                                │
        │──────────────────────▶┌─────────────┐     ┌────────────┐      │
        │                       │  Pay API    │────▶│ Blockchain │      │
        │◀──────────────────────└─────────────┘     └────────────┘      │
@@ -351,13 +351,20 @@ func confirmPayment(
     response: PaymentOptionsResponse
 ) async throws {
 
-    // 1. Get required signing actions
+    // 1. Collect data via WebView if required for selected option
+    if let collectData = selectedOption.collectData, let url = collectData.url {
+        // Show WebView and wait for IC_COMPLETE message.
+        // The WebView submits data directly to the backend.
+        try await showDataCollectionWebView(url: url)
+    }
+
+    // 2. Get required signing actions
     let actions = try await WalletKit.instance.Pay.getRequiredPaymentActions(
         paymentId: paymentId,
         optionId: selectedOption.id
     )
 
-    // 2. Sign each action using YOUR wallet's signer
+    // 3. Sign each action using YOUR wallet's signer
     var signatures: [String] = []
     for action in actions {
         let rpc = action.walletRpc
@@ -398,12 +405,6 @@ func confirmPayment(
         default:
             throw PaymentError.unsupportedMethod(rpc.method)
         }
-    }
-
-    // 3. Collect data via WebView if required for selected option
-    if let collectData = selectedOption.collectData, let url = collectData.url {
-        // Show WebView and wait for IC_COMPLETE message
-        try await showDataCollectionWebView(url: url)
     }
 
     // 4. Confirm payment
@@ -709,7 +710,7 @@ enum PaymentStatus {
 
 2. **Wrong signature order** - Signatures array must match actions array order exactly.
 
-3. **Skipping WebView data collection** - Always check `selectedOption.collectData?.url` after the user selects an option and show the WebView before confirmation.
+3. **Skipping WebView data collection** - Always check `selectedOption.collectData?.url` after the user selects an option and show the WebView before calling `getRequiredPaymentActions`.
 
 4. **Not handling cold start** - Deep links on app launch need delayed handling.
 
