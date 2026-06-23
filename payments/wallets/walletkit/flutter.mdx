@@ -71,9 +71,7 @@ final walletKit = await ReownWalletKit.createInstance(
 );
 ```
 
-## Accessing the Pay Client
-
-You can access the `WalletConnectPay` instance directly:
+Access the `WalletConnectPay` client directly via `walletKit.pay`:
 
 ```dart
 final payClient = walletKit.pay;
@@ -498,16 +496,6 @@ class PaymentService {
     return [];
   }
 }
-```
-
-## Direct Access
-
-You can also access the underlying `WalletConnectPay` instance directly if needed:
-
-```dart
-final payClient = walletKit.pay;
-// Use payClient methods directly
-final response = await payClient.getPaymentOptions(request: request);
 ```
 
 ## API Reference
