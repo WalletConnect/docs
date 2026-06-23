@@ -79,8 +79,8 @@
                     "pages": [
                       "payments/wallets/walletkit/kotlin",
                       "payments/wallets/walletkit/swift",
-                      "payments/wallets/walletkit/flutter",
                       "payments/wallets/walletkit/react-native",
+                      "payments/wallets/walletkit/flutter",
                       "payments/wallets/walletkit/web"
                     ]
                   },
@@ -221,8 +221,8 @@
                     "pages": [
                       "payments/wallets/walletkit/kotlin",
                       "payments/wallets/walletkit/swift",
-                      "payments/wallets/walletkit/flutter",
                       "payments/wallets/walletkit/react-native",
+                      "payments/wallets/walletkit/flutter",
                       "payments/wallets/walletkit/web"
                     ]
                   },

@@ -38,7 +38,7 @@ dependencies {
 The version shown above may not be the latest. Check the [GitHub releases](https://github.com/reown-com/reown-kotlin/releases) for the most recent version.
 </Info>
 
-### JNA Dependency Configuration
+**JNA Dependency Configuration**
 
 If you encounter JNA-related errors (e.g., `UnsatisfiedLinkError` or class loading issues), explicitly configure the JNA dependency:
 
@@ -66,7 +66,7 @@ WalletConnectPay.initialize(
 )
 ```
 
-### Configuration Parameters
+**Configuration Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -308,7 +308,7 @@ selectedOption.collectData?.let { collectAction ->
             // .appendQueryParameter("themeVariables", themeVariables)
             .build().toString()
 
-        // Show WebView for this specific option — see WebView Implementation section below
+        // Show WebView for this specific option — see Data Collection Implementation section below
         showWebView(webViewUrl)
     }
 }
@@ -361,7 +361,7 @@ confirmResult.onSuccess { response ->
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
 When `selectedOption.collectData.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
 
@@ -547,17 +547,17 @@ class PaymentViewModel : ViewModel() {
 
 ## API Reference
 
-### WalletConnectPay
+**WalletConnectPay**
 
 Main entry point for the Pay SDK (singleton object).
 
-#### Properties
+**Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `isInitialized` | `Boolean` | Whether the SDK has been initialized |
 
-#### Methods
+**Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -568,7 +568,7 @@ Main entry point for the Pay SDK (singleton object).
 
 ## Data Models
 
-### Pay.PaymentOptionsResponse
+**Pay.PaymentOptionsResponse**
 
 ```kotlin
 data class PaymentOptionsResponse(
@@ -585,7 +585,7 @@ data class PaymentResultInfo(
 )
 ```
 
-### Pay.PaymentInfo
+**Pay.PaymentInfo**
 
 ```kotlin
 data class PaymentInfo(
@@ -601,7 +601,7 @@ data class MerchantInfo(
 )
 ```
 
-### Pay.PaymentOption
+**Pay.PaymentOption**
 
 ```kotlin
 data class PaymentOption(
@@ -613,7 +613,7 @@ data class PaymentOption(
 )
 ```
 
-### Pay.Amount
+**Pay.Amount**
 
 ```kotlin
 data class Amount(
@@ -632,7 +632,7 @@ data class AmountDisplay(
 )
 ```
 
-### Pay.WalletRpcAction
+**Pay.WalletRpcAction**
 
 ```kotlin
 data class WalletRpcAction(
@@ -642,7 +642,7 @@ data class WalletRpcAction(
 )
 ```
 
-### Pay.RequiredAction
+**Pay.RequiredAction**
 
 ```kotlin
 sealed class RequiredAction {
@@ -650,7 +650,7 @@ sealed class RequiredAction {
 }
 ```
 
-### Pay.CollectDataAction
+**Pay.CollectDataAction**
 
 ```kotlin
 data class CollectDataAction(
@@ -659,7 +659,7 @@ data class CollectDataAction(
 )
 ```
 
-### Pay.ConfirmPaymentResponse
+**Pay.ConfirmPaymentResponse**
 
 ```kotlin
 data class ConfirmPaymentResponse(
@@ -670,7 +670,7 @@ data class ConfirmPaymentResponse(
 )
 ```
 
-### Pay.PaymentStatus
+**Pay.PaymentStatus**
 
 | Status | Description |
 |--------|-------------|
@@ -685,7 +685,7 @@ data class ConfirmPaymentResponse(
 
 The SDK provides typed errors for different failure scenarios:
 
-### GetPaymentOptionsError
+**GetPaymentOptionsError**
 
 | Error | Description |
 |-------|-------------|
@@ -698,7 +698,7 @@ The SDK provides typed errors for different failure scenarios:
 | `Http` | Network error |
 | `InternalError` | Server error |
 
-### GetPaymentRequestError
+**GetPaymentRequestError**
 
 | Error | Description |
 |-------|-------------|
@@ -707,7 +707,7 @@ The SDK provides typed errors for different failure scenarios:
 | `InvalidAccount` | Invalid account format |
 | `Http` | Network error |
 
-### ConfirmPaymentError
+**ConfirmPaymentError**
 
 | Error | Description |
 |-------|-------------|
@@ -718,7 +718,7 @@ The SDK provides typed errors for different failure scenarios:
 | `RouteExpired` | Payment route expired |
 | `Http` | Network error |
 
-### Example Error Handling
+**Example Error Handling**
 
 ```kotlin
 val result = WalletConnectPay.getPaymentOptions(paymentLink, accounts)

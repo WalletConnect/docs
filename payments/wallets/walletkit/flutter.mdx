@@ -171,7 +171,7 @@ for (final option in response.options) {
 
 </Step>
 
-<Step title="Get Required Payment Actions" titleSize="h3">
+<Step title="Get Required Actions" titleSize="h3">
 
 Get the required wallet actions for a selected payment option:
 
@@ -193,9 +193,40 @@ for (final action in actions) {
 }
 ```
 
+</Step>
+
+<Step title="Sign Actions" titleSize="h3">
+
+Sign each action using your wallet's signing implementation, dispatching on the RPC method:
+
+```dart
+// Sign each action based on its RPC method
+final signatures = <String>[];
+for (final action in actions) {
+  final rpc = action.walletRpc;
+  switch (rpc.method) {
+    case 'eth_signTypedData_v4':
+      signatures.add(await signTypedData(rpc.chainId, rpc.params));
+      break;
+    case 'eth_sendTransaction':
+      signatures.add(await sendTransaction(rpc.chainId, rpc.params));
+      break;
+    case 'personal_sign':
+      signatures.add(await personalSign(rpc.chainId, rpc.params));
+      break;
+    default:
+      throw UnimplementedError('Unsupported RPC method: ${rpc.method}');
+  }
+}
+```
+
 <Note>
 Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/token-chain-support/usdt-support).
 </Note>
+
+<Warning>
+Signatures must be in the same order as the actions array.
+</Warning>
 
 </Step>
 
@@ -262,7 +293,7 @@ print('Is Final: ${confirmResponse.isFinal}');
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
 When `selectedOption.collectData.url` is present, display the URL in a WebView using `webview_flutter` (v4.10.0+). Add dependencies:
 
@@ -475,7 +506,7 @@ final response = await payClient.getPaymentOptions(request: request);
 
 ## API Reference
 
-### ReownWalletKit Pay Methods
+**ReownWalletKit Pay Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -485,9 +516,9 @@ final response = await payClient.getPaymentOptions(request: request);
 | `confirmPayment({required ConfirmPaymentRequest request})` | Confirm and finalize payment |
 | `pay` | Access the underlying WalletConnectPay instance |
 
-### Models
+**Models**
 
-#### GetPaymentOptionsRequest
+**GetPaymentOptionsRequest**
 
 ```dart
 GetPaymentOptionsRequest({
@@ -497,7 +528,7 @@ GetPaymentOptionsRequest({
 })
 ```
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```dart
 PaymentOptionsResponse({
@@ -509,7 +540,7 @@ PaymentOptionsResponse({
 })
 ```
 
-#### PaymentResultInfo
+**PaymentResultInfo**
 
 ```dart
 class PaymentResultInfo {
@@ -518,7 +549,7 @@ class PaymentResultInfo {
 }
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```dart
 PaymentInfo({
@@ -530,7 +561,7 @@ PaymentInfo({
 })
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```dart
 PaymentOption({
@@ -543,7 +574,7 @@ PaymentOption({
 })
 ```
 
-#### ConfirmPaymentRequest
+**ConfirmPaymentRequest**
 
 ```dart
 ConfirmPaymentRequest({
@@ -554,7 +585,7 @@ ConfirmPaymentRequest({
 })
 ```
 
-#### ConfirmPaymentResponse
+**ConfirmPaymentResponse**
 
 ```dart
 ConfirmPaymentResponse({
@@ -565,7 +596,7 @@ ConfirmPaymentResponse({
 })
 ```
 
-#### PaymentStatus
+**PaymentStatus**
 
 ```dart
 enum PaymentStatus {
@@ -578,7 +609,7 @@ enum PaymentStatus {
 }
 ```
 
-#### CollectDataAction
+**CollectDataAction**
 
 ```dart
 class CollectDataAction {
@@ -615,7 +646,7 @@ All errors include:
 - `details`: Additional error details
 - `stacktrace`: Stack trace
 
-### Example Error Handling
+**Example Error Handling**
 
 ```dart
 try {
@@ -653,14 +684,3 @@ try {
 
 10. **WebView Data Collection**: When `selectedOption.collectData.url` is present, display the URL in a WebView using `webview_flutter` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
 
-## Examples
-
-For a complete example implementation with UI components showing the full payment flow, see the [reown_walletkit example](https://github.com/reown-com/reown_flutter/tree/master/packages/reown_walletkit/example/lib/walletconnect_pay).
-
-The example demonstrates:
-- Payment link detection and processing
-- Payment options retrieval with UI
-- Data collection for compliance (KYB/KYC)
-- Payment details display
-- Transaction signing and confirmation
-- Payment status polling and result display

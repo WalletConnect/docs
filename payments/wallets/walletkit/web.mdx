@@ -472,17 +472,17 @@ class PaymentManager {
 
 ## API Reference
 
-### WalletKit Pay Methods
+**WalletKit Pay Methods**
 
 Pay methods are accessed via `walletkit.pay.*`.
 
-#### Utility Functions
+**Utility Functions**
 
 | Function | Description |
 |----------|-------------|
 | `isPaymentLink(uri: string): boolean` | Check if URI is a payment link (imported from `@reown/walletkit`) |
 
-#### Instance Methods (walletkit.pay)
+**Instance Methods (walletkit.pay)**
 
 | Method | Description |
 |--------|-------------|
@@ -490,9 +490,9 @@ Pay methods are accessed via `walletkit.pay.*`.
 | `getRequiredPaymentActions(params)` | Get signing actions for a payment option |
 | `confirmPayment(params)` | Confirm and execute the payment |
 
-### Parameters
+**Parameters**
 
-#### GetPaymentOptionsParams
+**GetPaymentOptionsParams**
 
 ```typescript
 interface GetPaymentOptionsParams {
@@ -502,7 +502,7 @@ interface GetPaymentOptionsParams {
 }
 ```
 
-#### GetRequiredPaymentActionsParams
+**GetRequiredPaymentActionsParams**
 
 ```typescript
 interface GetRequiredPaymentActionsParams {
@@ -511,7 +511,7 @@ interface GetRequiredPaymentActionsParams {
 }
 ```
 
-#### ConfirmPaymentParams
+**ConfirmPaymentParams**
 
 ```typescript
 interface ConfirmPaymentParams {
@@ -521,9 +521,9 @@ interface ConfirmPaymentParams {
 }
 ```
 
-### Response Types
+**Response Types**
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```typescript
 interface PaymentOptionsResponse {
@@ -540,7 +540,7 @@ interface PaymentResultInfo {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```typescript
 interface PaymentOption {
@@ -552,7 +552,7 @@ interface PaymentOption {
 }
 ```
 
-#### Action
+**Action**
 
 ```typescript
 interface Action {
@@ -566,7 +566,7 @@ interface WalletRpcAction {
 }
 ```
 
-#### ConfirmPaymentResponse
+**ConfirmPaymentResponse**
 
 ```typescript
 interface ConfirmPaymentResponse {
@@ -585,7 +585,7 @@ type PaymentStatus =
   | "cancelled";
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```typescript
 interface PaymentInfo {
@@ -602,7 +602,7 @@ interface MerchantInfo {
 }
 ```
 
-#### PayAmount
+**PayAmount**
 
 ```typescript
 interface PayAmount {
@@ -620,7 +620,7 @@ interface AmountDisplay {
 }
 ```
 
-#### CollectDataAction
+**CollectDataAction**
 
 ```typescript
 interface CollectDataAction {

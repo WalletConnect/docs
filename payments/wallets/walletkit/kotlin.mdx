@@ -378,7 +378,7 @@ confirmResult.onSuccess { response ->
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
 When `selectedOption.collectData.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
 
@@ -550,11 +550,11 @@ class PaymentViewModel : ViewModel() {
 
 ## API Reference
 
-### WalletKit.Pay
+**WalletKit.Pay**
 
 The payment operations object within WalletKit.
 
-#### Methods
+**Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -563,9 +563,9 @@ The payment operations object within WalletKit.
 | `getRequiredPaymentActions(params)` | Get actions requiring signatures |
 | `confirmPayment(params)` | Confirm and finalize payment |
 
-### Parameters
+**Parameters**
 
-#### Wallet.Params.RequiredPaymentActions
+**Wallet.Params.RequiredPaymentActions**
 
 ```kotlin
 data class RequiredPaymentActions(
@@ -574,7 +574,7 @@ data class RequiredPaymentActions(
 )
 ```
 
-#### Wallet.Params.ConfirmPayment
+**Wallet.Params.ConfirmPayment**
 
 ```kotlin
 data class ConfirmPayment(
@@ -586,7 +586,7 @@ data class ConfirmPayment(
 
 ## Data Models
 
-### Wallet.Model.PaymentOptionsResponse
+**Wallet.Model.PaymentOptionsResponse**
 
 ```kotlin
 data class PaymentOptionsResponse(
@@ -603,7 +603,7 @@ data class PaymentResultInfo(
 )
 ```
 
-### Wallet.Model.PaymentInfo
+**Wallet.Model.PaymentInfo**
 
 ```kotlin
 data class PaymentInfo(
@@ -619,7 +619,7 @@ data class MerchantInfo(
 )
 ```
 
-### Wallet.Model.PaymentOption
+**Wallet.Model.PaymentOption**
 
 ```kotlin
 data class PaymentOption(
@@ -631,7 +631,7 @@ data class PaymentOption(
 )
 ```
 
-### Wallet.Model.PaymentAmount
+**Wallet.Model.PaymentAmount**
 
 ```kotlin
 data class PaymentAmount(
@@ -650,7 +650,7 @@ data class PaymentAmountDisplay(
 )
 ```
 
-### Wallet.Model.WalletRpcAction
+**Wallet.Model.WalletRpcAction**
 
 ```kotlin
 data class WalletRpcAction(
@@ -660,7 +660,7 @@ data class WalletRpcAction(
 )
 ```
 
-### Wallet.Model.CollectDataAction
+**Wallet.Model.CollectDataAction**
 
 ```kotlin
 data class CollectDataAction(
@@ -669,7 +669,7 @@ data class CollectDataAction(
 )
 ```
 
-### Wallet.Model.ConfirmPaymentResponse
+**Wallet.Model.ConfirmPaymentResponse**
 
 ```kotlin
 data class ConfirmPaymentResponse(
@@ -680,7 +680,7 @@ data class ConfirmPaymentResponse(
 )
 ```
 
-### Wallet.Model.PaymentStatus
+**Wallet.Model.PaymentStatus**
 
 | Status | Description |
 |--------|-------------|

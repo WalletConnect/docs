@@ -40,7 +40,7 @@ yarn add @walletconnect/pay
 </Tab>
 </Tabs>
 
-### React Native Setup
+**React Native Setup**
 
 This SDK requires the WalletConnect React Native native module. Make sure you have `@walletconnect/react-native-compat` installed and linked in your React Native project:
 
@@ -71,7 +71,7 @@ const client = new WalletConnectPay({
 });
 ```
 
-### Configuration Parameters
+**Configuration Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -278,7 +278,7 @@ if (selectedOption.collectData?.url) {
   const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
   const webViewUrl = `${selectedOption.collectData.url}${separator}${query}`;
 
-  // Show WebView for this specific option — see WebView Implementation section below
+  // Show WebView for this specific option — see Data Collection Implementation section below
   showDataCollectionWebView(webViewUrl);
 }
 ```
@@ -312,7 +312,7 @@ if (result.status === "succeeded") {
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
 When `selectedOption.collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
 
@@ -526,72 +526,19 @@ import { NativeModules } from "react-native";
 setNativeModule(NativeModules.RNWalletConnectPay);
 ```
 
-## Error Handling
-
-The SDK throws typed errors for different failure scenarios:
-
-```typescript
-import { 
-  PayError, 
-  PaymentOptionsError, 
-  PaymentActionsError,
-  ConfirmPaymentError,
-  NativeModuleNotFoundError 
-} from "@walletconnect/pay";
-
-try {
-  const options = await client.getPaymentOptions({
-    paymentLink: link,
-    accounts,
-  });
-} catch (error) {
-  if (error instanceof PaymentOptionsError) {
-    console.error("Failed to get options:", error.originalMessage);
-  } else if (error instanceof PayError) {
-    console.error("Pay error:", error.code, error.message);
-  }
-}
-```
-
-### Error Types
-
-| Error Class | Description |
-|-------------|-------------|
-| `PayError` | Base error class for all Pay SDK errors |
-| `PaymentOptionsError` | Error when fetching payment options |
-| `PaymentActionsError` | Error when fetching required payment actions |
-| `ConfirmPaymentError` | Error when confirming payment |
-| `NativeModuleNotFoundError` | Error when native module is not available |
-
-### Error Codes
-
-The `PayError` class includes a `code` property with one of the following values:
-
-```typescript
-type PayErrorCode =
-  | "JSON_PARSE"
-  | "JSON_SERIALIZE"
-  | "PAYMENT_OPTIONS"
-  | "PAYMENT_REQUEST"
-  | "CONFIRM_PAYMENT"
-  | "NATIVE_MODULE_NOT_FOUND"
-  | "INITIALIZATION_ERROR"
-  | "UNKNOWN";
-```
-
 ## API Reference
 
-### WalletConnectPay
+**WalletConnectPay**
 
 Main client for payment operations.
 
-#### Constructor
+**Constructor**
 
 ```typescript
 new WalletConnectPay(options: WalletConnectPayOptions)
 ```
 
-#### Methods
+**Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -600,9 +547,9 @@ new WalletConnectPay(options: WalletConnectPayOptions)
 | `confirmPayment(params)` | Confirm and execute the payment |
 | `static isAvailable()` | Check if a provider is available |
 
-### Data Types
+**Data Types**
 
-#### PaymentStatus
+**PaymentStatus**
 
 ```typescript
 type PaymentStatus = 
@@ -613,19 +560,19 @@ type PaymentStatus =
   | "expired";
 ```
 
-#### PayProviderType
+**PayProviderType**
 
 ```typescript
 type PayProviderType = "native" | "wasm";
 ```
 
-#### CollectDataFieldType
+**CollectDataFieldType**
 
 ```typescript
 type CollectDataFieldType = "text" | "date";
 ```
 
-#### Method Parameters
+**Method Parameters**
 
 ```typescript
 interface GetPaymentOptionsParams {
@@ -654,7 +601,7 @@ interface ConfirmPaymentParams {
 }
 ```
 
-#### Response Types
+**Response Types**
 
 ```typescript
 interface PaymentOptionsResponse {
@@ -687,7 +634,7 @@ interface ConfirmPaymentResponse {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```typescript
 interface PaymentOption {
@@ -704,7 +651,7 @@ interface PaymentOption {
 }
 ```
 
-#### Action
+**Action**
 
 ```typescript
 interface Action {
@@ -721,7 +668,7 @@ interface WalletRpcAction {
 }
 ```
 
-#### Amount Types
+**Amount Types**
 
 ```typescript
 interface PayAmount {
@@ -747,7 +694,7 @@ interface AmountDisplay {
 }
 ```
 
-#### Payment Info Types
+**Payment Info Types**
 
 ```typescript
 interface PaymentInfo {
@@ -780,7 +727,7 @@ interface BuyerInfo {
 }
 ```
 
-#### Collect Data Types
+**Collect Data Types**
 
 ```typescript
 interface CollectDataAction {
@@ -789,6 +736,59 @@ interface CollectDataAction {
   /** JSON schema describing required fields */
   schema?: string;
 }
+```
+
+## Error Handling
+
+The SDK throws typed errors for different failure scenarios:
+
+```typescript
+import { 
+  PayError, 
+  PaymentOptionsError, 
+  PaymentActionsError,
+  ConfirmPaymentError,
+  NativeModuleNotFoundError 
+} from "@walletconnect/pay";
+
+try {
+  const options = await client.getPaymentOptions({
+    paymentLink: link,
+    accounts,
+  });
+} catch (error) {
+  if (error instanceof PaymentOptionsError) {
+    console.error("Failed to get options:", error.originalMessage);
+  } else if (error instanceof PayError) {
+    console.error("Pay error:", error.code, error.message);
+  }
+}
+```
+
+**Error Types**
+
+| Error Class | Description |
+|-------------|-------------|
+| `PayError` | Base error class for all Pay SDK errors |
+| `PaymentOptionsError` | Error when fetching payment options |
+| `PaymentActionsError` | Error when fetching required payment actions |
+| `ConfirmPaymentError` | Error when confirming payment |
+| `NativeModuleNotFoundError` | Error when native module is not available |
+
+**Error Codes**
+
+The `PayError` class includes a `code` property with one of the following values:
+
+```typescript
+type PayErrorCode =
+  | "JSON_PARSE"
+  | "JSON_SERIALIZE"
+  | "PAYMENT_OPTIONS"
+  | "PAYMENT_REQUEST"
+  | "CONFIRM_PAYMENT"
+  | "NATIVE_MODULE_NOT_FOUND"
+  | "INITIALIZATION_ERROR"
+  | "UNKNOWN";
 ```
 
 ## Best Practices
