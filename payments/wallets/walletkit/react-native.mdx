@@ -100,9 +100,9 @@ if (isPaymentLink(uri)) {
 
 ## Payment Flow
 
-The payment flow consists of five main steps:
+The payment flow consists of six main steps:
 
-**Detect Payment Link -> Get Options -> Get Actions -> Sign Actions -> Confirm Payment**
+**Detect Payment Link -> Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
 
 ```mermaid
 sequenceDiagram
@@ -122,6 +122,14 @@ sequenceDiagram
     Wallet->>User: Display payment options
     
     User->>Wallet: Select payment option
+
+    alt Data collection required
+        Wallet->>WebView: Load collectDataAction.url in WebView
+        WebView->>User: Display data collection form
+        User->>WebView: Fill form & accept T&C
+        WebView-->>Wallet: IC_COMPLETE message
+    end
+
     Wallet->>WalletKit: pay.getRequiredPaymentActions(params)
     WalletKit->>Backend: Get signing actions
     Backend-->>WalletKit: Required wallet RPC actions
@@ -129,13 +137,6 @@ sequenceDiagram
     
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
-    
-    alt Data collection required
-        Wallet->>WebView: Load collectDataAction.url in WebView
-        WebView->>User: Display data collection form
-        User->>WebView: Fill form & accept T&C
-        WebView-->>Wallet: IC_COMPLETE message
-    end
     
     Wallet->>WalletKit: pay.confirmPayment(params)
     WalletKit->>Backend: Submit payment
@@ -172,6 +173,33 @@ if (options.collectData) {
   console.log("Required fields:", options.collectData.fields);
 }
 ```
+
+</Step>
+
+<Step title="Collect User Data (If Required)" titleSize="h3">
+
+Some payments may require additional user data. If the selected option requires data collection, complete it **before** fetching the required actions — the backend rejects the actions request unless the information has been captured first:
+
+<WebViewOverview />
+
+```javascript
+if (options.collectData?.url) {
+  // Use the "required" list from options.collectData.schema to determine which fields to prefill
+  const prefillData = {
+    fullName: "John Doe",
+    dob: "1990-01-15",
+    pobAddress: "123 Main St, New York, NY 10001",
+  };
+  const prefillBase64 = btoa(JSON.stringify(prefillData));
+  const separator = options.collectData.url.includes("?") ? "&" : "?";
+  const webViewUrl = `${options.collectData.url}${separator}prefill=${prefillBase64}`;
+
+  // Show WebView and wait for IC_COMPLETE message
+  showDataCollectionWebView(webViewUrl);
+}
+```
+
+<WebViewMessageTypes />
 
 </Step>
 
@@ -229,33 +257,6 @@ Payment options may include multiple actions with different RPC methods. For exa
 <Warning>
 Signatures must be in the same order as the actions array.
 </Warning>
-
-</Step>
-
-<Step title="Collect User Data (If Required)" titleSize="h3">
-
-Some payments may require additional user data:
-
-<WebViewOverview />
-
-```javascript
-if (options.collectData?.url) {
-  // Use the "required" list from options.collectData.schema to determine which fields to prefill
-  const prefillData = {
-    fullName: "John Doe",
-    dob: "1990-01-15",
-    pobAddress: "123 Main St, New York, NY 10001",
-  };
-  const prefillBase64 = btoa(JSON.stringify(prefillData));
-  const separator = options.collectData.url.includes("?") ? "&" : "?";
-  const webViewUrl = `${options.collectData.url}${separator}prefill=${prefillBase64}`;
-
-  // Show WebView and wait for IC_COMPLETE message
-  showDataCollectionWebView(webViewUrl);
-}
-```
-
-<WebViewMessageTypes />
 
 </Step>
 
@@ -411,21 +412,22 @@ class PaymentManager {
       // Step 2: Let user select an option (simplified - use first option)
       const selectedOption = options.options[0];
 
-      // Step 3: Get required actions
+      // Step 3: Collect data via WebView if required — must happen BEFORE
+      // fetching the required actions, otherwise the backend rejects the request
+      if (options.collectData?.url) {
+        await this.showDataCollectionWebView(options.collectData.url);
+      }
+
+      // Step 4: Get required actions
       const actions = await this.walletkit.pay.getRequiredPaymentActions({
         paymentId: options.paymentId,
         optionId: selectedOption.id,
       });
 
-      // Step 4: Sign all actions
+      // Step 5: Sign all actions
       const signatures = await Promise.all(
         actions.map((action) => this.signAction(action, walletAddress))
       );
-
-      // Step 5: Collect data via WebView if required
-      if (options.collectData?.url) {
-        await this.showDataCollectionWebView(options.collectData.url);
-      }
 
       // Step 6: Confirm payment
       const result = await this.walletkit.pay.confirmPayment({

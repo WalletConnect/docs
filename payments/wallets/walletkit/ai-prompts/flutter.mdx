@@ -39,15 +39,16 @@ Before starting, ensure your wallet app has:
 ### Payment Flow Overview
 
 ```
-Payment Link → Detect → Get Options → [WebView Data Collection] → Sign Actions → Confirm Payment → Result
+Payment Link → Detect → Get Options → [WebView Data Collection] → Get Actions → Sign Actions → Confirm Payment → Result
 ```
 
 1. **Payment Link Detection**: Identify incoming payment links from QR codes, deep links, or text input
 2. **Get Payment Options**: Retrieve available payment methods with merchant information
-3. **WebView Data Collection** (optional): Display WebView form for KYC/compliance data if required by the payment
-4. **Sign Actions**: Execute wallet signing operations (typically `eth_signTypedData_v4`)
-5. **Confirm Payment**: Submit signatures to complete the transaction
-6. **Handle Result**: Display success/failure and handle polling if needed
+3. **WebView Data Collection** (optional): Display WebView form for KYC/compliance data if required by the payment. The WebView submits data directly to the backend, so this must happen BEFORE fetching actions.
+4. **Get Actions**: Fetch the required signing actions via `getRequiredPaymentActions` (only needed when the selected option's `actions` are empty)
+5. **Sign Actions**: Execute wallet signing operations (typically `eth_signTypedData_v4`)
+6. **Confirm Payment**: Submit signatures to complete the transaction
+7. **Handle Result**: Display success/failure and handle polling if needed
 
 ### Key Data Models
 
