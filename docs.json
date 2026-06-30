@@ -61,6 +61,13 @@
                 ]
               },
               {
+                "group": "WalletConnect Pay for PSPs",
+                "pages": [
+                  "payments/psps/overview",
+                  "payments/psps/headless-sdk"
+                ]
+              },
+              {
                 "group": "WalletConnect Pay for Wallets",
                 "pages": [
                   "payments/wallets/overview",
@@ -200,6 +207,13 @@
                 "group": "Merchant API",
                 "pages": [
                   "payments/merchant-api/logo-specification"
+                ]
+              },
+              {
+                "group": "WalletConnect Pay for PSPs",
+                "pages": [
+                  "payments/psps/overview",
+                  "payments/psps/headless-sdk"
                 ]
               },
               {

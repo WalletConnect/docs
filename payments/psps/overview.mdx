@@ -1,0 +1,176 @@
+---
+title: "WalletConnect Pay - PSP Integration"
+sidebarTitle: "Overview"
+
+metatags:
+  description: "Build your own branded crypto checkout on WalletConnect Pay with the Headless SDK — a set of framework-agnostic @walletconnect/pay-* packages that own the payment flow while you own the UI, transport, and wallet connection."
+---
+
+WalletConnect Pay ships a **hosted gateway** at `pay.walletconnect.com` that handles the full payment experience out of the box. PSPs, acquirers, and platforms that need a **fully branded, fully owned checkout** can instead build their own gateway on the same engine using the **Headless SDK**.
+
+The Headless SDK is the exact runtime that powers our own hosted Buyer Experience — extracted into a set of framework-agnostic [`@walletconnect/pay-*`](https://www.npmjs.com/org/walletconnect) packages. You get the payment state machine, Engine API client, and wallet orchestration; you bring your own UI, branding, routing, and infrastructure.
+
+<Note>
+  **Beta (v0.1.x)** — The Headless SDK is under active development. Public APIs may change between minor releases until 1.0. [Talk to us](https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s) before going to production.
+</Note>
+
+## Who is it for?
+
+- **Payment Service Providers & Acquirers** who want crypto checkout inside their own product, with their own design system and domain — not a redirect to a third-party page.
+- **Platforms & marketplaces** embedding pay-with-crypto directly into an existing checkout flow.
+- **Teams that need control** over every step of the UX: wallet selection, network/token choice, compliance prompts, success and error states.
+
+If you just want to accept payments with the least effort, use the [hosted gateway](/payments/overview) or the [Ecommerce integration](/payments/ecommerce/overview) instead. Reach for the Headless SDK when you need to **own the experience**.
+
+## What you get
+
+<CardGroup cols={2}>
+  <Card title="A headless payment runtime" icon="diagram-project">
+    The full payment state machine (load → connect → quote → sign → confirm → settle) as a framework-agnostic engine. No UI imposed.
+  </Card>
+  <Card title="A typed Engine API client" icon="code">
+    A zero-dependency client for the WalletConnect Pay Engine, with the secret API key safely held server-side.
+  </Card>
+  <Card title="A React binding" icon="react">
+    A single `usePaymentSession` hook that projects the runtime into a clean, serializable snapshot plus named actions — zero state-machine internals leak into your components.
+  </Card>
+  <Card title="A wallet adapter" icon="wallet">
+    A ready-made adapter over [Reown AppKit](https://reown.com/appkit) for wallet connection across EVM and Solana — or bring your own.
+  </Card>
+</CardGroup>
+
+## The packages
+
+The runtime is split into layered packages. Each is independently consumable, and lower layers never depend on higher ones — so you can take only what you need.
+
+<table>
+  <thead>
+    <tr>
+      <th>Package</th>
+      <th>Role</th>
+      <th>Depends on</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-core"><code>@walletconnect/pay-core</code></a>
+      </td>
+      <td>Engine API client — contract types, CAIP utilities, the browser <code>Transport</code> seam (<code>createHttpTransport</code>), and the server-side <code>createEngineClient</code> that holds your API key. The foundation.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-state"><code>@walletconnect/pay-state</code></a>
+      </td>
+      <td>The headless runtime — the payment state machine, orchestration, the injectable <strong>seam</strong> contracts, the session factory, and the public <code>PaymentSnapshot</code> view-model. No React, no HTTP client, no wallet SDK.</td>
+      <td><code>pay-core</code></td>
+    </tr>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-react"><code>@walletconnect/pay-react</code></a>
+      </td>
+      <td>Thin React binding — <code>usePaymentSession</code> returns the snapshot plus domain actions. Zero state-machine leak.</td>
+      <td><code>pay-state</code></td>
+    </tr>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-appkit"><code>@walletconnect/pay-appkit</code></a>
+      </td>
+      <td>Reown AppKit adapter — implements the <code>WalletProvider</code> seam over a Reown AppKit instance (plus the Solana web3 loader). A <code>/react</code> subpath ships the wallet-connection hook.</td>
+      <td><code>pay-state</code></td>
+    </tr>
+  </tbody>
+</table>
+
+## How it fits together
+
+The Headless SDK follows a **headless runtime + host** model. The payment flow lives entirely in the SDK; your application is the **host** that consumes it. The runtime reaches the outside world only through five injectable **seams** — so you can swap in your own transport, wallet, timing, and analytics, and reuse the exact same payment machine.
+
+```
+   Your gateway (the host)
+   ─ your UI, branding, routing ─
+            │  consumes
+            ▼
+   @walletconnect/pay-react · usePaymentSession
+            │  drives
+            ▼
+   @walletconnect/pay-state · payment runtime
+            │  reaches the outside world only through seams
+            ▼
+ ┌──────────┬───────────────┬─────────┬────────┬───────────┐
+ │Transport │ WalletProvider │ Signer  │ Clock  │ Telemetry │
+ └────┬─────┴───────┬───────┴────┬────┴───┬────┴─────┬─────┘
+      │             │            │        │          │
+  your server    AppKit /     signing  timers/   analytics
+  → Engine API   your wallet  strategy  polling
+```
+
+The five seams the runtime depends on:
+
+| Seam             | What it abstracts                          | Provided by                                          |
+| ---------------- | ------------------------------------------ | ---------------------------------------------------- |
+| `Transport`      | Engine HTTP calls                          | `pay-core` `createHttpTransport` → your server route |
+| `WalletProvider` | connect / accounts / provider / switch     | `pay-appkit`, or your own wallet integration         |
+| `Signer`         | sign a payment option's wallet-RPC actions | `pay-state` signing strategies over the wallet seam  |
+| `Clock`          | intervals + page visibility (for polling)  | browser timers (the SDK ships a default)             |
+| `Telemetry`      | analytics breadcrumbs                      | your analytics pipeline (optional)                   |
+
+<Note>
+  `@walletconnect/pay-state` ships browser-ready `Clock` and `Telemetry` defaults (`browserClock`, `noopTelemetry`). In practice a React/Next.js gateway wires three seams itself — a `Transport` (pointed at your server route), a `WalletProvider` (the AppKit adapter), and a `Signer` (built from the wallet) — and reuses `browserClock` for the rest. `Telemetry` is optional.
+</Note>
+
+## The Engine API key never reaches the browser
+
+WalletConnect Pay's Engine API is authenticated with a secret API key that **must stay server-side**. The SDK enforces this split:
+
+```
+Browser → Transport seam → your server route → Engine API
+          (no secret)      (createEngineClient holds the key)
+```
+
+`pay-core` exposes two entry points for exactly this: `createHttpTransport` for the browser (talks to *your* server) and `createEngineClient` (imported from `@walletconnect/pay-core/server`) which holds the API key and talks to the Engine. In a Next.js app, your Route Handler sits in the middle.
+
+## The payment lifecycle
+
+Whatever UI you build, the runtime moves a payment through the same stages. Your job is to render each stage and call the matching action.
+
+<Steps>
+  <Step title="Load the payment" icon="link">
+    The buyer arrives with a payment ID (from a QR code, link, or your checkout). The runtime fetches the payment intent — amount, merchant, accepted tokens.
+  </Step>
+  <Step title="Connect a wallet" icon="wallet">
+    The buyer connects a wallet through the `WalletProvider` seam. The runtime reads their accounts across the supported networks.
+  </Step>
+  <Step title="Fetch payment options" icon="list">
+    Given the connected accounts, the Engine returns the concrete ways to pay — token, network, amount, fees, and whether compliance data is required.
+  </Step>
+  <Step title="Select & build" icon="hammer">
+    The buyer picks an option. The runtime builds the transaction(s) and the exact wallet-RPC actions to sign.
+  </Step>
+  <Step title="Sign" icon="signature">
+    The `Signer` drives the wallet through the required signatures (e.g. a permit + the payment).
+  </Step>
+  <Step title="Confirm & settle" icon="check">
+    Signed results are submitted to confirm the payment. The runtime then polls status until the payment succeeds, fails, or expires.
+  </Step>
+</Steps>
+
+## Supported networks & tokens
+
+The Headless SDK supports the full WalletConnect Pay token and network coverage — USDC, USDT, EURC, PYUSD and more across Ethereum, Polygon, Base, Optimism, Arbitrum (and Solana, rolling out). See [Token & chain coverage](/payments/token-and-chain-coverage) for the live list.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Headless SDK" icon="cube" href="/payments/psps/headless-sdk">
+    Install the packages and build a checkout in React / Next.js, step by step.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/index">
+    The Gateway and Payments endpoints behind the SDK.
+  </Card>
+</CardGroup>
+
+<Card title="Talk to us about PSP integration" href="https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s" icon="credit-card">
+  Are you a PSP or acquirer? Tell us what you're building and we'll help you get set up.
+</Card>
