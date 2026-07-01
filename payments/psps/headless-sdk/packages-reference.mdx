@@ -1,0 +1,269 @@
+---
+title: "Packages Reference"
+sidebarTitle: "Packages Reference"
+
+metatags:
+  description: "The @walletconnect/pay-* Headless SDK packages and their full public API — pay-core (Engine client + Transport seam), pay-state (runtime + seams + snapshot), pay-react (usePaymentSession), and pay-appkit (Reown AppKit wallet adapter)."
+---
+
+The runtime is split into layered packages. Each is independently consumable, and lower layers never depend on higher ones — so you can take only what you need.
+
+<table>
+  <thead>
+    <tr>
+      <th>Package</th>
+      <th>Role</th>
+      <th>Depends on</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-core"><code>@walletconnect/pay-core</code></a>
+      </td>
+      <td>Engine API client — contract types, CAIP utilities, the browser <code>Transport</code> seam (<code>createHttpTransport</code>), and the server-side <code>createEngineClient</code> that holds your API key. The foundation.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-state"><code>@walletconnect/pay-state</code></a>
+      </td>
+      <td>The headless runtime — the payment state machine, orchestration, the injectable <strong>seam</strong> contracts, the session factory, and the public <code>PaymentSnapshot</code> view-model. No React, no HTTP client, no wallet SDK.</td>
+      <td><code>pay-core</code></td>
+    </tr>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-react"><code>@walletconnect/pay-react</code></a>
+      </td>
+      <td>Thin React binding — <code>usePaymentSession</code> returns the snapshot plus domain actions. Zero state-machine leak.</td>
+      <td><code>pay-state</code></td>
+    </tr>
+    <tr>
+      <td style={{ whiteSpace: "nowrap" }}>
+        <a href="https://www.npmjs.com/package/@walletconnect/pay-appkit"><code>@walletconnect/pay-appkit</code></a>
+      </td>
+      <td>Reown AppKit adapter — implements the <code>WalletProvider</code> seam over a Reown AppKit instance (plus the Solana web3 loader). A <code>/react</code> subpath ships the wallet-connection hook.</td>
+      <td><code>pay-state</code></td>
+    </tr>
+  </tbody>
+</table>
+
+## `@walletconnect/pay-core`
+
+The foundation: Engine contract types, CAIP utilities, and the `Transport` seam. Zero runtime dependencies. Two entry points — a browser-safe main entry and a server-only `/server` entry that holds the key.
+
+### Browser entry — `@walletconnect/pay-core`
+
+```typescript
+import { createHttpTransport, type Transport, type HttpTransportConfig } from '@walletconnect/pay-core'
+
+interface HttpTransportConfig {
+  baseUrl?: string      // default '/api/wcp'
+  fetch?: typeof fetch
+  timeoutMs?: number    // default 30_000
+}
+
+function createHttpTransport(config?: HttpTransportConfig): Transport
+```
+
+The `Transport` contract (the seam the runtime depends on) — five methods, each resolving to an `EngineResponse<T>` envelope (never throwing):
+
+```typescript
+interface Transport {
+  getPayment(paymentId): Promise<EngineResponse<GetPaymentResponse>>
+  getPaymentOptions(paymentId, request): Promise<EngineResponse<GetPaymentOptionsResponseExtended>>
+  fetchOptionActions(paymentId, request): Promise<EngineResponse<EngineBuildData>>
+  confirmPayment(paymentId, request): Promise<EngineResponse<unknown>>
+  getPaymentStatus(paymentId): Promise<EngineResponse<GetPaymentStatusResponse>>
+}
+```
+
+Also exported: all Engine contract types (`GetPaymentResponse`, `PaymentOptionExtended`, `Amount`, `CollectData`, `PaymentStatus`, …), CAIP utilities (`parseCaip2`, `parseCaip10`, …), and transport error helpers (`TRANSPORT_ERROR_CODES`, `isAbortError`, `DEFAULT_TIMEOUT_MS`).
+
+### Server entry — `@walletconnect/pay-core/server`
+
+```typescript
+import { createEngineClient, type EngineClient, type EngineClientConfig, DEFAULT_VERSION } from '@walletconnect/pay-core/server'
+
+interface EngineClientConfig {
+  apiUrl: string        // e.g. https://staging.api.pay.walletconnect.org (no trailing slash)
+  apiKey: string        // your Gateway Api-Key — keep secret, server-side only
+  version?: string      // WCP API version; defaults to DEFAULT_VERSION
+  fetch?: typeof fetch
+  timeoutMs?: number    // default 30_000
+}
+
+function createEngineClient(config: EngineClientConfig): EngineClient
+```
+
+`EngineClient` exposes the same five methods as `Transport`, but attaches the secret `Api-Key` and `Wcp-Version` headers and calls the Engine directly. Use it only on the server.
+
+## `@walletconnect/pay-state`
+
+The headless runtime: the payment state machine, the injectable seam contracts, the framework-agnostic `PaymentController`, the signing strategies, and the public `PaymentSnapshot` view-model.
+
+### `createPaymentController`
+
+The framework-agnostic binding (the React hook wraps this). Use it directly in a non-React host.
+
+```typescript
+import { createPaymentController, type PaymentController, type PaymentControllerOptions } from '@walletconnect/pay-state'
+
+interface PaymentControllerOptions {
+  paymentId: string
+  seams: PaymentSessionSeams        // { transport, clock, signer?, telemetry? }
+  wallet: WalletProvider
+  initialPayment?: GetPaymentResponse
+  signingTimeoutMs?: number
+  onMachineEvent?: MachineEventObserver  // read-only analytics observer
+}
+
+function createPaymentController(options: PaymentControllerOptions): PaymentController
+```
+
+```typescript
+interface PaymentController {
+  getSnapshot(): PaymentSnapshot
+  subscribe(listener: () => void): () => void
+  start(): void
+  destroy(): void
+  // domain actions (see the React hook below for the full list)
+  connectWallet(wallet, namespace?, options?): void
+  // …
+}
+```
+
+### Seams
+
+The runtime reaches the outside world only through these contracts:
+
+```typescript
+interface PaymentSessionSeams {
+  transport: Transport          // Engine calls (from pay-core)
+  clock: Clock                  // intervals + page visibility (for status polling)
+  signer?: Signer               // signing capability — required for an end-to-end payment
+  telemetry?: Telemetry         // optional analytics breadcrumbs
+}
+
+interface WalletProvider {
+  getAccounts(): Partial<Record<Namespace, NamespaceAccount | undefined>>
+  getProvider<T extends Namespace>(network: Caip2 & { namespace: T }): ProviderForNamespace<T> | null
+  connect(wallet: WalletRef, namespace: Namespace, options?: WalletConnectOptions): Promise<void>
+  disconnect(namespace?: Namespace): Promise<void>
+  switchNetwork(caipNetworkId: string): Promise<void>
+  subscribe(listener: () => void): () => void
+}
+
+interface Signer {
+  signActions(option: PaymentOptionExtended, range?: ActionRange): Promise<SignPaymentResult[]>
+}
+```
+
+Browser defaults are provided so you only have to inject `transport`, `wallet`, and `signer`:
+
+```typescript
+import { browserClock, noopTelemetry, browserDefaults } from '@walletconnect/pay-state'
+```
+
+### Signing strategies
+
+```typescript
+import { EvmSigningStrategy, SolanaSigningStrategy, signOptionActions } from '@walletconnect/pay-state'
+
+// Dispatch each of an option's actions to the matching strategy:
+signOptionActions(option: PaymentOptionExtended, strategies: SigningStrategy[], range?: ActionRange): Promise<SignPaymentResult[]>
+```
+
+### `PaymentSnapshot`
+
+The public, serializable view-model. `state` is one of:
+
+| Group       | States                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| Loading     | `Initializing`                                                                           |
+| Wallet      | `ReadyForWallet`, `ConnectingWallet`                                                      |
+| Options     | `LoadingOptions`, `OptionsReady`, `NoOptions`, `OptionSelected`                           |
+| Compliance  | `InformationCapture`                                                                      |
+| Approval    | `RequiresApproval`, `AwaitingWalletApproval`, `WaitingForConfirmation`                    |
+| Terminal    | `Succeeded`, `Failed`, `PaymentExpired`, `PaymentCancelled`, `InvalidPayment`, `SanctionedUser` |
+
+```typescript
+interface PaymentSnapshot {
+  state: PaymentState
+  payment?: GetPaymentResponse
+  options: PaymentOptionExtended[]
+  selectedOption?: PaymentOptionExtended
+  collectData?: CollectData | null
+  wallet: { isConnected: boolean; accounts: string[] }
+  requiresApproval: boolean
+  signingError?: { code: string; message?: string }
+  isQuoteExpired: boolean
+  profileId?: string
+  profileNotFound: boolean
+  // …diagnostic fields
+}
+```
+
+## `@walletconnect/pay-react`
+
+A single hook — `usePaymentSession` — a `useSyncExternalStore`-based binding over the controller. SSR-safe, tear-free, zero XState leak.
+
+```typescript
+import { usePaymentSession, type UsePaymentSessionOptions, type PaymentSessionApi } from '@walletconnect/pay-react'
+
+function usePaymentSession(options: UsePaymentSessionOptions): PaymentSessionApi
+```
+
+`UsePaymentSessionOptions` matches `PaymentControllerOptions` (`paymentId`, `seams`, `wallet`, `initialPayment?`, `signingTimeoutMs?`, `onMachineEvent?`). The return is `{ snapshot }` plus the named actions:
+
+| Action                                          | Drives                                          |
+| ----------------------------------------------- | ----------------------------------------------- |
+| `connectWallet(wallet, namespace?, options?)`   | Begin connecting a wallet                       |
+| `disconnectWallet(namespace?)`                  | Disconnect one namespace, or all               |
+| `selectOption(option, rank)`                    | Pick a payment option                           |
+| `confirmSelection()`                            | Confirm and move toward signing                 |
+| `unselectOption()`                              | Return to the option list                       |
+| `submitInfoCapture(data)`                       | Submit collected KYC/contact data               |
+| `navigateBack()`                                | Step back                                       |
+
+Plus a **host-orchestration channel** for signals the runtime can't observe itself — `refreshOptions`, `notifyQuoteExpired`, `acknowledgeQuoteExpiry`, `markUserSanctioned`, `setProfileLookup`, `notifyPaymentExpired`, `failWalletConnection`. Most gateways won't need these to start.
+
+## `@walletconnect/pay-appkit`
+
+The Reown AppKit adapter — implements the `WalletProvider` seam over an AppKit instance, and ships a headless wallet-picker controller. The main entry is framework-neutral; the React hook lives on `/react`.
+
+### Main entry — `@walletconnect/pay-appkit`
+
+```typescript
+import {
+  createAppKitWalletProvider,   // (appKit, options?) => WalletProvider
+  createAppKitWalletList,        // (appKit, options?) => AppKitWalletList  (framework-neutral picker)
+  loadSolanaWeb3,               // lazy @solana/web3.js codec loader for the Solana signing strategy
+  applyPlacements, resolvePlacements, // wallet-ordering helpers
+  type AppKit,                  // re-exported AppKit instance type — don't import @reown/appkit directly
+  type WalletListItem, type ConnectedWallet, type WalletListState, type WalletListOptions
+} from '@walletconnect/pay-appkit'
+```
+
+`createAppKitWalletList` returns a controller — `wallet` (the seam), `getState()`, `subscribe()`, `fetchWallets()`, `search()`, `loadMore()`, `getWcUri()` — for non-React hosts.
+
+### React entry — `@walletconnect/pay-appkit/react`
+
+```typescript
+import { useAppKitWalletProvider, type AppKitWalletProviderHandle, type UseAppKitWalletProviderOptions } from '@walletconnect/pay-appkit/react'
+
+function useAppKitWalletProvider(appKit: AppKit | undefined, options?: UseAppKitWalletProviderOptions): AppKitWalletProviderHandle
+```
+
+The handle extends `WalletListState` and adds `wallet` (the seam to hand `usePaymentSession`), `searchQuery`/`setSearchQuery` (debounced), `fetchWallets`, `loadMore`, and `getWcUri` for the pairing QR.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Implementation" icon="code" href="/payments/psps/headless-sdk/implementation">
+    The step-by-step React / Next.js walkthrough.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/index">
+    The Gateway and Payments endpoints behind the SDK.
+  </Card>
+</CardGroup>

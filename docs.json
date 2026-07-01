@@ -64,7 +64,15 @@
                 "group": "WalletConnect Pay for PSPs",
                 "pages": [
                   "payments/psps/overview",
-                  "payments/psps/headless-sdk"
+                  {
+                    "group": "Headless SDK",
+                    "pages": [
+                      "payments/psps/headless-sdk/overview",
+                      "payments/psps/headless-sdk/how-it-works",
+                      "payments/psps/headless-sdk/implementation",
+                      "payments/psps/headless-sdk/packages-reference"
+                    ]
+                  }
                 ]
               },
               {
@@ -213,7 +221,15 @@
                 "group": "WalletConnect Pay for PSPs",
                 "pages": [
                   "payments/psps/overview",
-                  "payments/psps/headless-sdk"
+                  {
+                    "group": "Headless SDK",
+                    "pages": [
+                      "payments/psps/headless-sdk/overview",
+                      "payments/psps/headless-sdk/how-it-works",
+                      "payments/psps/headless-sdk/implementation",
+                      "payments/psps/headless-sdk/packages-reference"
+                    ]
+                  }
                 ]
               },
               {
