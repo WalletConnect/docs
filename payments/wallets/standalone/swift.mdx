@@ -26,7 +26,7 @@ For a complete working example, check out our sample wallet implementation:
 
 ## Installation
 
-### Swift Package Manager
+**Swift Package Manager**
 
 Add WalletConnectPay to your `Package.swift`:
 
@@ -49,7 +49,7 @@ Then add `WalletConnectPay` to your target dependencies:
 The version shown above may not be the latest. Check the [GitHub releases](https://github.com/reown-com/reown-swift/releases) for the most recent version.
 </Info>
 
-## Configuration
+## Initialization
 
 Configure the Pay client during app initialization, typically in your `AppDelegate` or `SceneDelegate`:
 
@@ -70,7 +70,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions...)
 }
 ```
 
-### Configuration Parameters
+**Configuration Parameters**
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -115,7 +115,7 @@ WalletConnect Pay currently supports the following tokens and networks:
 Include accounts for all supported networks to maximize payment options for your users.
 </Note>
 
-## Detecting Payment Links
+## Payment Link Detection
 
 The `isPaymentLink` utility method detects WalletConnect Pay links by checking for:
 - `pay.` hosts (e.g., pay.walletconnect.com)
@@ -128,6 +128,25 @@ func isPaymentLink(_ string: String) -> Bool {
     return lower.contains("pay.") ||
            lower.contains("pay=") ||
            lower.contains("pay_")
+}
+```
+
+Call it wherever your wallet receives a link — from a deep link or a scanned QR code:
+
+```swift
+// Deep link opened from outside your app (SceneDelegate or AppDelegate)
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    if isPaymentLink(url.absoluteString) {
+        startPaymentFlow(paymentLink: url.absoluteString)
+    }
+}
+
+// QR code payload
+func handleScannedQR(_ content: String) {
+    if isPaymentLink(content) {
+        startPaymentFlow(paymentLink: content)
+    }
 }
 ```
 
@@ -226,7 +245,7 @@ do {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-If the selected option has `collectData` set, you must collect user information **before** fetching the required actions. The backend requires Information Capture to be completed first and will reject `getRequiredPaymentActions` otherwise:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
@@ -241,23 +260,27 @@ if let collectData = selectedOption.collectData, let url = collectData.url {
         "pobAddress": "123 Main St, New York, NY 10001"
     ]
     let jsonData = try JSONSerialization.data(withJSONObject: prefillData)
+    // Encode prefill as base64url (URL-safe, no padding)
     let prefillBase64 = jsonData.base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
     var components = URLComponents(string: url)!
     var queryItems = components.queryItems ?? []
     queryItems.append(URLQueryItem(name: "prefill", value: prefillBase64))
+    // Optional appearance params (see "Form URL parameters"):
+    queryItems.append(URLQueryItem(name: "theme", value: "dark")) // "light" | "dark"
+    // themeVariables is a base64url string exported from the WalletConnect Pay Dashboard:
+    // queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
     components.queryItems = queryItems
     let webViewUrl = components.string!
 
-    // Show WebView for this specific option — see WebView Implementation section below
+    // Show WebView for this specific option — see Data Collection Implementation section below
     showWebView(url: webViewUrl)
 }
 ```
 
 <WebViewMessageTypes />
-
-<Note>
-The WebView submits the captured data directly to the backend. You do **not** pass `collectedData` to `confirmPayment` when using the WebView approach.
-</Note>
 
 </Step>
 
@@ -363,9 +386,11 @@ case .cancelled:
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When a selected option has `collectData.url` present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices />
 
 ```swift
 import WebKit
@@ -446,15 +471,29 @@ struct PayDataCollectionWebView: UIViewRepresentable {
     }
 }
 
-func buildPrefillUrl(baseUrl: String, prefillData: [String: String]) -> String {
-    guard !prefillData.isEmpty,
-          let jsonData = try? JSONSerialization.data(withJSONObject: prefillData) else {
-        return baseUrl
-    }
-    let base64 = jsonData.base64EncodedString()
-    var components = URLComponents(string: baseUrl)!
+func buildFormUrl(
+    baseUrl: String,
+    prefillData: [String: String] = [:],
+    theme: String? = nil,            // "light" or "dark"
+    themeVariables: String? = nil    // base64url string exported from the Pay Dashboard
+) -> String {
+    guard var components = URLComponents(string: baseUrl) else { return baseUrl }
     var queryItems = components.queryItems ?? []
-    queryItems.append(URLQueryItem(name: "prefill", value: base64))
+    if !prefillData.isEmpty,
+       let jsonData = try? JSONSerialization.data(withJSONObject: prefillData) {
+        // base64url: URL-safe, no padding
+        let prefill = jsonData.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        queryItems.append(URLQueryItem(name: "prefill", value: prefill))
+    }
+    if let theme = theme {
+        queryItems.append(URLQueryItem(name: "theme", value: theme))
+    }
+    if let themeVariables = themeVariables {
+        queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
+    }
     components.queryItems = queryItems
     return components.string ?? baseUrl
 }
@@ -570,73 +609,9 @@ class PaymentManager {
 }
 ```
 
-## Deep Link Handling
-
-To handle payment links opened from outside your app:
-
-```swift
-// In SceneDelegate or AppDelegate
-func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-    guard let url = URLContexts.first?.url else { return }
-    
-    if isPaymentLink(url.absoluteString) {
-        startPaymentFlow(paymentLink: url.absoluteString)
-    }
-}
-```
-
-## QR Code Scanning
-
-Payment links can be encoded as QR codes. Use the `isPaymentLink` utility for detection:
-
-```swift
-func handleScannedQR(_ content: String) {
-    if isPaymentLink(content) {
-        // WalletConnect Pay QR code
-        startPaymentFlow(paymentLink: content)
-    }
-}
-```
-
-## Error Handling
-
-The SDK throws specific error types for different failure scenarios:
-
-### GetPaymentOptionsError
-
-| Error | Description |
-|-------|-------------|
-| `.paymentNotFound` | Payment ID doesn't exist |
-| `.paymentExpired` | Payment has expired |
-| `.invalidRequest` | Invalid request parameters |
-| `.invalidAccount` | Invalid account format |
-| `.complianceFailed` | Compliance check failed |
-| `.http` | Network error |
-| `.internalError` | Server error |
-
-### GetPaymentRequestError
-
-| Error | Description |
-|-------|-------------|
-| `.optionNotFound` | Selected option doesn't exist |
-| `.paymentNotFound` | Payment ID doesn't exist |
-| `.invalidAccount` | Invalid account format |
-| `.http` | Network error |
-
-### ConfirmPaymentError
-
-| Error | Description |
-|-------|-------------|
-| `.paymentNotFound` | Payment ID doesn't exist |
-| `.paymentExpired` | Payment has expired |
-| `.invalidOption` | Invalid option ID |
-| `.invalidSignature` | Signature verification failed |
-| `.routeExpired` | Payment route expired |
-| `.http` | Network error |
-
 ## API Reference
 
-### WalletConnectPay
+**WalletConnectPay**
 
 Static configuration class for the Pay SDK.
 
@@ -645,7 +620,7 @@ Static configuration class for the Pay SDK.
 | `configure(apiKey:appId:baseUrl:logging:)` | Initialize the SDK with your credentials |
 | `instance` | Access the shared `PayClient` instance |
 
-### PayClient
+**PayClient**
 
 Main client for payment operations.
 
@@ -655,9 +630,9 @@ Main client for payment operations.
 | `getRequiredPaymentActions(paymentId:optionId:)` | Get signing actions for a payment option |
 | `confirmPayment(paymentId:optionId:signatures:maxPollMs:)` | Confirm and execute the payment |
 
-### Data Types
+**Data Types**
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```swift
 struct PaymentOptionsResponse {
@@ -674,7 +649,7 @@ struct PaymentResultInfo {
 }
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```swift
 struct PaymentInfo {
@@ -686,7 +661,7 @@ struct PaymentInfo {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```swift
 struct PaymentOption {
@@ -698,7 +673,7 @@ struct PaymentOption {
 }
 ```
 
-#### PayAmount
+**PayAmount**
 
 ```swift
 struct PayAmount {
@@ -716,7 +691,7 @@ struct AmountDisplay {
 }
 ```
 
-#### Action & WalletRpcAction
+**Action & WalletRpcAction**
 
 ```swift
 struct Action {
@@ -730,7 +705,7 @@ struct WalletRpcAction {
 }
 ```
 
-#### CollectDataAction & CollectDataField
+**CollectDataAction & CollectDataField**
 
 ```swift
 struct CollectDataAction {
@@ -739,7 +714,7 @@ struct CollectDataAction {
 }
 ```
 
-#### ConfirmPaymentResultResponse
+**ConfirmPaymentResultResponse**
 
 ```swift
 struct ConfirmPaymentResultResponse {
@@ -758,6 +733,42 @@ enum PaymentStatus {
     case cancelled                     // Payment cancelled by user
 }
 ```
+
+## Error Handling
+
+The SDK throws specific error types for different failure scenarios:
+
+**GetPaymentOptionsError**
+
+| Error | Description |
+|-------|-------------|
+| `.paymentNotFound` | Payment ID doesn't exist |
+| `.paymentExpired` | Payment has expired |
+| `.invalidRequest` | Invalid request parameters |
+| `.invalidAccount` | Invalid account format |
+| `.complianceFailed` | Compliance check failed |
+| `.http` | Network error |
+| `.internalError` | Server error |
+
+**GetPaymentRequestError**
+
+| Error | Description |
+|-------|-------------|
+| `.optionNotFound` | Selected option doesn't exist |
+| `.paymentNotFound` | Payment ID doesn't exist |
+| `.invalidAccount` | Invalid account format |
+| `.http` | Network error |
+
+**ConfirmPaymentError**
+
+| Error | Description |
+|-------|-------------|
+| `.paymentNotFound` | Payment ID doesn't exist |
+| `.paymentExpired` | Payment has expired |
+| `.invalidOption` | Invalid option ID |
+| `.invalidSignature` | Signature verification failed |
+| `.routeExpired` | Payment route expired |
+| `.http` | Network error |
 
 ## Best Practices
 

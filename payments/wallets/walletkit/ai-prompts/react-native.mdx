@@ -625,6 +625,28 @@ When `selectedOption.collectData?.url` is present, display the URL in a WebView.
 
 Wire `onComplete` to your `onDataCollectionComplete` handler (which then calls `fetchPaymentActions`), so action fetching only happens once the WebView has submitted the Information Capture data to the backend.
 
+The form URL accepts optional query parameters — append them to `selectedOption.collectData.url` before loading, preserving existing query parameters:
+- `prefill` — base64url-encoded JSON of known user fields. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`).
+- `theme` — `light` or `dark`, to match your wallet's color mode.
+- `themeVariables` — a base64url string exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) that overrides design tokens (font, font size, some colors, button/input border radius). Append it verbatim.
+
+```typescript
+function buildFormUrl(baseUrl, options = {}) {
+  const params = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}${params.join("&")}`;
+}
+```
+
 Install `react-native-webview`:
 
 ```bash
