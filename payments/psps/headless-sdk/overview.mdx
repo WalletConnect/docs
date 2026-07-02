@@ -1,0 +1,63 @@
+---
+title: "Headless SDK"
+sidebarTitle: "Overview"
+
+metatags:
+  description: "Build your own branded crypto checkout on WalletConnect Pay with the Headless SDK — a set of framework-agnostic @walletconnect/pay-* packages that own the payment flow while you own the UI, transport, and wallet connection."
+---
+
+The Headless SDK is a set of framework-agnostic [`@walletconnect/pay-*`](https://www.npmjs.com/org/walletconnect) packages that own the WalletConnect Pay payment flow while you own the UI. It's the exact runtime that powers our own hosted Buyer Experience — extracted so you can build a fully branded, fully owned checkout on the same engine.
+
+You get the payment state machine, Engine API client, and wallet orchestration; you bring your own UI, branding, routing, and infrastructure.
+
+<Note>
+  **Beta (v0.1.x)** — The Headless SDK is under active development. Public APIs may change between minor releases until 1.0. [Talk to us](https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s) before going to production.
+</Note>
+
+## Who is it for?
+
+- **Payment Service Providers & Acquirers** who want crypto checkout inside their own product, with their own design system and domain — not a redirect to a third-party page.
+- **Platforms & marketplaces** embedding pay-with-crypto directly into an existing checkout flow.
+- **Teams that need control** over every step of the UX: wallet selection, network/token choice, compliance prompts, success and error states.
+
+If you just want to accept payments with the least effort, use the [hosted gateway](/payments/overview) or the [Ecommerce integration](/payments/ecommerce/overview) instead. Reach for the Headless SDK when you need to **own the experience**.
+
+## What you get
+
+<CardGroup cols={2}>
+  <Card title="A headless payment runtime" icon="diagram-project">
+    The full payment state machine (load → connect → quote → sign → confirm → settle) as a framework-agnostic engine. No UI imposed.
+  </Card>
+  <Card title="A typed Engine API client" icon="code">
+    A zero-dependency client for the WalletConnect Pay Engine, with the secret API key safely held server-side.
+  </Card>
+  <Card title="A React binding" icon="react">
+    A single `usePaymentSession` hook that projects the runtime into a clean, serializable snapshot plus named actions — zero state-machine internals leak into your components.
+  </Card>
+  <Card title="A wallet adapter" icon="wallet">
+    A ready-made adapter over [Reown AppKit](https://reown.com/appkit) for wallet connection across EVM and Solana — or bring your own.
+  </Card>
+</CardGroup>
+
+## Supported networks & tokens
+
+The Headless SDK supports the full WalletConnect Pay token and network coverage — USDC, USDT, EURC, PYUSD and more across Ethereum, Polygon, Base, Optimism, Arbitrum (and Solana, rolling out). See [Token & chain coverage](/payments/token-and-chain-coverage) for the live list.
+
+## Full example
+
+The fastest way to learn the SDK is to read the reference checkout it's extracted from. Every snippet in these docs comes from it.
+
+<Card title="Reference example — headless-checkout (Next.js)" icon="github" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/headless-checkout">
+  A complete, branded Next.js checkout built on the four packages.
+</Card>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="How it works" icon="diagram-project" href="/payments/psps/headless-sdk/how-it-works">
+    The payment lifecycle, the host + seams model, and how the API key stays server-side.
+  </Card>
+  <Card title="Implementation" icon="code" href="/payments/psps/headless-sdk/implementation">
+    Build a complete checkout in React / Next.js, step by step.
+  </Card>
+</CardGroup>

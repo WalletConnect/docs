@@ -1,0 +1,51 @@
+---
+title: "WalletConnect Pay for PSPs"
+sidebarTitle: "Overview"
+
+metatags:
+  description: "WalletConnect Pay for Payment Service Providers — accept crypto payments through the hosted gateway, or build a fully branded, fully owned checkout with the Headless SDK."
+---
+
+WalletConnect Pay lets Payment Service Providers, acquirers, and platforms accept crypto payments on the same engine that powers our hosted gateway. You choose how much of the experience you own — from a redirect to a hosted page, all the way to a fully branded checkout built inside your own product.
+
+## Two ways to integrate
+
+<CardGroup cols={2}>
+  <Card title="Hosted gateway" icon="bolt">
+    Send buyers to `pay.walletconnect.com` and let WalletConnect Pay handle the whole experience — wallet selection, quoting, signing, and settlement. The fastest path to accepting payments, with no UI to build.
+  </Card>
+  <Card title="Headless SDK" icon="cube" href="/payments/psps/headless-sdk/overview">
+    Build a **fully branded, fully owned checkout** inside your own product. You get the payment runtime, Engine client, and wallet orchestration as framework-agnostic packages; you bring the UI, branding, and domain.
+  </Card>
+</CardGroup>
+
+## Which one is for me?
+
+Reach for the **hosted gateway** if you want to accept payments with the least effort and are happy to send buyers to a WalletConnect-hosted page. See the [hosted gateway overview](/payments/overview) or the [Ecommerce integration](/payments/ecommerce/overview).
+
+Reach for the **Headless SDK** when you need to **own the experience** end to end — wallet selection, network and token choice, compliance prompts, success and error states — all inside your own design system and domain, with no redirect to a third-party page.
+
+<Note>
+  Both paths run on the same WalletConnect Pay Engine and share the same token and network coverage. You can start with the hosted gateway and move to the Headless SDK later without re-doing your backend integration.
+</Note>
+
+## Who is it for?
+
+- **Payment Service Providers & Acquirers** offering crypto checkout inside their own product, with their own design system and domain.
+- **Platforms & marketplaces** embedding pay-with-crypto directly into an existing checkout flow.
+- **Teams that need control** over every step of the UX.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Headless SDK" icon="cube" href="/payments/psps/headless-sdk/overview">
+    Own the full checkout experience with the `@walletconnect/pay-*` packages.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/index">
+    The Gateway and Payments endpoints behind WalletConnect Pay.
+  </Card>
+</CardGroup>
+
+<Card title="Talk to us about PSP integration" href="https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s" icon="credit-card">
+  Are you a PSP or acquirer? Tell us what you're building and we'll help you get set up.
+</Card>

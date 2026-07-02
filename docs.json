@@ -97,6 +97,21 @@
                 ]
               },
               {
+                "group": "WalletConnect Pay for PSPs",
+                "pages": [
+                  "payments/psps/overview",
+                  {
+                    "group": "Headless SDK",
+                    "pages": [
+                      "payments/psps/headless-sdk/overview",
+                      "payments/psps/headless-sdk/how-it-works",
+                      "payments/psps/headless-sdk/implementation",
+                      "payments/psps/headless-sdk/packages-reference"
+                    ]
+                  }
+                ]
+              },
+              {
                 "group": "Ecommerce and Online Checkout",
                 "pages": [
                   "payments/ecommerce/overview",
@@ -236,6 +251,21 @@
                     ]
                   },
                   "payments/wallets/tap-to-pay"
+                ]
+              },
+              {
+                "group": "WalletConnect Pay for PSPs",
+                "pages": [
+                  "payments/psps/overview",
+                  {
+                    "group": "Headless SDK",
+                    "pages": [
+                      "payments/psps/headless-sdk/overview",
+                      "payments/psps/headless-sdk/how-it-works",
+                      "payments/psps/headless-sdk/implementation",
+                      "payments/psps/headless-sdk/packages-reference"
+                    ]
+                  }
                 ]
               },
               {
