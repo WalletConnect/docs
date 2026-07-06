@@ -71,9 +71,7 @@ final walletKit = await ReownWalletKit.createInstance(
 );
 ```
 
-## Accessing the Pay Client
-
-You can access the `WalletConnectPay` instance directly:
+Access the `WalletConnectPay` client directly via `walletKit.pay`:
 
 ```dart
 final payClient = walletKit.pay;
@@ -162,9 +160,11 @@ if (response.info != null) {
   print('Merchant: ${response.info!.merchant.name}');
 }
 
-// Check if data collection is required
-if (response.collectData != null) {
-  print('Data collection required: ${response.collectData!.fields.length} fields');
+// Check which options require data collection (per-option)
+for (final option in response.options) {
+  if (option.collectData != null) {
+    print('Option ${option.id} requires info capture');
+  }
 }
 ```
 
@@ -172,23 +172,30 @@ if (response.collectData != null) {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-Some payments may require additional user data. After the user selects an option, check for `collectData` on the response and run this step **before** fetching the required payment actions — the backend rejects the actions request with `400 IC data required` for options needing Information Capture if data has not yet been collected:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
 ```dart
-if (response.collectData?.url != null) {
-  // Use the "required" list from response.collectData.schema to determine which fields to prefill
+if (selectedOption.collectData?.url != null) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
   final prefillData = {
     'fullName': 'John Doe',
     'dob': '1990-01-15',
     'pobAddress': '123 Main St, New York, NY 10001',
   };
-  final prefillJson = jsonEncode(prefillData);
-  final prefillBase64 = base64Url.encode(utf8.encode(prefillJson));
-  final uri = Uri.parse(response.collectData!.url);
+  // Encode prefill as base64url (no padding, consistent with the other SDKs)
+  final prefillBase64 = base64Url.encode(utf8.encode(jsonEncode(prefillData))).replaceAll('=', '');
+  final uri = Uri.parse(selectedOption.collectData!.url);
   final webViewUrl = uri.replace(
-    queryParameters: {...uri.queryParameters, 'prefill': prefillBase64},
+    queryParameters: {
+      ...uri.queryParameters,
+      'prefill': prefillBase64,
+      // Optional appearance params (see "Form URL parameters"):
+      'theme': 'dark', // "light" | "dark"
+      // themeVariables is a base64url string exported from the Pay Dashboard:
+      // 'themeVariables': themeVariables,
+    },
   ).toString();
 
   // Show WebView and wait for IC_COMPLETE message
@@ -198,11 +205,9 @@ if (response.collectData?.url != null) {
 
 <WebViewMessageTypes />
 
-The WebView submits the collected data directly to the backend, so you do **not** pass `collectedData` to `confirmPayment` later.
-
 </Step>
 
-<Step title="Get Required Payment Actions" titleSize="h3">
+<Step title="Get Required Actions" titleSize="h3">
 
 Get the required wallet actions for a selected payment option:
 
@@ -224,9 +229,40 @@ for (final action in actions) {
 }
 ```
 
+</Step>
+
+<Step title="Sign Actions" titleSize="h3">
+
+Sign each action using your wallet's signing implementation, dispatching on the RPC method:
+
+```dart
+// Sign each action based on its RPC method
+final signatures = <String>[];
+for (final action in actions) {
+  final rpc = action.walletRpc;
+  switch (rpc.method) {
+    case 'eth_signTypedData_v4':
+      signatures.add(await signTypedData(rpc.chainId, rpc.params));
+      break;
+    case 'eth_sendTransaction':
+      signatures.add(await sendTransaction(rpc.chainId, rpc.params));
+      break;
+    case 'personal_sign':
+      signatures.add(await personalSign(rpc.chainId, rpc.params));
+      break;
+    default:
+      throw UnimplementedError('Unsupported RPC method: ${rpc.method}');
+  }
+}
+```
+
 <Note>
 Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/token-chain-support/usdt-support).
 </Note>
+
+<Warning>
+Signatures must be in the same order as the actions array.
+</Warning>
 
 </Step>
 
@@ -256,15 +292,17 @@ When using the WebView data-collection approach, you do **not** pass `collectedD
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When `collectData.url` is present, display the URL in a WebView using `webview_flutter` (v4.10.0+). Add dependencies:
+When `selectedOption.collectData.url` is present, display the URL in a WebView using `webview_flutter` (v4.10.0+). Add dependencies:
 
 ```yaml
 dependencies:
   webview_flutter: ^4.10.0
   url_launcher: ^6.1.0
 ```
+
+<WebViewBestPractices />
 
 ```dart
 import 'dart:convert';
@@ -375,14 +413,14 @@ class PaymentService {
       final paymentId = optionsResponse.paymentId;
       final optionId = selectedOption.id;
 
-      // Step 3: Collect data via WebView if required.
+      // Step 3: Collect data via WebView if required for selected option.
       // This must happen BEFORE fetching the required payment actions —
       // the backend rejects the actions request with 400 "IC data required"
       // for options needing Information Capture if data wasn't collected first.
       // The WebView submits the data directly to the backend, so it is NOT
       // passed to confirmPayment later.
-      if (optionsResponse.collectData?.url != null) {
-        await showDataCollectionWebView(optionsResponse.collectData!.url);
+      if (selectedOption.collectData?.url != null) {
+        await showDataCollectionWebView(selectedOption.collectData!.url);
       }
 
       // Step 4: Get required payment actions (if not already in the option)
@@ -460,19 +498,9 @@ class PaymentService {
 }
 ```
 
-## Direct Access
-
-You can also access the underlying `WalletConnectPay` instance directly if needed:
-
-```dart
-final payClient = walletKit.pay;
-// Use payClient methods directly
-final response = await payClient.getPaymentOptions(request: request);
-```
-
 ## API Reference
 
-### ReownWalletKit Pay Methods
+**ReownWalletKit Pay Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -482,9 +510,9 @@ final response = await payClient.getPaymentOptions(request: request);
 | `confirmPayment({required ConfirmPaymentRequest request})` | Confirm and finalize payment |
 | `pay` | Access the underlying WalletConnectPay instance |
 
-### Models
+**Models**
 
-#### GetPaymentOptionsRequest
+**GetPaymentOptionsRequest**
 
 ```dart
 GetPaymentOptionsRequest({
@@ -494,7 +522,7 @@ GetPaymentOptionsRequest({
 })
 ```
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```dart
 PaymentOptionsResponse({
@@ -506,7 +534,7 @@ PaymentOptionsResponse({
 })
 ```
 
-#### PaymentResultInfo
+**PaymentResultInfo**
 
 ```dart
 class PaymentResultInfo {
@@ -515,7 +543,7 @@ class PaymentResultInfo {
 }
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```dart
 PaymentInfo({
@@ -527,7 +555,7 @@ PaymentInfo({
 })
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```dart
 PaymentOption({
@@ -536,10 +564,11 @@ PaymentOption({
   required PayAmount amount,
   @JsonKey(name: 'etaS') required int etaSeconds,
   required List<Action> actions,
+  CollectDataAction? collectData,  // Per-option data collection (null if not required)
 })
 ```
 
-#### ConfirmPaymentRequest
+**ConfirmPaymentRequest**
 
 ```dart
 ConfirmPaymentRequest({
@@ -550,7 +579,7 @@ ConfirmPaymentRequest({
 })
 ```
 
-#### ConfirmPaymentResponse
+**ConfirmPaymentResponse**
 
 ```dart
 ConfirmPaymentResponse({
@@ -561,7 +590,7 @@ ConfirmPaymentResponse({
 })
 ```
 
-#### PaymentStatus
+**PaymentStatus**
 
 ```dart
 enum PaymentStatus {
@@ -574,7 +603,7 @@ enum PaymentStatus {
 }
 ```
 
-#### CollectDataAction
+**CollectDataAction**
 
 ```dart
 class CollectDataAction {
@@ -611,7 +640,7 @@ All errors include:
 - `details`: Additional error details
 - `stacktrace`: Stack trace
 
-### Example Error Handling
+**Example Error Handling**
 
 ```dart
 try {
@@ -647,16 +676,5 @@ try {
 
 9. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-10. **WebView Data Collection**: When `collectData.url` is present, display the URL in a WebView using `webview_flutter` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+10. **WebView Data Collection**: When `selectedOption.collectData.url` is present, display the URL in a WebView using `webview_flutter` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
 
-## Examples
-
-For a complete example implementation with UI components showing the full payment flow, see the [reown_walletkit example](https://github.com/reown-com/reown_flutter/tree/master/packages/reown_walletkit/example/lib/walletconnect_pay).
-
-The example demonstrates:
-- Payment link detection and processing
-- Payment options retrieval with UI
-- Data collection for compliance (KYB/KYC)
-- Payment details display
-- Transaction signing and confirmation
-- Payment status polling and result display

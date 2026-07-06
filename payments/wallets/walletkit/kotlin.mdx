@@ -206,7 +206,7 @@ viewModelScope.launch {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-Some payments require additional user information. After the user selects an option, check for `collectData` on that option and complete data collection **before** fetching the required actions — the backend rejects the actions request if data collection is required but not yet captured:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
@@ -222,12 +222,17 @@ selectedOption.collectData?.let { collectAction ->
             put("dob", "1990-01-15")
             put("pobAddress", "123 Main St, New York, NY 10001")
         }.toString()
+        // Encode prefill as base64url (URL-safe, no padding)
         val prefillBase64 = Base64.encodeToString(
             prefillJson.toByteArray(),
-            Base64.NO_WRAP or Base64.URL_SAFE
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
         )
         val webViewUrl = Uri.parse(url).buildUpon()
             .appendQueryParameter("prefill", prefillBase64)
+            // Optional appearance params (see "Form URL parameters"):
+            .appendQueryParameter("theme", "dark") // "light" | "dark"
+            // themeVariables is a base64url string exported from the Pay Dashboard:
+            // .appendQueryParameter("themeVariables", themeVariables)
             .build().toString()
 
         // Show WebView for this specific option and wait for IC_COMPLETE message
@@ -237,10 +242,6 @@ selectedOption.collectData?.let { collectAction ->
 ```
 
 <WebViewMessageTypes />
-
-<Note>
-The WebView submits the collected data directly to the backend. You only receive an `IC_COMPLETE`/`IC_ERROR` signal — you do **not** pass `collectedData` to `confirmPayment`.
-</Note>
 
 </Step>
 
@@ -377,9 +378,11 @@ confirmResult.onSuccess { response ->
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When a selected option has `collectData.url` present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices />
 
 ```kotlin
 import android.webkit.JavascriptInterface
@@ -549,11 +552,11 @@ class PaymentViewModel : ViewModel() {
 
 ## API Reference
 
-### WalletKit.Pay
+**WalletKit.Pay**
 
 The payment operations object within WalletKit.
 
-#### Methods
+**Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -562,9 +565,9 @@ The payment operations object within WalletKit.
 | `getRequiredPaymentActions(params)` | Get actions requiring signatures |
 | `confirmPayment(params)` | Confirm and finalize payment |
 
-### Parameters
+**Parameters**
 
-#### Wallet.Params.RequiredPaymentActions
+**Wallet.Params.RequiredPaymentActions**
 
 ```kotlin
 data class RequiredPaymentActions(
@@ -573,7 +576,7 @@ data class RequiredPaymentActions(
 )
 ```
 
-#### Wallet.Params.ConfirmPayment
+**Wallet.Params.ConfirmPayment**
 
 ```kotlin
 data class ConfirmPayment(
@@ -585,7 +588,7 @@ data class ConfirmPayment(
 
 ## Data Models
 
-### Wallet.Model.PaymentOptionsResponse
+**Wallet.Model.PaymentOptionsResponse**
 
 ```kotlin
 data class PaymentOptionsResponse(
@@ -602,7 +605,7 @@ data class PaymentResultInfo(
 )
 ```
 
-### Wallet.Model.PaymentInfo
+**Wallet.Model.PaymentInfo**
 
 ```kotlin
 data class PaymentInfo(
@@ -618,7 +621,7 @@ data class MerchantInfo(
 )
 ```
 
-### Wallet.Model.PaymentOption
+**Wallet.Model.PaymentOption**
 
 ```kotlin
 data class PaymentOption(
@@ -630,7 +633,7 @@ data class PaymentOption(
 )
 ```
 
-### Wallet.Model.PaymentAmount
+**Wallet.Model.PaymentAmount**
 
 ```kotlin
 data class PaymentAmount(
@@ -649,7 +652,7 @@ data class PaymentAmountDisplay(
 )
 ```
 
-### Wallet.Model.WalletRpcAction
+**Wallet.Model.WalletRpcAction**
 
 ```kotlin
 data class WalletRpcAction(
@@ -659,7 +662,7 @@ data class WalletRpcAction(
 )
 ```
 
-### Wallet.Model.CollectDataAction
+**Wallet.Model.CollectDataAction**
 
 ```kotlin
 data class CollectDataAction(
@@ -668,7 +671,7 @@ data class CollectDataAction(
 )
 ```
 
-### Wallet.Model.ConfirmPaymentResponse
+**Wallet.Model.ConfirmPaymentResponse**
 
 ```kotlin
 data class ConfirmPaymentResponse(
@@ -679,7 +682,7 @@ data class ConfirmPaymentResponse(
 )
 ```
 
-### Wallet.Model.PaymentStatus
+**Wallet.Model.PaymentStatus**
 
 | Status | Description |
 |--------|-------------|

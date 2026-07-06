@@ -1,9 +1,10 @@
-### WebView Data Collection Best Practices
+**Data Collection Best Practices**
 
-- **Display prominently**: Show the WebView full-screen or as a prominent modal so users can interact with the form easily
-- **Loading indicator**: Show a loading indicator while the WebView page loads
+- **Display prominently**: Show the form full-screen or as a prominent modal so users can interact with it easily
+- **Loading indicator**: Show a loading indicator while the form loads
 - **Handle errors**: Listen for `IC_ERROR` messages and display a user-facing error message with an option to retry
-- **External links**: Open Terms & Conditions and Privacy Policy links in the system browser rather than navigating within the WebView
+- **External links**: Open Terms & Conditions and Privacy Policy links in the system browser rather than navigating within the form
 - **Domain restriction**: Only allow navigation to WalletConnect pay domains and HTTPS URLs
-- **Back navigation**: Handle back/dismiss gracefully — confirm cancellation with the user before closing the WebView mid-flow
-- **Keyboard behavior**: Test that the soft keyboard appears and behaves correctly when users tap on form inputs within the WebView
+- **Back navigation**: Handle back/dismiss gracefully — confirm cancellation with the user before closing the form mid-flow
+- **Keyboard behavior**: Test that the soft keyboard appears and behaves correctly when users tap on form inputs
+- **Theme to match your brand**: Pass `theme=light` or `theme=dark` to match your wallet's active color mode, and apply brand tokens with `themeVariables` exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com). See [Form URL parameters](#form-url-parameters).

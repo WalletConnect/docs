@@ -168,9 +168,11 @@ if (options.info) {
   console.log("Amount:", options.info.amount.display.assetSymbol, options.info.amount.value);
 }
 
-// Check if data collection is required
-if (options.collectData) {
-  console.log("Required fields:", options.collectData.fields);
+// Check which options require data collection (per-option)
+for (const option of options.options) {
+  if (option.collectData) {
+    console.log(`Option ${option.id} requires info capture`);
+  }
 }
 ```
 
@@ -178,21 +180,29 @@ if (options.collectData) {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-Some payments may require additional user data. If the selected option requires data collection, complete it **before** fetching the required actions — the backend rejects the actions request unless the information has been captured first:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
 ```javascript
-if (options.collectData?.url) {
-  // Use the "required" list from options.collectData.schema to determine which fields to prefill
+if (selectedOption.collectData?.url) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
   const prefillData = {
     fullName: "John Doe",
     dob: "1990-01-15",
     pobAddress: "123 Main St, New York, NY 10001",
   };
-  const prefillBase64 = btoa(JSON.stringify(prefillData));
-  const separator = options.collectData.url.includes("?") ? "&" : "?";
-  const webViewUrl = `${options.collectData.url}${separator}prefill=${prefillBase64}`;
+  // Encode prefill as base64url (URL-safe, no padding)
+  const prefill = btoa(JSON.stringify(prefillData))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  // Optional appearance params (see "Form URL parameters"):
+  //   theme=light|dark — base color mode
+  //   themeVariables=<base64url> — exported from the WalletConnect Pay Dashboard
+  const themeVariables = "<base64url-exported-from-dashboard>";
+  const query = `prefill=${prefill}&theme=dark&themeVariables=${themeVariables}`;
+  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
+  const webViewUrl = `${selectedOption.collectData.url}${separator}${query}`;
 
   // Show WebView and wait for IC_COMPLETE message
   showDataCollectionWebView(webViewUrl);
@@ -289,13 +299,15 @@ if (result.status === "succeeded") {
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When `collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
+When `selectedOption.collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
 
 ```bash
 npm install react-native-webview@13.16.0
 ```
+
+<WebViewBestPractices />
 
 ```jsx
 import React, { useCallback } from "react";
@@ -347,11 +359,19 @@ function PayDataCollectionWebView({ url, onComplete, onError }) {
   );
 }
 
-function buildPrefillUrl(baseUrl, prefillData) {
-  if (Object.keys(prefillData).length === 0) return baseUrl;
-  const base64 = btoa(JSON.stringify(prefillData));
+function buildFormUrl(baseUrl, options = {}) {
+  const params = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
   const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}prefill=${base64}`;
+  return `${baseUrl}${separator}${params.join("&")}`;
 }
 ```
 
@@ -414,8 +434,8 @@ class PaymentManager {
 
       // Step 3: Collect data via WebView if required — must happen BEFORE
       // fetching the required actions, otherwise the backend rejects the request
-      if (options.collectData?.url) {
-        await this.showDataCollectionWebView(options.collectData.url);
+      if (selectedOption.collectData?.url) {
+        await this.showDataCollectionWebView(selectedOption.collectData.url);
       }
 
       // Step 4: Get required actions
@@ -463,17 +483,17 @@ class PaymentManager {
 
 ## API Reference
 
-### WalletKit Pay Methods
+**WalletKit Pay Methods**
 
 Pay methods are accessed via `walletkit.pay.*`.
 
-#### Utility Functions
+**Utility Functions**
 
 | Function | Description |
 |----------|-------------|
 | `isPaymentLink(uri: string): boolean` | Check if URI is a payment link (imported from `@reown/walletkit`) |
 
-#### Instance Methods (walletkit.pay)
+**Instance Methods (walletkit.pay)**
 
 | Method | Description |
 |--------|-------------|
@@ -481,9 +501,9 @@ Pay methods are accessed via `walletkit.pay.*`.
 | `getRequiredPaymentActions(params)` | Get signing actions for a payment option |
 | `confirmPayment(params)` | Confirm and execute the payment |
 
-### Parameters
+**Parameters**
 
-#### GetPaymentOptionsParams
+**GetPaymentOptionsParams**
 
 ```typescript
 interface GetPaymentOptionsParams {
@@ -493,7 +513,7 @@ interface GetPaymentOptionsParams {
 }
 ```
 
-#### GetRequiredPaymentActionsParams
+**GetRequiredPaymentActionsParams**
 
 ```typescript
 interface GetRequiredPaymentActionsParams {
@@ -502,7 +522,7 @@ interface GetRequiredPaymentActionsParams {
 }
 ```
 
-#### ConfirmPaymentParams
+**ConfirmPaymentParams**
 
 ```typescript
 interface ConfirmPaymentParams {
@@ -512,9 +532,9 @@ interface ConfirmPaymentParams {
 }
 ```
 
-### Response Types
+**Response Types**
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```typescript
 interface PaymentOptionsResponse {
@@ -531,7 +551,7 @@ interface PaymentResultInfo {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```typescript
 interface PaymentOption {
@@ -539,10 +559,11 @@ interface PaymentOption {
   amount: PayAmount;        // Amount in this asset
   etaS: number;             // Estimated time to complete (seconds)
   actions: Action[];        // Required signing actions
+  collectData?: CollectDataAction;  // Per-option data collection (undefined if not required)
 }
 ```
 
-#### Action
+**Action**
 
 ```typescript
 interface Action {
@@ -556,7 +577,7 @@ interface WalletRpcAction {
 }
 ```
 
-#### ConfirmPaymentResponse
+**ConfirmPaymentResponse**
 
 ```typescript
 interface ConfirmPaymentResponse {
@@ -575,7 +596,7 @@ type PaymentStatus =
   | "cancelled";
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```typescript
 interface PaymentInfo {
@@ -592,7 +613,7 @@ interface MerchantInfo {
 }
 ```
 
-#### PayAmount
+**PayAmount**
 
 ```typescript
 interface PayAmount {
@@ -610,7 +631,7 @@ interface AmountDisplay {
 }
 ```
 
-#### CollectDataAction
+**CollectDataAction**
 
 ```typescript
 interface CollectDataAction {
@@ -662,4 +683,4 @@ try {
 
 9. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-10. **WebView Data Collection**: When `collectData.url` is present, display the URL in a WebView using `react-native-webview` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+10. **WebView Data Collection**: When `selectedOption.collectData.url` is present, display the URL in a WebView using `react-native-webview` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.

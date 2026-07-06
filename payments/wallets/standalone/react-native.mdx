@@ -40,7 +40,7 @@ yarn add @walletconnect/pay
 </Tab>
 </Tabs>
 
-### React Native Setup
+**React Native Setup**
 
 This SDK requires the WalletConnect React Native native module. Make sure you have `@walletconnect/react-native-compat` installed and linked in your React Native project:
 
@@ -57,7 +57,7 @@ The SDK uses a provider abstraction that allows different implementations:
 
 The SDK auto-detects the best available provider for your environment.
 
-## Configuration
+## Initialization
 
 Initialize the WalletConnect Pay client with your credentials:
 
@@ -71,7 +71,7 @@ const client = new WalletConnectPay({
 });
 ```
 
-### Configuration Parameters
+**Configuration Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -199,7 +199,7 @@ for (const option of options.options) {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-Some payments may require additional user data. Check for `collectData` on the selected payment option. If present, complete data collection **before** fetching the required actions — the backend rejects the actions request unless the information has been captured first:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
@@ -212,11 +212,19 @@ if (selectedOption.collectData?.url) {
     dob: "1990-01-15",
     pobAddress: "123 Main St, New York, NY 10001",
   };
-  const prefillBase64 = btoa(JSON.stringify(prefillData));
-  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
-  const webViewUrl = `${selectedOption.collectData.url}${separator}prefill=${prefillBase64}`;
+  // Encode prefill as base64url (URL-safe, no padding)
+  const prefill = btoa(JSON.stringify(prefillData))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-  // Show WebView for this specific option — see WebView Implementation section below
+  // Optional appearance params (see "Form URL parameters"):
+  //   theme=light|dark — base color mode
+  //   themeVariables=<base64url> — exported from the WalletConnect Pay Dashboard
+  const themeVariables = "<base64url-exported-from-dashboard>";
+  const query = `prefill=${prefill}&theme=dark&themeVariables=${themeVariables}`;
+  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
+  const webViewUrl = `${selectedOption.collectData.url}${separator}${query}`;
+
+  // Show WebView for this specific option — see Data Collection Implementation section below
   showDataCollectionWebView(webViewUrl);
 }
 ```
@@ -305,13 +313,15 @@ if (result.status === "succeeded") {
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When a selected option has `collectData.url` present, display the URL in a WebView using `react-native-webview`. Install the dependency:
+When `selectedOption.collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
 
 ```bash
 npm install react-native-webview@13.16.0
 ```
+
+<WebViewBestPractices />
 
 ```tsx
 import React, { useCallback } from "react";
@@ -377,14 +387,26 @@ function PayDataCollectionWebView({
   );
 }
 
-function buildPrefillUrl(
+function buildFormUrl(
   baseUrl: string,
-  prefillData: Record<string, string>
+  options: {
+    prefill?: Record<string, string>;
+    theme?: "light" | "dark";
+    themeVariables?: string; // base64url string exported from the Pay Dashboard
+  } = {}
 ): string {
-  if (Object.keys(prefillData).length === 0) return baseUrl;
-  const base64 = btoa(JSON.stringify(prefillData));
+  const params: string[] = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
   const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}prefill=${base64}`;
+  return `${baseUrl}${separator}${params.join("&")}`;
 }
 ```
 
@@ -507,72 +529,19 @@ import { NativeModules } from "react-native";
 setNativeModule(NativeModules.RNWalletConnectPay);
 ```
 
-## Error Handling
-
-The SDK throws typed errors for different failure scenarios:
-
-```typescript
-import { 
-  PayError, 
-  PaymentOptionsError, 
-  PaymentActionsError,
-  ConfirmPaymentError,
-  NativeModuleNotFoundError 
-} from "@walletconnect/pay";
-
-try {
-  const options = await client.getPaymentOptions({
-    paymentLink: link,
-    accounts,
-  });
-} catch (error) {
-  if (error instanceof PaymentOptionsError) {
-    console.error("Failed to get options:", error.originalMessage);
-  } else if (error instanceof PayError) {
-    console.error("Pay error:", error.code, error.message);
-  }
-}
-```
-
-### Error Types
-
-| Error Class | Description |
-|-------------|-------------|
-| `PayError` | Base error class for all Pay SDK errors |
-| `PaymentOptionsError` | Error when fetching payment options |
-| `PaymentActionsError` | Error when fetching required payment actions |
-| `ConfirmPaymentError` | Error when confirming payment |
-| `NativeModuleNotFoundError` | Error when native module is not available |
-
-### Error Codes
-
-The `PayError` class includes a `code` property with one of the following values:
-
-```typescript
-type PayErrorCode =
-  | "JSON_PARSE"
-  | "JSON_SERIALIZE"
-  | "PAYMENT_OPTIONS"
-  | "PAYMENT_REQUEST"
-  | "CONFIRM_PAYMENT"
-  | "NATIVE_MODULE_NOT_FOUND"
-  | "INITIALIZATION_ERROR"
-  | "UNKNOWN";
-```
-
 ## API Reference
 
-### WalletConnectPay
+**WalletConnectPay**
 
 Main client for payment operations.
 
-#### Constructor
+**Constructor**
 
 ```typescript
 new WalletConnectPay(options: WalletConnectPayOptions)
 ```
 
-#### Methods
+**Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -581,9 +550,9 @@ new WalletConnectPay(options: WalletConnectPayOptions)
 | `confirmPayment(params)` | Confirm and execute the payment |
 | `static isAvailable()` | Check if a provider is available |
 
-### Data Types
+**Data Types**
 
-#### PaymentStatus
+**PaymentStatus**
 
 ```typescript
 type PaymentStatus = 
@@ -594,19 +563,19 @@ type PaymentStatus =
   | "expired";
 ```
 
-#### PayProviderType
+**PayProviderType**
 
 ```typescript
 type PayProviderType = "native" | "wasm";
 ```
 
-#### CollectDataFieldType
+**CollectDataFieldType**
 
 ```typescript
 type CollectDataFieldType = "text" | "date";
 ```
 
-#### Method Parameters
+**Method Parameters**
 
 ```typescript
 interface GetPaymentOptionsParams {
@@ -635,7 +604,7 @@ interface ConfirmPaymentParams {
 }
 ```
 
-#### Response Types
+**Response Types**
 
 ```typescript
 interface PaymentOptionsResponse {
@@ -668,7 +637,7 @@ interface ConfirmPaymentResponse {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```typescript
 interface PaymentOption {
@@ -685,7 +654,7 @@ interface PaymentOption {
 }
 ```
 
-#### Action
+**Action**
 
 ```typescript
 interface Action {
@@ -702,7 +671,7 @@ interface WalletRpcAction {
 }
 ```
 
-#### Amount Types
+**Amount Types**
 
 ```typescript
 interface PayAmount {
@@ -728,7 +697,7 @@ interface AmountDisplay {
 }
 ```
 
-#### Payment Info Types
+**Payment Info Types**
 
 ```typescript
 interface PaymentInfo {
@@ -761,7 +730,7 @@ interface BuyerInfo {
 }
 ```
 
-#### Collect Data Types
+**Collect Data Types**
 
 ```typescript
 interface CollectDataAction {
@@ -770,6 +739,59 @@ interface CollectDataAction {
   /** JSON schema describing required fields */
   schema?: string;
 }
+```
+
+## Error Handling
+
+The SDK throws typed errors for different failure scenarios:
+
+```typescript
+import { 
+  PayError, 
+  PaymentOptionsError, 
+  PaymentActionsError,
+  ConfirmPaymentError,
+  NativeModuleNotFoundError 
+} from "@walletconnect/pay";
+
+try {
+  const options = await client.getPaymentOptions({
+    paymentLink: link,
+    accounts,
+  });
+} catch (error) {
+  if (error instanceof PaymentOptionsError) {
+    console.error("Failed to get options:", error.originalMessage);
+  } else if (error instanceof PayError) {
+    console.error("Pay error:", error.code, error.message);
+  }
+}
+```
+
+**Error Types**
+
+| Error Class | Description |
+|-------------|-------------|
+| `PayError` | Base error class for all Pay SDK errors |
+| `PaymentOptionsError` | Error when fetching payment options |
+| `PaymentActionsError` | Error when fetching required payment actions |
+| `ConfirmPaymentError` | Error when confirming payment |
+| `NativeModuleNotFoundError` | Error when native module is not available |
+
+**Error Codes**
+
+The `PayError` class includes a `code` property with one of the following values:
+
+```typescript
+type PayErrorCode =
+  | "JSON_PARSE"
+  | "JSON_SERIALIZE"
+  | "PAYMENT_OPTIONS"
+  | "PAYMENT_REQUEST"
+  | "CONFIRM_PAYMENT"
+  | "NATIVE_MODULE_NOT_FOUND"
+  | "INITIALIZATION_ERROR"
+  | "UNKNOWN";
 ```
 
 ## Best Practices

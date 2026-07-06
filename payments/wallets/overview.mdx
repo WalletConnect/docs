@@ -138,7 +138,7 @@ Wallets can earn interchange-like revenue on eligible WalletConnect Pay payments
   </Accordion>
 
   <Accordion title="What if my wallet already has the required data?">
-    Wallets that already have verified user PII (e.g. a neobank, a card issuing wallet) can prefill the WebView form by appending a `?prefill=<base64-json>` query parameter to the WebView URL. The `required` list from the `collectDataAction.schema` tells you which fields the form expects (e.g., `fullName`, `dob`, `pobAddress`). The user will still see the form but with pre-populated fields, reducing friction.
+    Wallets that already have verified user PII (e.g. a neobank, a card issuing wallet) can prefill the WebView form by appending a `?prefill=<base64url-json>` query parameter to the WebView URL. The `required` list from the `collectDataAction.schema` tells you which fields the form expects (e.g., `fullName`, `dob`, `pobAddress`). The user will still see the form but with pre-populated fields, reducing friction.
   </Accordion>
 
   <Accordion title="How does this work technically?">
@@ -197,5 +197,14 @@ Wallets can earn interchange-like revenue on eligible WalletConnect Pay payments
     If wallets choose to skip the WebView form, they must ensure the user has accepted:
     - [WalletConnect Terms and Conditions](https://walletconnect.com/terms)
     - [WalletConnect Privacy Policy](https://walletconnect.com/privacy)
+  </Accordion>
+
+  <Accordion title="Can wallets customize the look of the form?">
+    Yes. The hosted form accepts two optional appearance parameters on its URL:
+
+    - `theme=light` or `theme=dark` — sets the form's base color mode. Match it to your wallet's active mode.
+    - `themeVariables=<base64url>` — overrides design tokens (font, font size, some colors, button border radius, and input border radius). Generate and export this value from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) and append it to the form URL verbatim.
+
+    Both are optional and independent — when omitted, the form uses its default styling. See your platform's integration guide for the URL-building code.
   </Accordion>
 </AccordionGroup>

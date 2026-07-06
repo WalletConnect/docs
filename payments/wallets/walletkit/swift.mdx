@@ -34,7 +34,7 @@ For a complete working example, check out our sample wallet implementation:
 
 ## Installation
 
-### Swift Package Manager
+**Swift Package Manager**
 
 Add ReownWalletKit to your `Package.swift`:
 
@@ -59,7 +59,7 @@ WalletConnectPay is automatically included as a dependency of WalletKit.
 Check the [GitHub releases](https://github.com/reown-com/reown-swift/releases) for the latest version.
 </Info>
 
-## Configuration
+## Initialization
 
 When using WalletKit, Pay is automatically configured using your project's `Networking.projectId`. No separate configuration is needed.
 
@@ -101,6 +101,25 @@ The `isPaymentLink` utility method detects WalletConnect Pay links by checking f
 - `pay.` hosts (e.g., pay.walletconnect.com)
 - `pay=` parameter in WalletConnect URIs
 - `pay_` prefix in bare payment IDs
+
+Call it wherever your wallet receives a link — from a deep link or a scanned QR code:
+
+```swift
+// Deep link opened from outside your app (SceneDelegate or AppDelegate)
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    if WalletKit.isPaymentLink(url.absoluteString) {
+        startPaymentFlow(paymentLink: url.absoluteString)
+    }
+}
+
+// QR code payload
+func handleScannedQR(_ content: String) {
+    if WalletKit.isPaymentLink(content) {
+        startPaymentFlow(paymentLink: content)
+    }
+}
+```
 
 ## Payment Flow
 
@@ -185,7 +204,7 @@ for option in options.options {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-If the selected option has `collectData` set, you must collect user information **before** fetching the required actions. The backend requires Information Capture to be completed first and will reject `getRequiredPaymentActions` otherwise:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
@@ -199,10 +218,18 @@ if let collectData = selectedOption.collectData, let url = collectData.url {
         "pobAddress": "123 Main St, New York, NY 10001"
     ]
     let jsonData = try JSONSerialization.data(withJSONObject: prefillData)
+    // Encode prefill as base64url (URL-safe, no padding)
     let prefillBase64 = jsonData.base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
     var components = URLComponents(string: url)!
     var queryItems = components.queryItems ?? []
     queryItems.append(URLQueryItem(name: "prefill", value: prefillBase64))
+    // Optional appearance params (see "Form URL parameters"):
+    queryItems.append(URLQueryItem(name: "theme", value: "dark")) // "light" | "dark"
+    // themeVariables is a base64url string exported from the WalletConnect Pay Dashboard:
+    // queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
     components.queryItems = queryItems
     let webViewUrl = components.string!
 
@@ -212,10 +239,6 @@ if let collectData = selectedOption.collectData, let url = collectData.url {
 ```
 
 <WebViewMessageTypes />
-
-<Note>
-The WebView submits the captured data directly to the backend. You do **not** pass `collectedData` to `confirmPayment` when using the WebView approach.
-</Note>
 
 </Step>
 
@@ -342,9 +365,11 @@ case .cancelled:
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When a selected option has `collectData.url` present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices />
 
 ```swift
 import WebKit
@@ -534,48 +559,19 @@ class PaymentManager {
 }
 ```
 
-## Deep Link Handling
-
-To handle payment links opened from outside your app:
-
-```swift
-// In SceneDelegate or AppDelegate
-func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-    guard let url = URLContexts.first?.url else { return }
-    
-    // Use isPaymentLink for reliable detection
-    if WalletKit.isPaymentLink(url.absoluteString) {
-        startPaymentFlow(paymentLink: url.absoluteString)
-    }
-}
-```
-
-## QR Code Scanning
-
-Payment links can be encoded as QR codes. Use the `isPaymentLink` utility for detection:
-
-```swift
-func handleScannedQR(_ content: String) {
-    if WalletKit.isPaymentLink(content) {
-        // WalletConnect Pay QR code
-        startPaymentFlow(paymentLink: content)
-    }
-}
-```
-
 ## API Reference
 
-### WalletKit Integration
+**WalletKit Integration**
 
 When using WalletKit, Pay methods are accessed via `WalletKit.instance.Pay.*`.
 
-#### Static Methods
+**Static Methods**
 
 | Method | Description |
 |--------|-------------|
 | `WalletKit.isPaymentLink(_:)` | Check if a string is a payment link (can call before `configure()`) |
 
-#### Instance Methods (WalletKit.instance.Pay)
+**Instance Methods (WalletKit.instance.Pay)**
 
 | Method | Description |
 |--------|-------------|
@@ -584,9 +580,9 @@ When using WalletKit, Pay methods are accessed via `WalletKit.instance.Pay.*`.
 | `getRequiredPaymentActions(paymentId:optionId:)` | Get signing actions for a payment option |
 | `confirmPayment(paymentId:optionId:signatures:maxPollMs:)` | Confirm and execute the payment |
 
-### Data Types
+**Data Types**
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```swift
 struct PaymentOptionsResponse {
@@ -603,7 +599,7 @@ struct PaymentResultInfo {
 }
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```swift
 struct PaymentInfo {
@@ -615,7 +611,7 @@ struct PaymentInfo {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```swift
 struct PaymentOption {
@@ -627,7 +623,7 @@ struct PaymentOption {
 }
 ```
 
-#### PayAmount
+**PayAmount**
 
 ```swift
 struct PayAmount {
@@ -645,7 +641,7 @@ struct AmountDisplay {
 }
 ```
 
-#### Action & WalletRpcAction
+**Action & WalletRpcAction**
 
 ```swift
 struct Action {
@@ -659,7 +655,7 @@ struct WalletRpcAction {
 }
 ```
 
-#### CollectDataAction
+**CollectDataAction**
 
 ```swift
 struct CollectDataAction {
@@ -668,7 +664,7 @@ struct CollectDataAction {
 }
 ```
 
-#### ConfirmPaymentResultResponse
+**ConfirmPaymentResultResponse**
 
 ```swift
 struct ConfirmPaymentResultResponse {
@@ -679,7 +675,7 @@ struct ConfirmPaymentResultResponse {
 }
 ```
 
-#### PaymentStatus
+**PaymentStatus**
 
 ```swift
 enum PaymentStatus {
@@ -696,7 +692,7 @@ enum PaymentStatus {
 
 The SDK throws specific error types for different failure scenarios:
 
-### GetPaymentOptionsError
+**GetPaymentOptionsError**
 
 | Error | Description |
 |-------|-------------|
@@ -708,7 +704,7 @@ The SDK throws specific error types for different failure scenarios:
 | `.http` | Network error |
 | `.internalError` | Server error |
 
-### GetPaymentRequestError
+**GetPaymentRequestError**
 
 | Error | Description |
 |-------|-------------|
@@ -717,7 +713,7 @@ The SDK throws specific error types for different failure scenarios:
 | `.invalidAccount` | Invalid account format |
 | `.http` | Network error |
 
-### ConfirmPaymentError
+**ConfirmPaymentError**
 
 | Error | Description |
 |-------|-------------|

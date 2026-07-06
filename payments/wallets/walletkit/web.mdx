@@ -5,6 +5,8 @@ sidebarTitle: "Web/Node.js"
 ---
 
 import AppIdSnippet from "/snippets/app-id.mdx";
+import WebViewOverview from "/snippets/webview-data-collection-overview.mdx";
+import WebViewBestPractices from "/snippets/webview-data-collection-best-practices.mdx";
 
 This documentation covers integrating WalletConnect Pay through WalletKit for Web/Node.js wallets. This approach provides a unified API where Pay is built into WalletKit, simplifying the integration for wallet developers.
 
@@ -165,9 +167,11 @@ if (options.info) {
   console.log("Amount:", options.info.amount.display.assetSymbol, options.info.amount.value);
 }
 
-// Check if data collection is required
-if (options.collectData) {
-  console.log("Required fields:", options.collectData.fields);
+// Check which options require data collection (per-option)
+for (const option of options.options) {
+  if (option.collectData) {
+    console.log(`Option ${option.id} requires info capture`);
+  }
 }
 ```
 
@@ -175,55 +179,29 @@ if (options.collectData) {
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-After the user selects an option — and **before** fetching required actions — check whether the selected option requires data collection. If it does, the data must be captured first, otherwise fetching the required actions will fail.
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
-## Iframe-Based Data Collection
-
-When a payment requires user information (e.g., for Travel Rule compliance), the SDK returns a `collectData` field on individual payment options. Each option may independently require data collection — some options may require it while others don't.
-
-### Recommended Flow (Per-Option)
-
-The recommended approach is to display all payment options upfront, then handle data collection only when the user selects an option that requires it:
-
-1. Call `getPaymentOptions` and display all available options to the user
-2. Show a visual indicator (e.g., "Info required" badge) on options where `option.collectData` is present
-3. When the user selects an option, check `selectedOption.collectData`
-4. If present, open `selectedOption.collectData.url` in an iframe within your wallet
-5. Optionally append a `prefill=<base64-json>` query parameter with known user data (e.g., name, date of birth, address). Use proper URL building to handle existing query parameters.
-6. Listen for `postMessage` events: `IC_COMPLETE` (success) or `IC_ERROR` (failure)
-7. On `IC_COMPLETE`, proceed to `getRequiredPaymentActions()` and then `confirmPayment()` **without** passing `collectedData` — the iframe submits data directly to the backend
-
-### Decision Matrix
-
-| Response `collectData` | `option.collectData` | Behavior |
-|---|---|---|
-| present | present | Option requires IC — use `option.collectData.url` |
-| present | `null` | Option does NOT require IC (others might) — skip IC for this option |
-| `null` | `null` | No IC needed for any option |
-
-<Info>
-The `collectData` also includes a `schema` field — a JSON schema string describing the required fields. The `required` list in this schema tells you which fields the form expects. Wallets can use these field names as keys when building the prefill JSON object. For example, if the schema's `required` array contains `["fullName", "dob", "pobAddress"]`, you can prefill with `{"fullName": "...", "dob": "...", "pobAddress": "..."}`.
-</Info>
-
-<Note>
-The top-level `collectData` on the payment options response is still available for backward compatibility. However, the per-option `collectData` is the recommended approach as it provides more granular control over the flow.
-</Note>
-
-<Warning>
-When using the iframe approach, do **not** pass `collectedData` to `confirmPayment()`. The iframe handles data submission directly.
-</Warning>
+<WebViewOverview />
 
 ```javascript
-if (options.collectData?.url) {
-  // Use the "required" list from options.collectData.schema to determine which fields to prefill
+if (selectedOption.collectData?.url) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
   const prefillData = {
     fullName: "John Doe",
     dob: "1990-01-15",
     pobAddress: "123 Main St, New York, NY 10001",
   };
-  const prefillBase64 = btoa(JSON.stringify(prefillData));
-  const separator = options.collectData.url.includes("?") ? "&" : "?";
-  const iframeUrl = `${options.collectData.url}${separator}prefill=${prefillBase64}`;
+  // Encode prefill as base64url (URL-safe, no padding)
+  const prefill = btoa(JSON.stringify(prefillData))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  // Optional appearance params (see "Form URL parameters"):
+  //   theme=light|dark — base color mode
+  //   themeVariables=<base64url> — exported from the WalletConnect Pay Dashboard
+  const themeVariables = "<base64url-exported-from-dashboard>";
+  const query = `prefill=${prefill}&theme=dark&themeVariables=${themeVariables}`;
+  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
+  const iframeUrl = `${selectedOption.collectData.url}${separator}${query}`;
 
   // Show data collection in an iframe or popup and wait for IC_COMPLETE message
   showDataCollectionView(iframeUrl);
@@ -329,7 +307,9 @@ if (result.status === "succeeded") {
 
 ## Data Collection Implementation
 
-When `collectData.url` is present, display the URL in an iframe or modal. Listen for `postMessage` events to handle completion:
+When `selectedOption.collectData.url` is present, display the URL in an iframe or modal. Listen for `postMessage` events to handle completion:
+
+<WebViewBestPractices />
 
 ```javascript
 function showDataCollectionView(url) {
@@ -370,11 +350,19 @@ function showDataCollectionView(url) {
   });
 }
 
-function buildPrefillUrl(baseUrl, prefillData) {
-  if (Object.keys(prefillData).length === 0) return baseUrl;
-  const base64 = btoa(JSON.stringify(prefillData));
+function buildFormUrl(baseUrl, options = {}) {
+  const params = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
   const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}prefill=${base64}`;
+  return `${baseUrl}${separator}${params.join("&")}`;
 }
 ```
 
@@ -435,11 +423,11 @@ class PaymentManager {
       // Step 2: Let user select an option (simplified - use first option)
       const selectedOption = options.options[0];
 
-      // Step 3: Collect data via iframe if required.
+      // Step 3: Collect data via iframe if required for selected option.
       // This must happen BEFORE fetching required actions, otherwise the
       // backend rejects the fetch for options that require info capture.
-      if (options.collectData?.url) {
-        await this.showDataCollectionView(options.collectData.url);
+      if (selectedOption.collectData?.url) {
+        await this.showDataCollectionView(selectedOption.collectData.url);
       }
 
       // Step 4: Get required actions
@@ -487,17 +475,17 @@ class PaymentManager {
 
 ## API Reference
 
-### WalletKit Pay Methods
+**WalletKit Pay Methods**
 
 Pay methods are accessed via `walletkit.pay.*`.
 
-#### Utility Functions
+**Utility Functions**
 
 | Function | Description |
 |----------|-------------|
 | `isPaymentLink(uri: string): boolean` | Check if URI is a payment link (imported from `@reown/walletkit`) |
 
-#### Instance Methods (walletkit.pay)
+**Instance Methods (walletkit.pay)**
 
 | Method | Description |
 |--------|-------------|
@@ -505,9 +493,9 @@ Pay methods are accessed via `walletkit.pay.*`.
 | `getRequiredPaymentActions(params)` | Get signing actions for a payment option |
 | `confirmPayment(params)` | Confirm and execute the payment |
 
-### Parameters
+**Parameters**
 
-#### GetPaymentOptionsParams
+**GetPaymentOptionsParams**
 
 ```typescript
 interface GetPaymentOptionsParams {
@@ -517,7 +505,7 @@ interface GetPaymentOptionsParams {
 }
 ```
 
-#### GetRequiredPaymentActionsParams
+**GetRequiredPaymentActionsParams**
 
 ```typescript
 interface GetRequiredPaymentActionsParams {
@@ -526,7 +514,7 @@ interface GetRequiredPaymentActionsParams {
 }
 ```
 
-#### ConfirmPaymentParams
+**ConfirmPaymentParams**
 
 ```typescript
 interface ConfirmPaymentParams {
@@ -536,9 +524,9 @@ interface ConfirmPaymentParams {
 }
 ```
 
-### Response Types
+**Response Types**
 
-#### PaymentOptionsResponse
+**PaymentOptionsResponse**
 
 ```typescript
 interface PaymentOptionsResponse {
@@ -555,7 +543,7 @@ interface PaymentResultInfo {
 }
 ```
 
-#### PaymentOption
+**PaymentOption**
 
 ```typescript
 interface PaymentOption {
@@ -563,10 +551,11 @@ interface PaymentOption {
   amount: PayAmount;        // Amount in this asset
   etaS: number;             // Estimated time to complete (seconds)
   actions: Action[];        // Required signing actions
+  collectData?: CollectDataAction;  // Per-option data collection (undefined if not required)
 }
 ```
 
-#### Action
+**Action**
 
 ```typescript
 interface Action {
@@ -580,7 +569,7 @@ interface WalletRpcAction {
 }
 ```
 
-#### ConfirmPaymentResponse
+**ConfirmPaymentResponse**
 
 ```typescript
 interface ConfirmPaymentResponse {
@@ -599,7 +588,7 @@ type PaymentStatus =
   | "cancelled";
 ```
 
-#### PaymentInfo
+**PaymentInfo**
 
 ```typescript
 interface PaymentInfo {
@@ -616,7 +605,7 @@ interface MerchantInfo {
 }
 ```
 
-#### PayAmount
+**PayAmount**
 
 ```typescript
 interface PayAmount {
@@ -634,7 +623,7 @@ interface AmountDisplay {
 }
 ```
 
-#### CollectDataAction
+**CollectDataAction**
 
 ```typescript
 interface CollectDataAction {
@@ -686,4 +675,4 @@ try {
 
 9. **User Data**: Only collect data when `collectData` is present in the response and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
 
-10. **Data Collection**: When `collectData.url` is present, display the URL in an iframe or modal rather than building custom forms. The hosted form handles rendering, validation, and T&C acceptance.
+10. **Data Collection**: When `selectedOption.collectData.url` is present, display the URL in an iframe or modal rather than building custom forms. The hosted form handles rendering, validation, and T&C acceptance.

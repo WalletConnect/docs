@@ -224,12 +224,36 @@ class PaymentOption {
   final PayAmount amount;           // Amount in this option's token
   final int etaSeconds;             // Estimated completion time
   final List<Action> actions;       // Signing actions (may be empty initially)
+  final CollectDataAction? collectData; // Per-option data collection (null if not required)
 }
 ```
 
 ### Step 5: Handle Data Collection via WebView
 
-If `response.collectData` is not null and has a `url`, display the URL in a WebView for data collection. The hosted form handles rendering, validation, and T&C acceptance.
+If the selected option's `collectData` is not null and has a `url`, display the URL in a WebView for data collection. The hosted form handles rendering, validation, and T&C acceptance.
+
+The form URL accepts optional query parameters — append them to `selectedOption.collectData.url` before loading, preserving existing query parameters:
+- `prefill` — base64url-encoded JSON of known user fields. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`).
+- `theme` — `light` or `dark`, to match your wallet's color mode.
+- `themeVariables` — a base64url string exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) that overrides design tokens (font, font size, some colors, button/input border radius). Append it verbatim.
+
+```dart
+String buildFormUrl(
+  String baseUrl, {
+  Map<String, String> prefillData = const {},
+  String? theme,           // "light" or "dark"
+  String? themeVariables,  // base64url string exported from the Pay Dashboard
+}) {
+  final uri = Uri.parse(baseUrl);
+  final params = {...uri.queryParameters};
+  if (prefillData.isNotEmpty) {
+    params['prefill'] = base64Url.encode(utf8.encode(jsonEncode(prefillData))).replaceAll('=', '');
+  }
+  if (theme != null) params['theme'] = theme;
+  if (themeVariables != null) params['themeVariables'] = themeVariables;
+  return uri.replace(queryParameters: params).toString();
+}
+```
 
 ```dart
 import 'dart:convert';
@@ -588,11 +612,11 @@ Future<void> processPayment(String paymentLink) async {
     final selectedOption = await showPaymentOptionsModal(options);
     if (selectedOption == null) return; // User cancelled
 
-    // Step 3: Collect data via WebView if required
-    if (options.collectData?.url != null) {
+    // Step 3: Collect data via WebView if required for selected option
+    if (selectedOption.collectData?.url != null) {
       final success = await showDataCollectionWebView(
         context,
-        options.collectData!.url,
+        selectedOption.collectData!.url,
       );
       if (!success) return; // User cancelled or error
     }

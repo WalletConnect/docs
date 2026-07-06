@@ -38,7 +38,7 @@ dependencies {
 The version shown above may not be the latest. Check the [GitHub releases](https://github.com/reown-com/reown-kotlin/releases) for the most recent version.
 </Info>
 
-### JNA Dependency Configuration
+**JNA Dependency Configuration**
 
 If you encounter JNA-related errors (e.g., `UnsatisfiedLinkError` or class loading issues), explicitly configure the JNA dependency:
 
@@ -49,7 +49,7 @@ implementation("com.walletconnect:pay:1.0.0") {
 implementation("net.java.dev.jna:jna:5.17.0@aar")
 ```
 
-## Configuration
+## Initialization
 
 Initialize the SDK in your `Application` class or before any payment operations:
 
@@ -66,7 +66,7 @@ WalletConnectPay.initialize(
 )
 ```
 
-### Configuration Parameters
+**Configuration Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -222,7 +222,7 @@ result.onSuccess { response ->
 
 <Step title="Collect User Data (If Required)" titleSize="h3">
 
-Some payments require collecting additional user information. After the user selects an option, check for `collectData` on that option and complete data collection **before** fetching the required actions — the backend rejects the actions request if data collection is required but not yet captured:
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
 
 <WebViewOverview />
 
@@ -238,25 +238,26 @@ selectedOption.collectData?.let { collectAction ->
             put("dob", "1990-01-15")
             put("pobAddress", "123 Main St, New York, NY 10001")
         }.toString()
+        // Encode prefill as base64url (URL-safe, no padding)
         val prefillBase64 = Base64.encodeToString(
             prefillJson.toByteArray(),
-            Base64.NO_WRAP or Base64.URL_SAFE
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
         )
         val webViewUrl = Uri.parse(url).buildUpon()
             .appendQueryParameter("prefill", prefillBase64)
+            // Optional appearance params (see "Form URL parameters"):
+            .appendQueryParameter("theme", "dark") // "light" | "dark"
+            // themeVariables is a base64url string exported from the Pay Dashboard:
+            // .appendQueryParameter("themeVariables", themeVariables)
             .build().toString()
 
-        // Show WebView for this specific option — see WebView Implementation section below
+        // Show WebView for this specific option — see Data Collection Implementation section below
         showWebView(webViewUrl)
     }
 }
 ```
 
 <WebViewMessageTypes />
-
-<Note>
-The WebView submits the collected data directly to the backend. You only receive an `IC_COMPLETE`/`IC_ERROR` signal — you do **not** pass `collectedData` to `confirmPayment`.
-</Note>
 
 </Step>
 
@@ -360,9 +361,11 @@ confirmResult.onSuccess { response ->
 
 </Steps>
 
-## WebView Implementation
+## Data Collection Implementation
 
-When a selected option has `collectData.url` present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+When `selectedOption.collectData.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices />
 
 ```kotlin
 import android.webkit.JavascriptInterface
@@ -424,16 +427,23 @@ fun PayDataCollectionWebView(
     })
 }
 
-fun buildPrefillUrl(baseUrl: String, prefillData: Map<String, String>): String {
-    if (prefillData.isEmpty()) return baseUrl
-    val json = JSONObject(prefillData).toString()
-    val base64 = Base64.encodeToString(
-        json.toByteArray(),
-        Base64.NO_WRAP or Base64.URL_SAFE
-    )
-    return Uri.parse(baseUrl).buildUpon()
-        .appendQueryParameter("prefill", base64)
-        .build().toString()
+fun buildFormUrl(
+    baseUrl: String,
+    prefillData: Map<String, String> = emptyMap(),
+    theme: String? = null,            // "light" or "dark"
+    themeVariables: String? = null    // base64url string exported from the Pay Dashboard
+): String {
+    val builder = Uri.parse(baseUrl).buildUpon()
+    if (prefillData.isNotEmpty()) {
+        val prefill = Base64.encodeToString(
+            JSONObject(prefillData).toString().toByteArray(),
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
+        )
+        builder.appendQueryParameter("prefill", prefill)
+    }
+    theme?.let { builder.appendQueryParameter("theme", it) }
+    themeVariables?.let { builder.appendQueryParameter("themeVariables", it) }
+    return builder.build().toString()
 }
 ```
 
@@ -539,17 +549,17 @@ class PaymentViewModel : ViewModel() {
 
 ## API Reference
 
-### WalletConnectPay
+**WalletConnectPay**
 
 Main entry point for the Pay SDK (singleton object).
 
-#### Properties
+**Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `isInitialized` | `Boolean` | Whether the SDK has been initialized |
 
-#### Methods
+**Methods**
 
 | Method | Description |
 |--------|-------------|
@@ -560,7 +570,7 @@ Main entry point for the Pay SDK (singleton object).
 
 ## Data Models
 
-### Pay.PaymentOptionsResponse
+**Pay.PaymentOptionsResponse**
 
 ```kotlin
 data class PaymentOptionsResponse(
@@ -577,7 +587,7 @@ data class PaymentResultInfo(
 )
 ```
 
-### Pay.PaymentInfo
+**Pay.PaymentInfo**
 
 ```kotlin
 data class PaymentInfo(
@@ -593,7 +603,7 @@ data class MerchantInfo(
 )
 ```
 
-### Pay.PaymentOption
+**Pay.PaymentOption**
 
 ```kotlin
 data class PaymentOption(
@@ -605,7 +615,7 @@ data class PaymentOption(
 )
 ```
 
-### Pay.Amount
+**Pay.Amount**
 
 ```kotlin
 data class Amount(
@@ -624,7 +634,7 @@ data class AmountDisplay(
 )
 ```
 
-### Pay.WalletRpcAction
+**Pay.WalletRpcAction**
 
 ```kotlin
 data class WalletRpcAction(
@@ -634,7 +644,7 @@ data class WalletRpcAction(
 )
 ```
 
-### Pay.RequiredAction
+**Pay.RequiredAction**
 
 ```kotlin
 sealed class RequiredAction {
@@ -642,7 +652,7 @@ sealed class RequiredAction {
 }
 ```
 
-### Pay.CollectDataAction
+**Pay.CollectDataAction**
 
 ```kotlin
 data class CollectDataAction(
@@ -651,7 +661,7 @@ data class CollectDataAction(
 )
 ```
 
-### Pay.ConfirmPaymentResponse
+**Pay.ConfirmPaymentResponse**
 
 ```kotlin
 data class ConfirmPaymentResponse(
@@ -662,7 +672,7 @@ data class ConfirmPaymentResponse(
 )
 ```
 
-### Pay.PaymentStatus
+**Pay.PaymentStatus**
 
 | Status | Description |
 |--------|-------------|
@@ -677,7 +687,7 @@ data class ConfirmPaymentResponse(
 
 The SDK provides typed errors for different failure scenarios:
 
-### GetPaymentOptionsError
+**GetPaymentOptionsError**
 
 | Error | Description |
 |-------|-------------|
@@ -690,7 +700,7 @@ The SDK provides typed errors for different failure scenarios:
 | `Http` | Network error |
 | `InternalError` | Server error |
 
-### GetPaymentRequestError
+**GetPaymentRequestError**
 
 | Error | Description |
 |-------|-------------|
@@ -699,7 +709,7 @@ The SDK provides typed errors for different failure scenarios:
 | `InvalidAccount` | Invalid account format |
 | `Http` | Network error |
 
-### ConfirmPaymentError
+**ConfirmPaymentError**
 
 | Error | Description |
 |-------|-------------|
@@ -710,7 +720,7 @@ The SDK provides typed errors for different failure scenarios:
 | `RouteExpired` | Payment route expired |
 | `Http` | Network error |
 
-### Example Error Handling
+**Example Error Handling**
 
 ```kotlin
 val result = WalletConnectPay.getPaymentOptions(paymentLink, accounts)
