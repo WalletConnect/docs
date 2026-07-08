@@ -3,19 +3,20 @@ title: "Implementation"
 sidebarTitle: "Implementation"
 
 metatags:
-  description: "Build a branded WalletConnect Pay checkout with the @walletconnect/pay-* Headless SDK — a step-by-step React / Next.js walkthrough: server proxy, transport, AppKit, wallet seam, signer, and rendering the snapshot."
+  description: "Build a branded WalletConnect Pay checkout with the @walletconnect/pay-* Headless SDK. A step-by-step walkthrough — server proxy, transport, zero-config AppKit, and rendering the snapshot — with React and JavaScript examples side by side."
 ---
 
-This page walks through building a complete checkout in **React / Next.js** on the Headless SDK. New to the SDK? Read [How it works](/payments/psps/headless-sdk/how-it-works) first for the architecture and the role of each seam.
+This page walks through building a complete checkout on the Headless SDK, with **React / Next.js** and **JavaScript** examples side by side. New to the SDK? Read [How it works](/payments/psps/headless-sdk/how-it-works) first for the architecture and the role of each seam.
 
-You build four things, all shown below:
+Wallet connection is now **zero-config**: the SDK owns the entire Reown AppKit setup. You install only the `@walletconnect/pay-*` packages and never touch `@reown/*`, `wagmi`, or `viem` directly.
 
-1. A **server proxy** — Route Handlers that forward to the Engine with your secret key.
+You build three things:
+
+1. A **server proxy** — routes that forward to the Engine with your secret key.
 2. A **browser transport** — points the runtime at those routes.
-3. A **wallet integration** — Reown AppKit, adapted into the `WalletProvider` seam.
-4. A **signer** — turns the connected wallet into signing capability.
+3. The **AppKit provider** — one component (`<PayAppKitProvider>` in React) or one factory call (`createPayAppKit` in JavaScript).
 
-Then `usePaymentSession` ties them together and gives you a snapshot to render.
+The wallet seam, the signer, and the clock all come from the SDK. Then `usePaymentSession` (React) or `createPaymentController` (JavaScript) ties everything together and gives you a snapshot to render.
 
 <Note>
   The browser never holds the Engine API key. It talks to *your* server, and your server talks to the WalletConnect Pay Engine — see [The Engine API key never reaches the browser](/payments/psps/headless-sdk/how-it-works#the-engine-api-key-never-reaches-the-browser).
@@ -23,29 +24,25 @@ Then `usePaymentSession` ties them together and gives you a snapshot to render.
 
 ## Prerequisites
 
-- **Node 18+** and a React 18/19 app. This guide uses **Next.js** (App Router).
+- **Node 18+**. The React example uses **Next.js** (App Router); the JavaScript example is framework-neutral.
 - A **Reown Project ID** — create one at [dashboard.reown.com](https://dashboard.reown.com). Enable the **headless** feature on the project.
 - A **WalletConnect Pay Gateway API key** for the Engine (server-side). [Talk to us](https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s) to get onboarded.
 
 ## Install
 
+Install only the Headless SDK. Wallet connectivity (`@reown/appkit`, `wagmi`, `viem`, `@solana/web3.js`, `@tanstack/react-query`) comes transitively through `@walletconnect/pay-appkit` — you don't add or configure any of it.
+
 ```bash
-# The Headless SDK
 npm install @walletconnect/pay-core @walletconnect/pay-state \
-            @walletconnect/pay-react @walletconnect/pay-appkit
+            @walletconnect/pay-appkit
 
-# Reown AppKit + adapters for wallet connection (EVM via Wagmi, plus Solana)
-npm install @reown/appkit @reown/appkit-adapter-wagmi @reown/appkit-adapter-solana \
-            wagmi viem @solana/web3.js @tanstack/react-query
+# React hosts also need the hook binding:
+npm install @walletconnect/pay-react
 ```
-
-<Note>
-  `@walletconnect/pay-appkit` requires a Reown AppKit version that exposes the WalletConnect URI on its public state (used to render the pairing QR). Pin `@reown/appkit` (and its adapters) to **the same version**, at or above the SDK's peer range — check the [`pay-appkit` peer dependencies](https://www.npmjs.com/package/@walletconnect/pay-appkit) for the current minimum. All `@reown/appkit*` packages must share one version.
-</Note>
 
 ## Step 1 — Server proxy (keep the API key server-side)
 
-Create a server-only module that constructs the Engine client once and forwards calls. The key comes from server env and never ships to the browser.
+Create a server-only module that constructs the Engine client once and forwards calls. The key comes from server env and never ships to the browser. This is framework-agnostic — any server works; the example uses Next.js Route Handlers.
 
 ```typescript lib/server/engine.ts
 import 'server-only'
@@ -80,7 +77,7 @@ export async function callEngine(
 }
 ```
 
-Then expose one Route Handler per Engine call under `/api/wcp/payment/[id]`. The browser transport (Step 2) calls exactly these paths:
+Then expose one route per Engine call under `/api/wcp/payment/[id]`. The browser transport (Step 2) calls exactly these paths:
 
 ```typescript app/api/wcp/payment/[id]/options/route.ts
 import { callEngine } from '@/lib/server/engine'
@@ -111,6 +108,10 @@ Create the same handler for each route the transport uses:
 | `app/api/wcp/payment/[id]/confirm/route.ts` | `POST` | `confirmPayment`    |
 | `app/api/wcp/payment/[id]/status/route.ts`  | `GET`  | `getPaymentStatus`  |
 
+<Warning>
+  These proxy routes are a **starting point**, not production-ready — add your own origin allowlist, rate limiting, and auth before shipping. Their only job here is to keep the Engine key off the browser.
+</Warning>
+
 ## Step 2 — Browser transport
 
 On the client, point the runtime at your proxy. `createHttpTransport` issues requests to `${baseUrl}/payment/:id/...`, matching the routes above.
@@ -123,172 +124,90 @@ const transport = createHttpTransport({ baseUrl: '/api/wcp' })
 
 That's the entire `Transport` seam. It speaks the same five methods as the server client, but routes through your origin — no key, no CORS.
 
-## Step 3 — Initialize Reown AppKit (headless)
+## Step 3 — Set up AppKit (zero-config)
 
-Construct an AppKit instance once on the client, in headless mode (no built-in modal — you render your own wallet picker). Pass the **same `networks`** array to AppKit so a connected wallet's address expands across the chains the Engine quotes against.
+The SDK constructs the AppKit instance, the Wagmi/Solana adapters, and the WalletConnect-owned network set for you, in headless mode (no built-in modal — you render your own wallet picker). You supply only your `projectId` and `metadata`.
 
-```tsx components/providers.tsx
+In **React**, render `<PayAppKitProvider>` once near the root. It owns AppKit's client-only construction, the `WagmiProvider` + `QueryClientProvider` tree, and an SSR-safe context. In **JavaScript**, call `createPayAppKit` and `await` its async construction.
+
+<CodeGroup>
+```tsx React — components/providers.tsx
 'use client'
 
-import type { AppKit } from '@walletconnect/pay-appkit' // type re-exported by the SDK
-import { SolanaAdapter } from '@reown/appkit-adapter-solana'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet, polygon, arbitrum, optimism, base, solana, type AppKitNetwork } from '@reown/appkit/networks'
-import { createAppKit } from '@reown/appkit/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createContext, useContext, useEffect, useState } from 'react'
-import { WagmiProvider } from 'wagmi'
-
-export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [
-  mainnet, polygon, arbitrum, optimism, base, solana
-]
+import { PayAppKitProvider } from '@walletconnect/pay-appkit/react'
 
 const projectId = process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? ''
 
-let wagmiAdapter: WagmiAdapter | null = null
-let appKitInstance: AppKit | null = null
-
-function initAppKit() {
-  if (wagmiAdapter && appKitInstance) return { adapter: wagmiAdapter, appKit: appKitInstance }
-  if (typeof window === 'undefined' || !projectId) return null
-
-  wagmiAdapter = new WagmiAdapter({ networks, projectId })
-  appKitInstance = createAppKit({
-    adapters: [wagmiAdapter, new SolanaAdapter()],
-    networks,
-    projectId,
-    features: { headless: true }, // no modal — you own the picker
-    metadata: {
-      name: 'Acme Pay',
-      description: 'Headless checkout',
-      url: typeof window !== 'undefined' ? window.location.origin : 'https://example.com',
-      icons: []
-    }
-  })
-  return { adapter: wagmiAdapter, appKit: appKitInstance }
-}
-
-const AppKitContext = createContext<AppKit | null>(null)
-export function useAppKit(): AppKit {
-  const appKit = useContext(AppKitContext)
-  if (!appKit) throw new Error('useAppKit must be used within <Providers>')
-  return appKit
-}
-
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<{ adapter: WagmiAdapter; appKit: AppKit } | null>(null)
-  const [queryClient] = useState(() => new QueryClient())
-
-  useEffect(() => setState(initAppKit()), [])
-  if (!state) return <div>Initializing…</div>
-
   return (
-    <WagmiProvider config={state.adapter.wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <AppKitContext.Provider value={state.appKit}>{children}</AppKitContext.Provider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <PayAppKitProvider
+      projectId={projectId}
+      metadata={{
+        name: 'Acme Pay',
+        description: 'Headless checkout',
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://example.com',
+        icons: []
+      }}
+    >
+      {children}
+    </PayAppKitProvider>
   )
 }
 ```
 
-<Warning>
-  Call `createAppKit` **once** at module scope (guarded as above), never inside a component render. Keep every `@reown/appkit*` package on the same version.
-</Warning>
+```typescript JavaScript — appkit.ts
+import { createPayAppKit } from '@walletconnect/pay-appkit'
 
-## Step 4 — The wallet seam
-
-`@walletconnect/pay-appkit/react` turns the AppKit instance into the runtime's `WalletProvider` seam **and** a ready-made wallet-picker controller (list, search, pagination, the pairing QR URI). One hook gives you both.
-
-```tsx
-import { useAppKitWalletProvider } from '@walletconnect/pay-appkit/react'
-
-const {
-  wallet,             // ← the WalletProvider seam to hand the runtime
-  wallets,            // wallet list for your picker
-  connectedWallets,   // currently connected, per namespace
-  supportedNamespaces,
-  wcUri,              // WalletConnect URI for the QR
-  getWcUri,           // generate a generic pairing URI eagerly
-  searchQuery, setSearchQuery,
-  hasMore, loadMore,
-  isFetchingWallets,
-  isInitialized
-} = useAppKitWalletProvider(appKit, {
-  wcPayUrl: typeof window !== 'undefined' ? window.location.href : undefined
-})
-```
-
-## Step 5 — The signer
-
-The signing strategies (EVM + Solana) live in `@walletconnect/pay-state`; they just need the wallet's providers, which only your host can supply. Wire them into a `Signer`:
-
-```typescript lib/signer.ts
-import { loadSolanaWeb3 } from '@walletconnect/pay-appkit'
-import {
-  EvmSigningStrategy,
-  SolanaSigningStrategy,
-  signOptionActions,
-  type ActionRange,
-  type EIP1193Provider,
-  type PaymentOptionExtended,
-  type Signer,
-  type SignPaymentResult,
-  type SigningStrategy,
-  type SolanaProvider,
-  type WalletProvider
-} from '@walletconnect/pay-state'
-
-export function createAppKitSigner(wallet: WalletProvider): Signer {
-  return {
-    signActions(option: PaymentOptionExtended, range?: ActionRange): Promise<SignPaymentResult[]> {
-      const strategies: SigningStrategy[] = []
-
-      const evm = wallet.getProvider({ namespace: 'eip155', chainId: '1' })
-      if (evm) {
-        strategies.push(
-          new EvmSigningStrategy(evm as EIP1193Provider, {
-            switchNetwork: caip => wallet.switchNetwork(caip),
-            getActiveChainId: () => {
-              const caip = wallet.getAccounts().eip155?.caipAddress
-              const [ns, chain] = caip?.split(':') ?? []
-              return chain ? `${ns}:${chain}` : undefined
-            }
-          })
-        )
-      }
-
-      const sol = wallet.getProvider({ namespace: 'solana', chainId: 'mainnet' })
-      strategies.push(new SolanaSigningStrategy(sol as SolanaProvider | null, { loadWeb3: loadSolanaWeb3 }))
-
-      return signOptionActions(option, strategies, range)
-    }
+const payAppKit = createPayAppKit({
+  projectId: import.meta.env.VITE_APPKIT_PROJECT_ID ?? '',
+  metadata: {
+    name: 'Acme Pay',
+    description: 'Headless checkout',
+    url: window.location.origin,
+    icons: []
   }
-}
+})
+
+// Construction is client-only and async — await it before reading the instance.
+await payAppKit.whenReady()
+export const appKit = payAppKit.getInstance()
 ```
+</CodeGroup>
 
-## Step 6 — Drive the session
+`<PayAppKitProvider>` accepts an optional `queryClient` (a host with its own passes it to share one cache; omit it for a fully internal one) and optional `themeVariables` (e.g. a host font). Both `createPayAppKit` and the provider load the Reown modules through a client-only dynamic import, so AppKit's UI never enters your SSR bundle.
 
-Assemble the seams and call `usePaymentSession`. It returns the public `snapshot` plus named actions — no XState, no `send`.
+## Step 4 — Build the checkout
 
-```tsx components/checkout.tsx
+Assemble the seams and drive the session. The **wallet seam** comes from the SDK's wallet-list hook/controller, and the **signer** is a single built-in call — `createAppKitSigner(wallet)` — so you no longer wire up signing strategies by hand. `clock` is `browserClock`.
+
+In React, `useAppKitWalletProvider` turns the AppKit instance into the `WalletProvider` seam **and** a ready-made picker controller (list, search, pagination, the pairing QR URI). Read the instance from `getPayAppKitInstance()` once `usePayAppKit().isReady` is true. In JavaScript, `createAppKitWalletList` is the framework-neutral equivalent.
+
+<CodeGroup>
+```tsx React — components/checkout.tsx
 'use client'
 
 import { createHttpTransport } from '@walletconnect/pay-core'
-import { useAppKitWalletProvider } from '@walletconnect/pay-appkit/react'
-import { browserClock, type PaymentOptionExtended } from '@walletconnect/pay-state'
+import { createAppKitSigner } from '@walletconnect/pay-appkit'
+import {
+  getPayAppKitInstance,
+  useAppKitWalletProvider,
+  usePayAppKit
+} from '@walletconnect/pay-appkit/react'
+import { browserClock } from '@walletconnect/pay-state'
 import { usePaymentSession } from '@walletconnect/pay-react'
 import { useMemo } from 'react'
-import { useAppKit } from '@/components/providers'
-import { createAppKitSigner } from '@/lib/signer'
 
 export function Checkout({ paymentId }: { paymentId: string }) {
-  const appKit = useAppKit()
+  // The provider constructs AppKit asynchronously; read the instance once it's ready.
+  const { isReady } = usePayAppKit()
+  const appKit = isReady ? getPayAppKitInstance() : undefined
+
+  // The wallet seam + a ready-made picker (list, search, pagination, QR URI).
   const { wallet, wallets, wcUri, getWcUri } = useAppKitWalletProvider(appKit, {
     wcPayUrl: typeof window !== 'undefined' ? window.location.href : undefined
   })
 
-  // Assemble the runtime seams. `signer` lives inside `seams`; `wallet` is passed separately.
+  // Assemble the runtime seams. The signer is one built-in call.
   const seams = useMemo(
     () => ({
       transport: createHttpTransport({ baseUrl: '/api/wcp' }),
@@ -298,14 +217,49 @@ export function Checkout({ paymentId }: { paymentId: string }) {
     [wallet]
   )
 
-  const { snapshot, connectWallet, selectOption, confirmSelection, submitInfoCapture } =
-    usePaymentSession({ paymentId, seams, wallet })
+  const {
+    snapshot,
+    connectWallet,
+    disconnectWallet,
+    selectOption,
+    confirmSelection,
+    submitInfoCapture
+  } = usePaymentSession({ paymentId, seams, wallet })
 
-  return <div>{/* render per snapshot.state — see Step 7 */}</div>
+  return <div>{/* render per snapshot.state — see Step 5 */}</div>
 }
 ```
 
-Render it from a route, wrapped in your providers:
+```typescript JavaScript — main.ts
+import { createHttpTransport } from '@walletconnect/pay-core'
+import { createAppKitSigner, createAppKitWalletList } from '@walletconnect/pay-appkit'
+import { browserClock, createPaymentController } from '@walletconnect/pay-state'
+
+import { appKit } from './appkit'
+
+// The framework-neutral wallet-list controller: list / search / paginate / QR URI /
+// connect — and `walletList.wallet`, the seam the runtime drives.
+const walletList = createAppKitWalletList(appKit, {
+  wcPayUrl: window.location.href
+})
+const wallet = walletList.wallet
+
+const controller = createPaymentController({
+  paymentId,
+  wallet,
+  seams: {
+    transport: createHttpTransport({ baseUrl: '/api/wcp' }),
+    clock: browserClock,
+    signer: createAppKitSigner(wallet)
+  }
+})
+
+controller.subscribe(() => render(controller.getSnapshot()))
+controller.start()
+```
+</CodeGroup>
+
+In React, render the checkout from a route wrapped in your providers:
 
 ```tsx app/[paymentId]/page.tsx
 import { Checkout } from '@/components/checkout'
@@ -317,15 +271,14 @@ export default async function PaymentPage({ params }: { params: Promise<{ paymen
 }
 ```
 
-## Step 7 — Render the snapshot
+## Step 5 — Render the snapshot
 
-`snapshot.state` is a single string you switch on. Each state maps to one piece of UI; the named actions advance the flow.
+`snapshot.state` is a single string you switch on. Each state maps to one piece of UI; the named actions advance the flow. The logic is the same for React and JavaScript — the only difference is where the snapshot comes from (`usePaymentSession` vs `controller.getSnapshot()`).
 
 ```tsx
 switch (snapshot.state) {
   case 'ReadyForWallet':
-    // Show the QR (snapshot is connecting-agnostic; QR comes from getWcUri/wcUri)
-    // and a wallet picker. On pick:
+    // Show the QR (from getWcUri/wcUri) and a wallet picker. On pick:
     return <WalletPicker wallets={wallets} onPick={(w) => connectWallet(w, w.namespaces[0])} />
 
   case 'ConnectingWallet':
@@ -375,7 +328,7 @@ switch (snapshot.state) {
 }
 ```
 
-That's a full gateway. Connect → options → (optional KYC) → confirm → sign → settle, all driven by the runtime; you only render and call actions.
+That's a full gateway. Connect → options → (optional KYC) → confirm → sign → settle, all driven by the runtime; you only render and call actions. Once a wallet is connected, `disconnectWallet(namespace?)` drops one namespace or all of them.
 
 ## Environment variables
 
@@ -388,34 +341,20 @@ WCP_API_URL=https://staging.api.pay.walletconnect.org
 WCP_WALLET_API_KEY=
 ```
 
-## Without React (framework-neutral)
+<Note>
+  In a Vite / non-Next.js host, expose the project ID under that toolchain's client env convention (e.g. `VITE_APPKIT_PROJECT_ID`) and keep `WCP_WALLET_API_KEY` on the server only.
+</Note>
 
-Every React API here wraps a framework-agnostic core. A vanilla / Vue / Svelte host uses `createPaymentController` (pay-state) + `createAppKitWalletList` (pay-appkit) directly:
+## Reference apps
 
-```typescript
-import { createHttpTransport } from '@walletconnect/pay-core'
-import { createAppKitWalletList } from '@walletconnect/pay-appkit'
-import { browserClock, createPaymentController } from '@walletconnect/pay-state'
-
-const walletList = createAppKitWalletList(appKit, { wcPayUrl: window.location.href })
-
-const controller = createPaymentController({
-  paymentId,
-  wallet: walletList.wallet,
-  seams: {
-    transport: createHttpTransport({ baseUrl: '/api/wcp' }),
-    clock: browserClock,
-    signer: createAppKitSigner(walletList.wallet)
-  }
-})
-
-controller.subscribe(() => render(controller.getSnapshot()))
-controller.start()
-```
-
-<Card title="Vanilla reference — headless-checkout-vanilla" icon="github" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/headless-checkout-vanilla">
-  The same checkout with no framework — `createPaymentController` + manual subscribe + imperative render.
-</Card>
+<CardGroup cols={2}>
+  <Card title="headless-checkout (Next.js)" icon="react" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/headless-checkout">
+    The full React checkout — `<PayAppKitProvider>` + `usePaymentSession`, no `@reown/*` in the app.
+  </Card>
+  <Card title="headless-checkout-vanilla" icon="js" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/headless-checkout-vanilla">
+    The same checkout with no framework — `createPaymentController` + manual subscribe + imperative render.
+  </Card>
+</CardGroup>
 
 ## Next steps
 
