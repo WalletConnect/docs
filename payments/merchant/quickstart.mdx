@@ -4,9 +4,9 @@ sidebarTitle: "Quickstart"
 description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in six steps."
 ---
 
-This guide takes you from zero to a live payment in six steps:
+This guide takes you from zero to your first payment in six steps. You'll build in [test mode](/payments/merchant/test-mode) — same API, no real funds — and swap to a live key when you're ready.
 
-1. **Create an API key** in the dashboard.
+1. **Create a test API key** in the dashboard.
 2. **Authenticate** your requests with the key.
 3. **Create your first merchant** via `POST /v1/merchants`.
 4. **Configure crypto settlement** via `POST /v1/merchants/{merchantId}/settlements/crypto`.
@@ -19,11 +19,13 @@ Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.co
 
 <Steps>
 
-<Step title="Create an API key" stepNumber="1">
+<Step title="Create a test API key" stepNumber="1">
 
 1. Open [**API Keys**](https://merchant.pay.walletconnect.com/en/api-keys) in the dashboard and sign in if prompted.
-2. Click **Create key**. Copy the key — it is shown only once.
+2. Create a **test key** — it starts with `wcp_test_`. Copy the key — it is shown only once.
 3. Store it in a secret manager. Anyone with this key can act on behalf of your account.
+
+With a test key, everything in this guide behaves like production except that no funds move. See [Test mode](/payments/merchant/test-mode) for exactly what test payments do and don't do.
 
 </Step>
 
@@ -32,7 +34,7 @@ Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.co
 Every request to the Merchant API uses the `Api-Key` header.
 
 ```bash
-export WCP_API_KEY="wcp_…"           # the key you just created
+export WCP_API_KEY="wcp_test_…"      # the test key you just created
 export WCP_BASE="https://api.pay.walletconnect.com"
 ```
 
@@ -163,7 +165,7 @@ curl "$WCP_BASE/v1/payments/$WCP_PAYMENT_ID/status" \
   "isFinal": true,
   "pollInMs": null,
   "info": {
-    "txId": "0xabc123…",
+    "txId": "test:pay_…",
     "optionAmount": {
       "unit": "caip19/eip155:8453/erc20:0x...",
       "value": "1000000"
@@ -174,6 +176,10 @@ curl "$WCP_BASE/v1/payments/$WCP_PAYMENT_ID/status" \
 
 Use `isFinal` to decide when to stop polling. While the payment is still in flight, the response returns `isFinal: false` and a `pollInMs` hint for how long to wait before polling again. Once `isFinal` is `true`, `status` is one of `succeeded`, `failed`, `cancelled`, or `expired` and `pollInMs` is `null`.
 
+<Note>
+In test mode the `txId` is synthetic (`test:{paymentId}`) — no transaction is executed on-chain. Live payments return a real transaction hash.
+</Note>
+
 <Tip>
 Prefer webhooks for production — they remove the need to poll. The status endpoint is the right tool for one-off checks, scripts, and debugging.
 </Tip>
@@ -183,3 +189,7 @@ See the full response schema in [Get the payment status](/api-reference/latest/g
 </Step>
 
 </Steps>
+
+## Go live
+
+Once your integration works end to end in test mode, create a **live key** (`wcp_` prefix) in the dashboard and swap it in — same API, same endpoints, no code changes. See [Going live](/payments/merchant/test-mode#going-live) for the details.
