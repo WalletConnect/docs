@@ -34,11 +34,10 @@ Install only the Headless SDK. Wallet connectivity (`@reown/appkit`, `wagmi`, `v
 
 ```bash
 npm install @walletconnect/pay-core @walletconnect/pay-state \
-            @walletconnect/pay-appkit
-
-# React hosts also need the hook binding:
-npm install @walletconnect/pay-react
+            @walletconnect/pay-appkit @walletconnect/pay-react
 ```
+
+`@walletconnect/pay-react` is the React hook binding — omit it if you're not using React.
 
 ## Step 1 — Server proxy (keep the API key server-side)
 
@@ -145,7 +144,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       metadata={{
         name: 'Acme Pay',
         description: 'Headless checkout',
-        url: typeof window !== 'undefined' ? window.location.origin : 'https://example.com',
+        url: 'https://example.com',
         icons: []
       }}
     >
@@ -348,10 +347,10 @@ WCP_WALLET_API_KEY=
 ## Reference apps
 
 <CardGroup cols={2}>
-  <Card title="headless-checkout (Next.js)" icon="react" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/headless-checkout">
+  <Card title="headless-checkout (Next.js)" icon="react" href="https://github.com/WalletConnect/walletconnect-pay-examples/tree/main/gateway/headless-checkout">
     The full React checkout — `<PayAppKitProvider>` + `usePaymentSession`, no `@reown/*` in the app.
   </Card>
-  <Card title="headless-checkout-vanilla" icon="js" href="https://github.com/WalletConnect/buyer-experience/tree/main/examples/headless-checkout-vanilla">
+  <Card title="headless-checkout-vanilla" icon="js" href="https://github.com/WalletConnect/walletconnect-pay-examples/tree/main/gateway/headless-checkout-vanilla">
     The same checkout with no framework — `createPaymentController` + manual subscribe + imperative render.
   </Card>
 </CardGroup>
