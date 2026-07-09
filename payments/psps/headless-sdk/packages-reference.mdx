@@ -167,6 +167,8 @@ import { browserClock, noopTelemetry, browserDefaults } from '@walletconnect/pay
 
 ### Signing strategies
 
+AppKit hosts don't need these directly — `@walletconnect/pay-appkit` exports a zero-config `createAppKitSigner(wallet)` that wraps them with the bundled Solana codec. These are the low-level primitives, for a custom wallet integration.
+
 ```typescript
 import { EvmSigningStrategy, SolanaSigningStrategy, signOptionActions } from '@walletconnect/pay-state'
 
@@ -230,32 +232,47 @@ Plus a **host-orchestration channel** for signals the runtime can't observe itse
 
 ## `@walletconnect/pay-appkit`
 
-The Reown AppKit adapter — implements the `WalletProvider` seam over an AppKit instance, and ships a headless wallet-picker controller. The main entry is framework-neutral; the React hook lives on `/react`.
+The Reown AppKit adapter — it owns the entire AppKit setup so a host stays `@reown/*`-free. It constructs the instance, implements the `WalletProvider` seam over it, provides a zero-config `Signer`, and ships a headless wallet-picker controller. The main entry is framework-neutral; the React provider + hooks live on `/react`.
 
 ### Main entry — `@walletconnect/pay-appkit`
 
 ```typescript
 import {
-  createAppKitWalletProvider,   // (appKit, options?) => WalletProvider
+  createPayAppKit,              // ({ projectId, metadata, themeVariables? }) => PayAppKit  (one-call setup)
+  createAppKitSigner,           // (wallet) => Signer  (zero-config, bundles the Solana codec)
   createAppKitWalletList,        // (appKit, options?) => AppKitWalletList  (framework-neutral picker)
+  createAppKitWalletProvider,   // (appKit, options?) => WalletProvider
+  SUPPORTED_NETWORKS, EVM_NETWORKS, // the WC-owned network set (baked in, not host config)
   loadSolanaWeb3,               // lazy @solana/web3.js codec loader for the Solana signing strategy
   applyPlacements, resolvePlacements, // wallet-ordering helpers
   type AppKit,                  // re-exported AppKit instance type — don't import @reown/appkit directly
+  type PayAppKit, type CreatePayAppKitOptions, type PayAppKitMetadata,
   type WalletListItem, type ConnectedWallet, type WalletListState, type WalletListOptions
 } from '@walletconnect/pay-appkit'
 ```
+
+`createPayAppKit` builds the instance with the WC-owned networks + adapters in headless mode. It's **client-only and async** — `await payAppKit.whenReady()`, then read `getInstance()` / `getWagmiConfig()` / `getHooks()` / `getError()` / `isInitialized()`.
 
 `createAppKitWalletList` returns a controller — `wallet` (the seam), `getState()`, `subscribe()`, `fetchWallets()`, `search()`, `loadMore()`, `getWcUri()` — for non-React hosts.
 
 ### React entry — `@walletconnect/pay-appkit/react`
 
+The zero-config provider that owns AppKit's construction + the Wagmi/Query tree + an SSR-safe context, plus the state hook and the imperative instance accessor:
+
 ```typescript
-import { useAppKitWalletProvider, type AppKitWalletProviderHandle, type UseAppKitWalletProviderOptions } from '@walletconnect/pay-appkit/react'
+import {
+  PayAppKitProvider,     // <PayAppKitProvider projectId metadata themeVariables? queryClient?>
+  usePayAppKit,          // SSR-safe hook: isReady / account / network / walletConnection / connect / disconnect / …
+  getPayAppKitInstance,  // module-level accessor to the same AppKit instance (for non-hook consumers)
+  useAppKitWalletProvider,
+  type AppKitWalletProviderHandle,
+  type UseAppKitWalletProviderOptions
+} from '@walletconnect/pay-appkit/react'
 
 function useAppKitWalletProvider(appKit: AppKit | undefined, options?: UseAppKitWalletProviderOptions): AppKitWalletProviderHandle
 ```
 
-The handle extends `WalletListState` and adds `wallet` (the seam to hand `usePaymentSession`), `searchQuery`/`setSearchQuery` (debounced), `fetchWallets`, `loadMore`, and `getWcUri` for the pairing QR.
+`useAppKitWalletProvider`'s handle extends `WalletListState` and adds `wallet` (the seam to hand `usePaymentSession`), `searchQuery`/`setSearchQuery` (debounced), `fetchWallets`, `loadMore`, and `getWcUri` for the pairing QR.
 
 ## Next steps
 

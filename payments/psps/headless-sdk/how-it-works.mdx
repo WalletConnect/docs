@@ -69,12 +69,12 @@ The five seams the runtime depends on:
 | ---------------- | ------------------------------------------ | ---------------------------------------------------- |
 | `Transport`      | Engine HTTP calls                          | `pay-core` `createHttpTransport` → your server route |
 | `WalletProvider` | connect / accounts / provider / switch     | `pay-appkit`, or your own wallet integration         |
-| `Signer`         | sign a payment option's wallet-RPC actions | `pay-state` signing strategies over the wallet seam  |
+| `Signer`         | sign a payment option's wallet-RPC actions | `pay-appkit` `createAppKitSigner` — one call (wraps `pay-state`'s signing; drop to its raw strategies only for a custom, non-AppKit wallet) |
 | `Clock`          | intervals + page visibility (for polling)  | browser timers (the SDK ships a default)             |
 | `Telemetry`      | analytics breadcrumbs                      | your analytics pipeline (optional)                   |
 
 <Note>
-  `@walletconnect/pay-state` ships browser-ready `Clock` and `Telemetry` defaults (`browserClock`, `noopTelemetry`). In practice a React/Next.js gateway wires three seams itself — a `Transport` (pointed at your server route), a `WalletProvider` (the AppKit adapter), and a `Signer` (built from the wallet) — and reuses `browserClock` for the rest. `Telemetry` is optional.
+  `@walletconnect/pay-state` ships browser-ready `Clock` and `Telemetry` defaults (`browserClock`, `noopTelemetry`). In practice a React/Next.js gateway wires just the `Transport` (pointed at your server route); the `WalletProvider` and `Signer` come ready-made from `pay-appkit` (`<PayAppKitProvider>` + `createAppKitSigner`), and it reuses `browserClock` for the rest. `Telemetry` is optional.
 </Note>
 
 ## The Engine API key never reaches the browser
