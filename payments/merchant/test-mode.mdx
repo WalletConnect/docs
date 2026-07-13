@@ -6,7 +6,7 @@ description: "Integrate and verify your WalletConnect Pay setup end to end witho
 
 Every WalletConnect Pay account has two environments: **test** and **live**. Test mode lets you build and verify your full integration — merchants, settlement configuration, payments, and webhooks — without executing anything on-chain.
 
-Throughout these docs, <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> indicates test mode. In the dashboard, the environment selector at the top shows which environment you're working in.
+Throughout these docs and on the hosted payment page, <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> indicates test mode. In the dashboard, the environment selector at the top shows which environment you're working in.
 
 ## How test mode works
 
@@ -77,7 +77,10 @@ You can run the whole test flow from the [dashboard](https://merchant.pay.wallet
 
 ### Simulate status changes
 
-Test payments don't move through their lifecycle on their own — you drive them. In the test environment, the payments table shows a **Simulation actions** column: open the menu on a payment row and pick **Mark as [status]** to transition it.
+Test payments don't move through their lifecycle on their own — you drive them, from either of two places:
+
+- **The hosted payment page** — open the generated payment link. In test mode the page shows a <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> banner ("You're in test mode. No real funds move.") and lets you pay with a simulated **Test Wallet**. A floating **Test Console** lets you simulate the transition: **Confirm success**, **Simulate failure**, **Expire payment**, or **Cancel payment**.
+- **The dashboard payments list** — in the test environment, each payment row has a **Simulation actions** menu (three dots): pick **Mark as [status]** to transition it.
 
 ```mermaid
 stateDiagram-v2
