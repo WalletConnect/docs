@@ -15,17 +15,17 @@ API keys are created and managed in the [dashboard](https://merchant.pay.walletc
 
 ## Test and live keys
 
-Your account has two kinds of keys, one per environment:
+Your account has two kinds of keys, one for each mode:
 
-| Key prefix | Environment | Behavior |
+| Key prefix | Mode | Behavior |
 |---|---|---|
 | `wcp_test_` | **Test** | Payments are simulated; no funds move. See [Test mode](/payments/merchant/test-mode). |
 | `wcp_` | **Live** | Real payments with on-chain settlement. |
 
-The key is the **only** thing that selects the environment. Both key types work against the same base URL and the same endpoints, and there is no test flag or mode parameter on any request.
+The key is the **only** thing that selects test or live. Both key types work against the same base URL and the same endpoints, and there is no test flag or mode parameter on any request.
 
 <Warning>
-Responses do not include an environment field. A resource's environment is determined by the key that created it.
+Responses do not say whether a resource is test or live — that's determined by the key that created it.
 </Warning>
 
 ## Errors

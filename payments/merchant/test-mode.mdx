@@ -4,13 +4,13 @@ sidebarTitle: "Test mode"
 description: "Integrate and verify your WalletConnect Pay setup end to end without moving real funds."
 ---
 
-Every WalletConnect Pay account has two environments: **test** and **live**. Test mode lets you build and verify your full integration — merchants, settlement configuration, payments, and webhooks — without executing anything on-chain.
+Every WalletConnect Pay account has two modes: **test** and **live**. Test mode lets you build and verify your full integration — merchants, settlement configuration, and payments — without executing anything on-chain.
 
-Throughout these docs and on the hosted payment page, <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> indicates test mode. In the dashboard, the environment selector at the top shows which environment you're working in.
+Throughout these docs and on the hosted payment page, <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> indicates test mode. In the dashboard, the **Test / Live** selector at the top shows which mode you're working in.
 
 ## How test mode works
 
-Test and live are separated at the **account level**, and you choose the environment by **which API key you use**. There is no `test` flag or mode parameter on any request — a payment created with a test key is a test payment, and a payment created with a live key is a live payment.
+Test and live are separated at the **account level**, and you choose the mode by **which API key you use**. There is no `test` flag or mode parameter on any request — a payment created with a test key is a test payment, and a payment created with a live key is a live payment.
 
 ```mermaid
 flowchart LR
@@ -30,7 +30,7 @@ flowchart LR
     style TS fill:#EDE9FE,stroke:#7C3AED,color:#5B21B6
 ```
 
-Both environments use the **same API, the same base URL, and the same endpoints**. Nothing about your code changes between test and live except the key.
+Both modes use the **same API, the same base URL, and the same endpoints**. Nothing about your code changes between test and live except the key.
 
 | | Test mode | Live mode |
 |---|---|---|
@@ -50,10 +50,10 @@ export WCP_API_KEY="wcp_test_…"      # test key — safe to experiment with
 export WCP_BASE="https://api.pay.walletconnect.com"
 ```
 
-Merchants, settlement configurations, and payments created with a test key exist only in your test environment. They are never visible to live requests, and vice versa.
+Merchants, settlement configurations, and payments created with a test key exist only in test mode. They are never visible to live requests, and vice versa.
 
 <Warning>
-API responses do **not** include an environment field. The environment is determined entirely by the key that created the resource — if you need to tell test and live data apart in your systems, track which key produced it.
+API responses do **not** say whether a resource is test or live. The mode is determined entirely by the key that created the resource — if you need to tell test and live data apart in your systems, track which key produced it.
 </Warning>
 
 ## What test payments do
@@ -70,21 +70,14 @@ You can run the whole test flow from the [dashboard](https://merchant.pay.wallet
 
 ### Create a test payment
 
-1. Switch the **environment selector** at the top of the dashboard to **Test**.
-2. Open **Payments** and click **Create payment**.
-3. Select a merchant and enter any amount — test mode has no payment limit.
-4. Click **Create payment**, then **Copy link** to share the payment link or open it yourself.
+1. Switch the dashboard to **Test** with the selector in the top-right corner.
+2. If you don't have any merchants in test mode yet, open **Merchants** and click **Create merchant** — give it a name and a contact email. Merchants are separate between test and live, so your live merchants don't appear in test.
+3. Open **Payments** and click **Create payment**.
+4. Select a merchant and enter any amount — test mode has no payment limit.
+5. Click **Create payment**, then **Copy link** to share the payment link or open it yourself.
 
-<Frame caption="The environment selector switches the whole dashboard between your live and test environments.">
-  <img src="/images/test-mode-environment-selector.png" alt="Dashboard with the environment selector dropdown open, showing Live and Test options with Test selected" />
-</Frame>
-
-<Frame caption="Create payment in the test environment — pick a merchant and enter any amount.">
-  <img src="/images/test-mode-create-payment.png" alt="Create payment dialog with a merchant selected and an amount of 10 USD entered" />
-</Frame>
-
-<Frame caption="The generated payment link opens the hosted payment page in test mode.">
-  <img src="/images/test-mode-payment-created.png" alt="Payment created dialog showing the payment link with Copy link and Open buttons" />
+<Frame caption="Create payment in test mode (note the selector on Test, top right) — pick a merchant and enter any amount.">
+  <img src="/images/test-mode-create-payment.png" alt="Create payment dialog in test mode with a merchant selected and an amount of 10 USD entered" />
 </Frame>
 
 ### Simulate status changes
@@ -92,19 +85,24 @@ You can run the whole test flow from the [dashboard](https://merchant.pay.wallet
 Test payments don't move through their lifecycle on their own — you drive them, from either of two places:
 
 - **The hosted payment page** — open the generated payment link. In test mode the page shows a <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> banner ("You're in test mode. No real funds move.") and lets you pay with a simulated **Test Wallet**. A floating **Test Console** lets you simulate the transition: **Confirm success**, **Simulate failure**, **Expire payment**, or **Cancel payment**.
-- **The dashboard payments list** — in the test environment, each payment row has a **Simulation actions** menu (three dots): pick **Mark as [status]** to transition it.
+- **The dashboard payments list** — in test mode, each payment row has a **Simulation actions** menu (three dots): pick **Mark as [status]** to transition it.
 
-<Frame caption="The hosted payment page in test mode — purple banner, Test Wallet, and the Test Console at the bottom.">
-  <img src="/images/test-mode-payment-page.png" alt="Hosted payment page in test mode showing the purple test-mode banner, a Test Wallet payment option, and the Test Console button" />
-</Frame>
-
-<Frame caption="The Test Console — available actions depend on the payment's current status; before payment you can expire or cancel it.">
-  <img src="/images/test-mode-test-console.png" alt="Test Console panel titled Simulate transition, showing a test payment with Expire payment and Cancel payment actions" />
-</Frame>
+<Columns cols={2}>
+  <Frame caption="The hosted payment page in test mode — purple banner, Test Wallet, and the Test Console at the bottom.">
+    <img src="/images/test-mode-payment-page.png" alt="Hosted payment page in test mode showing the purple test-mode banner, a Test Wallet payment option, and the Test Console button" />
+  </Frame>
+  <Frame caption="The Test Console — available actions depend on the payment's current status.">
+    <img src="/images/test-mode-test-console.png" alt="Test Console panel titled Simulate transition, showing a test payment with Expire payment and Cancel payment actions" />
+  </Frame>
+</Columns>
 
 <Frame caption="Simulation actions in the dashboard — a processing payment can be marked as succeeded, failed, or expired.">
   <img src="/images/test-mode-simulation-actions.png" alt="Dashboard payments list in test mode with the Simulation actions menu open on a processing payment, showing Mark as Succeeded, Mark as Failed, and Mark as Expired options" />
 </Frame>
+
+### Allowed status transitions
+
+Whichever surface you use, a test payment can only move along these paths:
 
 ```mermaid
 stateDiagram-v2
@@ -123,7 +121,7 @@ Terminal states (`succeeded`, `failed`, `expired`, `cancelled`) have no further 
 
 Test mode has no payment limit — build and verify as much as you need.
 
-Your **live** environment starts in **pilot**: live payments are real, but they count toward a total payment limit until your account is taken off pilot. The dashboard home for your live environment shows a **Pilot to Live** card with the limit you have left. When you're ready to process real volume, click **Request to go live** — our team reviews the request and removes the limit.
+**Live mode** starts in **pilot**: live payments are real, but they count toward a total payment limit until your account is taken off pilot. In live mode, the dashboard home shows a **Pilot to Live** card with the limit you have left. When you're ready to process real volume, click **Request to go live** — our team reviews the request and removes the limit.
 
 Switching from test to live is just a key swap: create a **live key** (prefix `wcp_`) in the [dashboard](https://merchant.pay.walletconnect.com/en/api-keys) and use it instead — same API, same endpoints, no code changes. Test-mode data does not carry over, so re-create your merchants and settlement configuration with the live key.
 
