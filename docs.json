@@ -45,8 +45,8 @@
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
-                  "payments/test-mode",
-                  "payments/cex-coverage"
+                  "payments/cex-coverage",
+                  "payments/test-mode"
                 ]
               },
               {
@@ -204,8 +204,8 @@
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
-                  "payments/test-mode",
-                  "payments/cex-coverage"
+                  "payments/cex-coverage",
+                  "payments/test-mode"
                 ]
               },
               {
