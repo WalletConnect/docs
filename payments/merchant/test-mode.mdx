@@ -82,6 +82,10 @@ Test payments don't move through their lifecycle on their own — you drive them
 - **The hosted payment page** — open the generated payment link. In test mode the page shows a <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> banner ("You're in test mode. No real funds move.") and lets you pay with a simulated **Test Wallet**. A floating **Test Console** lets you simulate the transition: **Confirm success**, **Simulate failure**, **Expire payment**, or **Cancel payment**.
 - **The dashboard payments list** — in the test environment, each payment row has a **Simulation actions** menu (three dots): pick **Mark as [status]** to transition it.
 
+<Frame caption="Simulation actions on a test payment — a processing payment can be marked as succeeded, failed, or expired.">
+  <img src="/images/test-mode-simulation-actions.png" alt="Dashboard payments list in test mode with the Simulation actions menu open on a processing payment, showing Mark as Succeeded, Mark as Failed, and Mark as Expired options" />
+</Frame>
+
 ```mermaid
 stateDiagram-v2
     direction LR
