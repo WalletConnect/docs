@@ -45,14 +45,14 @@
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
+                  "payments/test-mode",
                   "payments/cex-coverage"
                 ]
               },
               {
                 "group": "WalletConnect Pay for Merchants",
                 "pages": [
-                  "payments/merchant/quickstart",
-                  "payments/merchant/test-mode"
+                  "payments/merchant/quickstart"
                 ]
               },
               {
@@ -204,14 +204,14 @@
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
+                  "payments/test-mode",
                   "payments/cex-coverage"
                 ]
               },
               {
                 "group": "WalletConnect Pay for Merchants",
                 "pages": [
-                  "payments/merchant/quickstart",
-                  "payments/merchant/test-mode"
+                  "payments/merchant/quickstart"
                 ]
               },
               {
