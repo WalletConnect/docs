@@ -6,7 +6,7 @@ description: "Integrate and verify your WalletConnect Pay setup end to end witho
 
 Every WalletConnect Pay account has two environments: **test** and **live**. Test mode lets you build and verify your full integration — merchants, settlement configuration, payments, and webhooks — without executing anything on-chain.
 
-Throughout the docs and the dashboard, <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> indicates test mode.
+Throughout these docs, <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> indicates test mode. In the dashboard, the environment selector at the top shows which environment you're working in.
 
 ## How test mode works
 
@@ -38,7 +38,7 @@ Both environments use the **same API, the same base URL, and the same endpoints*
 | **Base URL** | `https://api.pay.walletconnect.com` | `https://api.pay.walletconnect.com` |
 | **On-chain execution** | None — settlement is simulated | Real transactions |
 | **Transaction hash** | Synthetic (`test:{paymentId}`) | Real on-chain hash |
-| **Webhooks** | Delivered | Delivered |
+| **Payment limit** | None | Pilot limit until your account goes live |
 | **Data** | Fully separate from live data | Fully separate from test data |
 
 ## Test API keys
@@ -53,30 +53,52 @@ export WCP_BASE="https://api.pay.walletconnect.com"
 Merchants, settlement configurations, and payments created with a test key exist only in your test environment. They are never visible to live requests, and vice versa.
 
 <Warning>
-API responses and webhook payloads do **not** include an environment field. The environment is determined entirely by the key that created the resource — if you need to tell test and live data apart in your systems, track which key produced it.
+API responses do **not** include an environment field. The environment is determined entirely by the key that created the resource — if you need to tell test and live data apart in your systems, track which key produced it.
 </Warning>
 
 ## What test payments do
 
-A test payment moves through the same lifecycle as a live payment — created, processing, succeeded — so you can exercise your full integration, including status polling and webhook handling. The differences:
+A test payment moves through the same lifecycle as a live payment — created, processing, succeeded — so you can exercise your full integration, including status polling. The differences:
 
 - **No funds move.** Nothing is executed on-chain and no settlement is delivered.
 - **The transaction hash is synthetic.** Completed test payments report a `txId` of the form `test:{paymentId}` instead of a real on-chain hash.
-- **Amounts are fixed.** The test environment returns fixed 1-unit payment options per token and chain, regardless of the amount you request. Don't assert on exact amounts in test mode.
+- **Amounts are realistic.** Payment options are quoted from the amount you request, converted per token at current exchange rates — the same way live payments are priced.
 
-Webhook events for test payments are delivered to your configured endpoints the same way live events are. Like API responses, events carry no environment marker — use a separate webhook endpoint for your test environment if you need to keep them apart.
+## Test mode in the dashboard
 
-## Going live
+You can run the whole test flow from the [dashboard](https://merchant.pay.walletconnect.com) without writing any code.
 
-When your integration works end to end in test mode:
+### Create a test payment
 
-1. Create a **live key** in the [dashboard](https://merchant.pay.walletconnect.com/en/api-keys) (prefix `wcp_`).
-2. Swap the key in your configuration — no code or endpoint changes needed.
-3. Re-create your merchants and settlement configuration with the live key. Test-mode data does not carry over.
+1. Switch the **environment selector** at the top of the dashboard to **Test**.
+2. Open **Payments** and click **Create payment**.
+3. Select a merchant and enter any amount — test mode has no payment limit.
+4. Click **Create payment**, then **Copy link** to share the payment link or open it yourself.
 
-<Note>
-During the pilot phase, live accounts may have a spending cap on payment volume. Test mode is not subject to any cap — build and verify as much as you need.
-</Note>
+### Simulate status changes
+
+Test payments don't move through their lifecycle on their own — you drive them. In the test environment, the payments table shows a **Simulation actions** column: open the menu on a payment row and pick **Mark as [status]** to transition it.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    requires_action --> processing
+    requires_action --> expired
+    requires_action --> cancelled
+    processing --> succeeded
+    processing --> failed
+    processing --> expired
+```
+
+Terminal states (`succeeded`, `failed`, `expired`, `cancelled`) have no further actions. This lets you exercise every status your integration needs to handle — including the failure paths that are hard to produce on demand with real payments.
+
+## The pilot limit
+
+Test mode has no payment limit — build and verify as much as you need.
+
+Your **live** environment starts in **pilot**: live payments are real, but they count toward a total payment limit until your account is taken off pilot. The dashboard home for your live environment shows a **Pilot to Live** card with the limit you have left. When you're ready to process real volume, click **Request to go live** — our team reviews the request and removes the limit.
+
+Switching from test to live is just a key swap: create a **live key** (prefix `wcp_`) in the [dashboard](https://merchant.pay.walletconnect.com/en/api-keys) and use it instead — same API, same endpoints, no code changes. Test-mode data does not carry over, so re-create your merchants and settlement configuration with the live key.
 
 ## Next steps
 

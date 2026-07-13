@@ -4,7 +4,9 @@ sidebarTitle: "Quickstart"
 description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in six steps."
 ---
 
-This guide takes you from zero to your first payment in six steps. You'll build in [test mode](/payments/merchant/test-mode) — same API, no real funds — and swap to a live key when you're ready.
+This guide takes you from zero to your first payment in six steps.
+
+Every account has two environments: **test mode**, where payments are simulated and no funds move, and **live mode**, where payments execute on-chain for real. Both use the same API — the only difference is which API key you use (`wcp_test_…` vs `wcp_…`). This guide runs through the flow in **test mode first**, so you can build and verify everything safely. See [Test mode](/payments/merchant/test-mode) for the full picture.
 
 1. **Create a test API key** in the dashboard.
 2. **Authenticate** your requests with the key.
@@ -180,16 +182,12 @@ Use `isFinal` to decide when to stop polling. While the payment is still in flig
 In test mode the `txId` is synthetic (`test:{paymentId}`) — no transaction is executed on-chain. Live payments return a real transaction hash.
 </Note>
 
-<Tip>
-Prefer webhooks for production — they remove the need to poll. The status endpoint is the right tool for one-off checks, scripts, and debugging.
-</Tip>
-
 See the full response schema in [Get the payment status](/api-reference/latest/get-v1-payments-id-status).
 
 </Step>
 
 </Steps>
 
-## Go live
+## From test to live
 
-Once your integration works end to end in test mode, create a **live key** (`wcp_` prefix) in the dashboard and swap it in — same API, same endpoints, no code changes. See [Going live](/payments/merchant/test-mode#going-live) for the details.
+That's the whole flow. Repeating these same six steps with a **live key** (`wcp_` prefix) means every payment you create is a **real payment** — on-chain execution, real funds, real settlement. Nothing else changes: same API, same endpoints, same code. Test-mode data doesn't carry over, so you'll create your merchants and settlement configuration again with the live key.
