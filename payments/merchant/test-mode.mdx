@@ -75,6 +75,18 @@ You can run the whole test flow from the [dashboard](https://merchant.pay.wallet
 3. Select a merchant and enter any amount — test mode has no payment limit.
 4. Click **Create payment**, then **Copy link** to share the payment link or open it yourself.
 
+<Frame caption="The environment selector switches the whole dashboard between your live and test environments.">
+  <img src="/images/test-mode-environment-selector.png" alt="Dashboard with the environment selector dropdown open, showing Live and Test options with Test selected" />
+</Frame>
+
+<Frame caption="Create payment in the test environment — pick a merchant and enter any amount.">
+  <img src="/images/test-mode-create-payment.png" alt="Create payment dialog with a merchant selected and an amount of 10 USD entered" />
+</Frame>
+
+<Frame caption="The generated payment link opens the hosted payment page in test mode.">
+  <img src="/images/test-mode-payment-created.png" alt="Payment created dialog showing the payment link with Copy link and Open buttons" />
+</Frame>
+
 ### Simulate status changes
 
 Test payments don't move through their lifecycle on their own — you drive them, from either of two places:
@@ -82,7 +94,15 @@ Test payments don't move through their lifecycle on their own — you drive them
 - **The hosted payment page** — open the generated payment link. In test mode the page shows a <span style={{color: "#7C3AED", fontWeight: 600}}>purple</span> banner ("You're in test mode. No real funds move.") and lets you pay with a simulated **Test Wallet**. A floating **Test Console** lets you simulate the transition: **Confirm success**, **Simulate failure**, **Expire payment**, or **Cancel payment**.
 - **The dashboard payments list** — in the test environment, each payment row has a **Simulation actions** menu (three dots): pick **Mark as [status]** to transition it.
 
-<Frame caption="Simulation actions on a test payment — a processing payment can be marked as succeeded, failed, or expired.">
+<Frame caption="The hosted payment page in test mode — purple banner, Test Wallet, and the Test Console at the bottom.">
+  <img src="/images/test-mode-payment-page.png" alt="Hosted payment page in test mode showing the purple test-mode banner, a Test Wallet payment option, and the Test Console button" />
+</Frame>
+
+<Frame caption="The Test Console — available actions depend on the payment's current status; before payment you can expire or cancel it.">
+  <img src="/images/test-mode-test-console.png" alt="Test Console panel titled Simulate transition, showing a test payment with Expire payment and Cancel payment actions" />
+</Frame>
+
+<Frame caption="Simulation actions in the dashboard — a processing payment can be marked as succeeded, failed, or expired.">
   <img src="/images/test-mode-simulation-actions.png" alt="Dashboard payments list in test mode with the Simulation actions menu open on a processing payment, showing Mark as Succeeded, Mark as Failed, and Mark as Expired options" />
 </Frame>
 
