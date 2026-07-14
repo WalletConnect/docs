@@ -1,0 +1,92 @@
+---
+title: "Add a network to a merchant"
+sidebarTitle: "Add a network"
+description: "Configure the networks, settlement addresses, and tokens a merchant accepts from the WalletConnect Pay dashboard."
+---
+
+Each network on a merchant defines where WalletConnect Pay settles funds and which tokens buyers can pay with. This guide adds a network to an existing merchant from the dashboard in a few steps.
+
+<Info>
+Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s) to get started.
+</Info>
+
+<Steps>
+
+<Step title="Open the dashboard" stepNumber="1">
+
+Go to the [WalletConnect Pay dashboard](https://merchant.pay.walletconnect.com/) and sign in if prompted.
+
+</Step>
+
+<Step title="Select the merchant" stepNumber="2">
+
+Choose the merchant you want to configure from the list. The merchant page shows its details and **Active settlement destinations** — every network, address, and token it currently accepts.
+
+</Step>
+
+<Step title="Open the wallet manager" stepNumber="3">
+
+Click **Edit wallets** to open the **Manage crypto wallets** dialog.
+
+<Frame>
+<img src="/images/payments/merchant-networks/edit-wallets.png" alt="Merchant page in the WalletConnect Pay dashboard with the Edit wallets button highlighted" />
+</Frame>
+
+</Step>
+
+<Step title="Add a network" stepNumber="4">
+
+Click **Add network** to open the **Add network** dialog.
+
+<Frame>
+<img src="/images/payments/merchant-networks/manage-wallets.png" alt="Manage crypto wallets dialog listing configured networks with the Add network button" />
+</Frame>
+
+</Step>
+
+<Step title="Select the network" stepNumber="5">
+
+Open the **Network** dropdown and pick the network you want to add — for example, Ethereum, OP Mainnet, or Solana.
+
+<Frame>
+<img src="/images/payments/merchant-networks/add-network.png" alt="Add network dialog with the network selector and wallet address field" />
+</Frame>
+
+</Step>
+
+<Step title="Enter the settlement address" stepNumber="6">
+
+In the **Wallet address** field, paste the address that will receive settled funds on the selected network.
+
+<Warning>
+Double-check the address before saving. Settlements are on-chain and cannot be reversed. Use an address on the same network you selected in the previous step.
+</Warning>
+
+</Step>
+
+<Step title="Select the tokens" stepNumber="7">
+
+Under **Tokens**, select each token the merchant should accept on this network — for example, ETH and USDC. A checkmark marks the selected tokens.
+
+<Frame>
+<img src="/images/payments/merchant-networks/select-tokens.png" alt="Add network dialog showing the token list with ETH and USDC selected" />
+</Frame>
+
+<Note>
+Only tokens supported on the selected network appear in the list. See [Token & Chain Coverage](/payments/token-and-chain-coverage) for the full list.
+</Note>
+
+</Step>
+
+<Step title="Save the network" stepNumber="8">
+
+Click **Add network**. The new network appears in **Active settlement destinations** and buyers can immediately pay with the tokens you selected.
+
+</Step>
+
+</Steps>
+
+## Next steps
+
+- Repeat these steps to add more networks to the same merchant.
+- Configuring settlement programmatically instead? See the [Merchant API quickstart](/payments/merchant/quickstart).
