@@ -1,6 +1,6 @@
 export const ProductCard = ({ img, href, title, description, model, type }) => {
   return (
-    <a href={href} rel="noopener noreferrer" className="group mb-5">
+    <a href={href} rel="noopener noreferrer" className="group no-underline" style={{ textDecoration: 'none', borderBottom: 'none', backgroundImage: 'none', marginBottom: '0.25rem' }}>
       <div className="flex flex-col rounded-xl md:p-1">
         <div className="w-full h-32 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
           <img
@@ -11,8 +11,8 @@ export const ProductCard = ({ img, href, title, description, model, type }) => {
             noZoom
           />
         </div>
-        <div className="flex flex-col gap-3 pb-2">
-          <h2 className="text-md font-medium text-gray-900 dark:text-gray-200 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors mb-[-8px]">
+        <div className="flex flex-col gap-3 pb-2" style={{ marginTop: '1rem' }}>
+          <h2 className="text-md font-medium text-gray-900 dark:text-gray-200 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors mb-[-8px]" style={{ marginTop: 0 }}>
             {title}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">

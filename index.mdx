@@ -10,53 +10,20 @@ import { ProductTiles } from '/snippets/home/product-tiles.mdx';
 import { appCategories } from '/snippets/home/data.mdx';
 import { ProductCard } from '/snippets/home/product-cards.mdx';
 
-<div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
-  <Container>
-    <div className="w-full flex flex-col">
-      <div className="flex flex-col items-start justify-center w-full max-w-4xl text-left">
-        <div
+<div className="px-5">
+
+   <Container className="pt-0 pb-14">
+    <div className="flex flex-col w-full mb-8">
+      <div
           className="text-gray-900 dark:text-gray-200 text-4xl tracking-tight"
         >
           WalletConnect Pay
-        </div>
-        <p
-          className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4"
-        >
-        The easiest way to enable crypto payments from any wallet, any asset, anywhere.
-        </p>
-        <div className="flex flex-row gap-4 mt-5">
-        <a href="/payments/overview">
-          <button
-            type="button"
-            className="px-5 flex items-center font-medium text-sm rounded-full py-2 shadow-sm text-white dark:text-gray-900 bg-primary-dark dark:bg-primary-light hover:opacity-[0.9] hover:bg-primary justify-center"
-          >
-            Get started
-            <svg
-              className="size-3 ml-2 bg-white dark:bg-gray-900"
-              style={{
-                maskImage: 'url("https://mintlify.b-cdn.net/solid/arrow-right-long.svg")',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center center'
-              }}
-            />
-          </button>
-          </a>
-        </div>
-      </div>
-    </div>
-
-  </Container>
-   <Container>
-    <div className="flex flex-col w-full mb-8">
-      <div className="flex items-center justify-between w-full">
-        <Title>
-          Introducing WalletConnect Pay
-        </Title>
+        
       </div>
       <p
         className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3"
       >
-      **[WalletConnect Pay](/payments/overview)** is a complete, end-to-end crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration.
+      A complete, end-to-end crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration.
       </p>
     </div>
     <div className="dark:hidden block">
@@ -71,7 +38,7 @@ import { ProductCard } from '/snippets/home/product-cards.mdx';
         />
         <ProductCard
           title="Wallet Integration"
-          description="Add built in support for WalletConnect Pay and allow your users to pay in real-world context, retaining custody and control of the UX."
+          description="Add built-in WalletConnect Pay support so users can pay in real-world context, keeping custody and UX control."
           href="/payments/wallets/overview"
           img="/images/wallet.png"
           model="For Wallets"
@@ -99,7 +66,7 @@ import { ProductCard } from '/snippets/home/product-cards.mdx';
         />
          <ProductCard
         title="Wallet Integration"
-        description="Add built in support for WalletConnect Pay and allow your users to pay in real-world context, retaining custody and control of the UX."
+        description="Add built-in WalletConnect Pay support so users can pay in real-world context, keeping custody and UX control."
         href="/payments/wallets/overview"
         img="/images/wallet.png"
         model="For Wallets"
@@ -115,7 +82,49 @@ import { ProductCard } from '/snippets/home/product-cards.mdx';
         />
     </CardGroup>
     </div>
-    <ul class="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
+  </Container>
+
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        What's supported
+      </Title>
+      <p
+        className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3"
+      >
+      See the tokens, chains, fiat currencies, wallets, and exchanges available with WalletConnect Pay.
+      </p>
+    </div>
+    <Columns cols={2}>
+      <Card
+        title="Tokens & Chains"
+        icon="coins"
+        href="/payments/token-and-chain-coverage"
+      >
+      Supported tokens and blockchain networks.
+      </Card>
+      <Card
+        title="Fiat Currencies"
+        icon="money-bill"
+        href="/payments/fiat-coverage"
+      >
+      Fiat currencies available for settlement and pricing.
+      </Card>
+      <Card
+        title="Wallets"
+        icon="wallet"
+        href="/payments/wallet-coverage"
+      >
+      Wallets that support WalletConnect Pay.
+      </Card>
+      <Card
+        title="Exchanges (CEX)"
+        icon="building-columns"
+        href="/payments/cex-coverage"
+      >
+      Centralized exchanges supported for payments.
+      </Card>
+    </Columns>
   </Container>
 
   <Container>

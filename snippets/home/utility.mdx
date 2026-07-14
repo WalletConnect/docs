@@ -1,6 +1,6 @@
-export const Container = ({ children }) => {
+export const Container = ({ children, className = "py-14" }) => {
   return (
-    <div className="px-4 lg:px-10 py-14">
+    <div className={`px-4 lg:px-10 ${className}`}>
       {children}
     </div>
   )
@@ -8,7 +8,7 @@ export const Container = ({ children }) => {
 
 export const Title = ({ children }) => {
   return (
-    <div className="text-gray-900 dark:text-gray-200 text-2xl tracking-tight">
+    <div className="text-gray-900 dark:text-gray-200 text-2xl tracking-tight" style={{ paddingTop: '2.5rem' }}>
       {children}
     </div>
   )
