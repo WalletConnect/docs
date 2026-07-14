@@ -1,0 +1,9 @@
+/* Homepage: reduce the content wrapper's large-screen top padding (pt-10 -> pt-5).
+   `.lg\:pt-10` is applied by Mintlify's frame-mode layout, which only the homepage
+   (index.mdx, mode: "frame") uses, so this effectively scopes to the homepage.
+   Loaded after Mintlify's CSS, so this wins on equal specificity. */
+@media (min-width: 1024px) {
+  .lg\:pt-10 {
+    padding-top: calc(var(--spacing) * 5);
+  }
+}
