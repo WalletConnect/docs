@@ -12,7 +12,7 @@ Throughout these docs and on the hosted payment page, <span style={{color: "#7C3
 
 Test and live are separated at the **account level**, and you choose the mode by **which API key you use**. There is no `test` flag or mode parameter on any request — a payment created with a test key is a test payment, and a payment created with a live key is a live payment.
 
-```mermaid
+```mermaid actions={false}
 flowchart LR
     subgraph test ["Test mode"]
         TK["wcp_test_… key"] --> TP["Test payment"]
