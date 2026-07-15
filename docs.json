@@ -85,6 +85,7 @@
                     ]
                   },
                   "payments/wallets/api-first",
+                "payments/wallets/webview",
                   {
                     "group": "Token & Chain Support",
                     "pages": [
@@ -242,6 +243,7 @@
                     ]
                   },
                   "payments/wallets/api-first",
+                "payments/wallets/webview",
                   {
                     "group": "Token & Chain Support",
                     "pages": [
