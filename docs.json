@@ -45,7 +45,8 @@
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
-                  "payments/cex-coverage"
+                  "payments/cex-coverage",
+                  "payments/test-mode"
                 ]
               },
               {
@@ -135,6 +136,7 @@
                 "group": "Overview",
                 "pages": [
                   "api-reference/index",
+                  "api-reference/authentication",
                   "api-reference/versioning"
                 ]
               },
@@ -202,7 +204,8 @@
                   "payments/token-and-chain-coverage",
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
-                  "payments/cex-coverage"
+                  "payments/cex-coverage",
+                  "payments/test-mode"
                 ]
               },
               {
@@ -292,6 +295,7 @@
                 "group": "Overview",
                 "pages": [
                   "api-reference/index",
+                  "api-reference/authentication",
                   "api-reference/versioning"
                 ]
               },
