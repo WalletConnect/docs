@@ -73,7 +73,7 @@ const payUrl = buildPayUrl(
 | Parameter | Required | Description |
 |---|---|---|
 | `returnUrl` | **Yes** | Your app's native deep link (e.g. `myapp://`). The checkout passes this to wallets as the return destination so the OS routes the user back after signing. |
-| `preferUniversalLinks` | Recommended | Set to `1`. Tells the checkout to open wallets via universal links (`https://`) rather than custom URL schemes when both are available — more reliable on iOS. |
+| `preferUniversalLinks` | **Yes** | Set to `1`. Tells the checkout to open wallets via universal links (`https://`) rather than custom URL schemes when both are available — more reliable on iOS. |
 
 ## Bridge Messages
 
