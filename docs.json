@@ -46,8 +46,7 @@
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
                   "payments/cex-coverage",
-                  "payments/test-mode",
-                  "payments/webhooks"
+                  "payments/test-mode"
                 ]
               },
               {
@@ -206,8 +205,7 @@
                   "payments/fiat-coverage",
                   "payments/wallet-coverage",
                   "payments/cex-coverage",
-                  "payments/test-mode",
-                  "payments/webhooks"
+                  "payments/test-mode"
                 ]
               },
               {

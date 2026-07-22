@@ -1,23 +1,18 @@
 ---
 title: "Webhooks"
 sidebarTitle: "Webhooks"
-description: "Get notified in real time as payments move through their lifecycle — and handle delivery, ordering, and verification correctly."
+description: "Get notified in real time as payments move through their lifecycle."
 ---
 
 Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they happen. Instead of polling for every payment, you register an endpoint once and we `POST` an event to it whenever a payment is created, starts processing, succeeds, fails, expires, is cancelled, or settles.
 
-<Info>
-Webhooks are currently rolling out. If you don't see **Webhooks** in your [dashboard](https://merchant.pay.walletconnect.com), [contact us](https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s) to get access.
-</Info>
-
 ## Webhooks vs. polling
 
-Webhooks tell you *promptly* that something happened. They are not a substitute for the API as the source of truth:
+Webhooks are for **notifications**. They tell you promptly that something happened, so you can react quickly: update the order status in your UI, notify a customer, kick off downstream processing.
 
-- **Use webhooks** to react quickly — update order status in your UI, notify a customer, kick off downstream processing.
-- **Poll the API for the critical path.** Before you do anything irreversible — releasing goods, crediting a balance, marking an order paid — confirm the payment state with [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status). Treat the webhook as the trigger to go check, not as the authorization itself.
+On the **critical path, always poll**. Before you do anything irreversible, such as releasing goods, crediting a balance, or marking an order paid, confirm the payment state with [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status). Webhooks let you relax the polling schedule (for example, to every 5 seconds instead of something more aggressive), and when a webhook event arrives, confirm it right away by fetching the payment state. Treat the webhook as the trigger to go check, not as the authorization itself.
 
-This matters because webhook delivery is **at-least-once** and **not guaranteed to be in order** (see [Delivery guarantees](#delivery-guarantees)). A well-built integration works correctly even if a webhook arrives twice, late, out of order — or not at all.
+This matters because webhook delivery is **at-least-once** and **not guaranteed to be in order** (see [Delivery guarantees](#delivery-guarantees)). A well-built integration works correctly even if a webhook arrives twice, late, out of order, or not at all.
 
 ## Events
 
@@ -26,7 +21,7 @@ Every event is named `payment.<stage>`:
 | Event type | Sent when |
 |---|---|
 | `payment.created` | A payment was created. |
-| `payment.processing` | A payment started processing — the buyer has committed funds. |
+| `payment.processing` | A payment started processing: the buyer has committed funds. |
 | `payment.succeeded` | A payment succeeded. |
 | `payment.failed` | A payment failed. |
 | `payment.expired` | A payment expired before completion. |
@@ -43,18 +38,18 @@ flowchart LR
     C --> X["payment.cancelled"]
 ```
 
-When you register an endpoint you choose which event types it receives — all seven by default.
+When you register an endpoint you choose which event types it receives; by default it receives all seven.
 
 ## The event payload
 
-Every event carries the same envelope, and `data` is always a **full snapshot of the payment at the moment the event occurred** — never a delta. You never need a previous event to interpret the current one.
+Every event carries the same envelope, and `data` is always a **full snapshot of the payment at the moment the event occurred**, never a delta. You never need a previous event to interpret the current one.
 
 | Field | Description |
 |---|---|
-| `id` | Unique event ID (`evt_…`). **Your deduplication key** — the same event is always delivered with the same `id`. |
+| `id` | Unique event ID (`evt_…`). **Your deduplication key**: the same event is always delivered with the same `id`. |
 | `type` | The event type, e.g. `payment.succeeded`. |
 | `api_version` | The payload schema version (e.g. `2026-05-18`). Within a version, changes are additive only. |
-| `created_at` | When the event occurred (ISO 8601, UTC) — not when it was delivered. |
+| `created_at` | When the event occurred (ISO 8601, UTC), not when it was delivered. |
 | `data` | The full payment snapshot at event time. |
 
 The fields inside `data` you'll use most:
@@ -64,10 +59,10 @@ The fields inside `data` you'll use most:
 | `payment_id` / `merchant_id` | The same identifiers you use across the Merchant API. |
 | `reference_id` | Your own order identifier, as passed when creating the payment (or `null`). |
 | `status` | The payment status at event time: `requires_action`, `processing`, `succeeded`, `failed`, `expired`, or `cancelled`. |
-| `payment_state_version` | Monotonically increasing integer per payment. **Your ordering key** — see [Out-of-order delivery](#out-of-order-delivery). |
+| `payment_state_version` | Monotonically increasing integer per payment. **Your ordering key**; see [Out-of-order delivery](#out-of-order-delivery). |
 | `live` | `false` for test-mode payments and test deliveries. **Check `live === true` before driving real fulfillment.** |
-| `amount` | The requested amount: `{ "unit": "iso4217/USD", "value": "1000" }` — `value` is an integer string in the smallest unit. |
-| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks — `null` until the payment reaches that stage. `success` and `settled` include the transaction hash (`tx_id`). |
+| `amount` | The requested amount: `{ "unit": "iso4217/USD", "value": "1000" }`, where `value` is an integer string in the smallest unit. |
+| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks, `null` until the payment reaches that stage. `success` and `settled` include the transaction hash (`tx_id`). |
 
 A `payment.succeeded` event looks like this:
 
@@ -113,7 +108,7 @@ A `payment.succeeded` event looks like this:
 ```
 
 <Warning>
-**Parse tolerantly.** New fields are added to the payload over time without a version bump — that's the additive-only contract. Ignore fields you don't recognize; never reject an event because it contains something new. Strict schema validation that fails on unknown fields **will** break your integration.
+**Parse tolerantly.** New fields are added to the payload over time without a version bump; that is the additive-only contract. Ignore fields you don't recognize, and never reject an event because it contains something new. Strict schema validation that fails on unknown fields **will** break your integration.
 </Warning>
 
 ## Delivery guarantees
@@ -122,18 +117,18 @@ Design your handler around three properties of webhook delivery. Getting these r
 
 ### At-least-once delivery
 
-Every event is delivered *at least* once — which means occasionally more than once. Deduplicate on the event `id`: record each `id` you've processed (with a TTL of a few days), and acknowledge-but-skip any event whose `id` you've already seen.
+Every event is delivered *at least* once, which means occasionally more than once. Deduplicate on the event `id`: record each `id` you've processed (with a TTL of a few days), and acknowledge but skip any event whose `id` you've already seen.
 
 ### Out-of-order delivery
 
-Events for the same payment can arrive out of order — a `payment.succeeded` may land before the `payment.processing` that preceded it, especially when retries are involved. Two rules keep you safe:
+Events for the same payment can arrive out of order. A `payment.succeeded` may land before the `payment.processing` that preceded it, especially when retries are involved. Two rules keep you safe:
 
-1. **Compare `payment_state_version`.** It increases with every state change of a payment. Keep the highest version you've processed per `payment_id`, and ignore any event with a version less than or equal to it — it's stale.
-2. **Poll for the critical path.** Since each event is a full snapshot, a late event never corrupts your state if you follow rule 1 — but for irreversible actions, confirm with [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) rather than acting on the webhook alone.
+1. **Compare `payment_state_version`.** It increases with every state change of a payment. Keep the highest version you've processed per `payment_id`, and ignore any event with a version less than or equal to it, because it is stale.
+2. **Poll for the critical path.** Since each event is a full snapshot, a late event never corrupts your state if you follow rule 1. For irreversible actions, though, confirm with [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) rather than acting on the webhook alone.
 
 ### Retries
 
-An attempt counts as delivered only when your endpoint responds with a **2xx** status. Any other response — including redirects, which are not followed — or a timeout counts as a failure, and the delivery is retried with increasing back-off:
+An attempt counts as delivered only when your endpoint responds with a **2xx** status. Any other response, including redirects (which are not followed), or a timeout counts as a failure, and the delivery is retried with increasing back-off:
 
 | Attempt | Time after previous attempt |
 |---|---|
@@ -146,10 +141,10 @@ An attempt counts as delivered only when your endpoint responds with a **2xx** s
 | 7 | 10 hours |
 | 8 | 10 hours |
 
-That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically** — recovering from a longer outage is manual. Check your endpoint's delivery history in the dashboard, and reconcile missed payments by fetching their current state from the API.
+That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically**, so recovering from a longer outage is manual. Check your endpoint's delivery history in the dashboard, and reconcile missed payments by fetching their current state from the API.
 
 <Tip>
-Acknowledge first, process later. Return `200` as soon as you've verified the signature and durably queued the event — don't make the webhook response wait on your business logic. Slow responses time out, count as failed attempts, and cause redundant redeliveries.
+Acknowledge first, process later. Return `200` as soon as you've verified the signature and durably queued the event, and don't make the webhook response wait on your business logic. Slow responses time out, count as failed attempts, and cause redundant redeliveries.
 </Tip>
 
 ## Set up your endpoint
@@ -158,11 +153,11 @@ Acknowledge first, process later. Return `200` as soon as you've verified the si
 
 <Step title="Register the endpoint" stepNumber="1">
 
-1. In the [dashboard](https://merchant.pay.walletconnect.com), make sure the **Test / Live** selector matches the mode you're setting up — endpoints are configured separately per mode.
+1. In the [dashboard](https://merchant.pay.walletconnect.com), make sure the **Test / Live** selector matches the mode you're setting up, since endpoints are configured separately per mode.
 2. Open **Webhooks** and add your endpoint: a publicly reachable **HTTPS** URL, and the event types you want (all seven by default).
 3. Copy the **signing secret** (`whsec_…`) and store it in a secret manager. You'll use it to verify every delivery.
 
-You can reveal the secret again later, and rotate it from the same page — after a rotation, the old secret stays valid for 24 hours so you can roll over without dropping deliveries.
+You can reveal the secret again later, and rotate it from the same page. After a rotation, the old secret stays valid for 24 hours so you can roll over without dropping deliveries.
 
 <Note>
 You can register one webhook endpoint per mode. Test and live endpoints are fully separate, each with its own signing secret.
@@ -172,7 +167,7 @@ You can register one webhook endpoint per mode. Test and live endpoints are full
 
 <Step title="Verify signatures" stepNumber="2">
 
-Every delivery is signed so you can confirm it came from WalletConnect Pay and wasn't tampered with. The signature arrives in three headers — `svix-id`, `svix-timestamp`, and `svix-signature` — following the [Svix](https://docs.svix.com/receiving/verifying-payloads/how) webhook signature scheme, so you can verify with any Svix library:
+Every delivery is signed so you can confirm it came from WalletConnect Pay and wasn't tampered with. The signature arrives in three headers (`svix-id`, `svix-timestamp`, and `svix-signature`) and follows the [Svix](https://docs.svix.com/receiving/verifying-payloads/how) webhook signature scheme, so you can verify with any Svix library:
 
 <CodeGroup>
 
@@ -185,7 +180,7 @@ const wh = new Webhook(process.env.WCP_WEBHOOK_SECRET); // whsec_…
 
 app.post(
   "/webhooks/walletconnect-pay",
-  // verification needs the raw body — don't JSON-parse it first
+  // verification needs the raw body; don't JSON-parse it first
   express.raw({ type: "application/json" }),
   (req, res) => {
     let event;
@@ -213,7 +208,7 @@ wh = Webhook(WCP_WEBHOOK_SECRET)  # whsec_…
 
 @app.post("/webhooks/walletconnect-pay")
 async def handle_webhook(request: Request):
-    payload = await request.body()  # raw bytes — don't parse first
+    payload = await request.body()  # raw bytes; don't parse first
     try:
         event = wh.verify(payload, request.headers)
     except WebhookVerificationError:
@@ -231,7 +226,7 @@ Two things trip people up:
 - **Verify the raw request body**, byte for byte. Parsing and re-serializing the JSON changes the bytes and the verification fails.
 - The timestamp header is checked against the current time to prevent replay attacks, so make sure your server clock is accurate.
 
-Reject anything that fails verification with a `400` — never process an unverified payload. If you'd rather verify manually (HMAC-SHA256 over `{svix-id}.{svix-timestamp}.{body}`), see the [signature scheme reference](https://docs.svix.com/receiving/verifying-payloads/how-manual).
+Reject anything that fails verification with a `400`, and never process an unverified payload. If you'd rather verify manually (HMAC-SHA256 over `{svix-id}.{svix-timestamp}.{body}`), see the [signature scheme reference](https://docs.svix.com/receiving/verifying-payloads/how-manual).
 
 </Step>
 
@@ -239,8 +234,8 @@ Reject anything that fails verification with a `400` — never process an unveri
 
 Two ways to see events hit your endpoint before any real payment exists:
 
-- **Send a test event.** In the dashboard's **Webhooks** page, send a test event of any type to your endpoint. Test events carry sample data with `live: false` — use them to check signature verification and your 2xx response.
-- **Run the full flow in [test mode](/payments/test-mode).** Create a test payment and drive it through its lifecycle with the Test Console or the dashboard's simulation actions. Each transition emits the real webhook — `payment.created` through `payment.succeeded` (or `failed`, `expired`, `cancelled`) — so you can verify your handler against every path, including the ones that are hard to produce on demand with real payments.
+- **Send a test event.** In the dashboard's **Webhooks** page, send a test event of any type to your endpoint. Test events carry sample data with `live: false`; use them to check signature verification and your 2xx response.
+- **Run the full flow in [test mode](/payments/test-mode).** Create a test payment and drive it through its lifecycle with the Test Console or the dashboard's simulation actions. Each transition emits the real webhook, from `payment.created` through `payment.succeeded` (or `failed`, `expired`, `cancelled`), so you can verify your handler against every path, including the ones that are hard to produce on demand with real payments.
 
 The dashboard shows each endpoint's recent deliveries with response status and timing, which is the first place to look when something doesn't arrive.
 
@@ -254,10 +249,10 @@ During local development, expose your handler with a tunnel (e.g. `ngrok`, `clou
 
 ## Go live
 
-Webhook configuration does **not** carry over from test to live — they are separate environments end to end. When you switch:
+Webhook configuration does **not** carry over from test to live; they are separate environments end to end. When you switch:
 
 1. Flip the dashboard to **Live** and register your production endpoint URL and event types again.
-2. Store the **live signing secret** — it's different from your test secret — and make sure your handler uses the secret matching the environment.
+2. Store the **live signing secret**, which is different from your test secret, and make sure your handler uses the secret matching the environment.
 3. Confirm your handler checks `data.live === true` before triggering real fulfillment. Test events and test-mode payments always carry `live: false`.
 4. Re-verify the critical path: dedupe by `id`, ordering by `payment_state_version`, and a status poll before anything irreversible.
 
