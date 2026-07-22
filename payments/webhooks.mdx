@@ -143,6 +143,8 @@ An attempt counts as delivered only when your endpoint responds with a **2xx** s
 
 That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically**, so recovering from a longer outage is manual. Check your endpoint's delivery history in the dashboard, and reconcile missed payments by fetching their current state from the API.
 
+To stop deliveries entirely (for example, when decommissioning an integration), delete the endpoint from the dashboard's **Webhooks** page. Deletion takes effect immediately and cannot be undone.
+
 <Tip>
 Acknowledge first, process later. Return `200` as soon as you've verified the signature and durably queued the event, and don't make the webhook response wait on your business logic. Slow responses time out, count as failed attempts, and cause redundant redeliveries.
 </Tip>
