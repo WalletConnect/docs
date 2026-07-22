@@ -58,7 +58,7 @@ function buildPayUrl(gatewayUrl: string, appDeepLink: string): string {
   const url = new URL(gatewayUrl);
   // Required: the wallet returns here after signing
   url.searchParams.set('returnUrl', appDeepLink);
-  // Recommended: open wallets via universal links instead of custom schemes
+  // Required: open wallets via universal links instead of custom schemes
   url.searchParams.set('preferUniversalLinks', '1');
   return url.toString();
 }
