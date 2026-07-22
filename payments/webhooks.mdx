@@ -4,7 +4,7 @@ sidebarTitle: "Webhooks"
 description: "Get notified in real time as payments move through their lifecycle."
 ---
 
-Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they happen. Instead of polling for every payment, you register an endpoint once and we `POST` an event to it whenever a payment is created, starts processing, succeeds, fails, expires, is cancelled, or settles.
+Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they happen. Enhance your integration by registering an endpoint once: we `POST` an event to it whenever a payment is created, starts processing, succeeds, fails, expires, is cancelled, or settles.
 
 ## Webhooks vs. polling
 
@@ -200,7 +200,31 @@ You can register one webhook endpoint per mode. Test and live endpoints are full
 
 <Step title="Verify signatures" stepNumber="2">
 
-Every delivery is signed so you can confirm it came from WalletConnect Pay and wasn't tampered with. The signature is a **standard HMAC-SHA256**, so you don't need any SDK to verify it. It arrives in three headers on every delivery:
+Every delivery is signed so you can confirm it came from WalletConnect Pay and wasn't tampered with. The signature is a **standard HMAC-SHA256**, so you don't need any SDK to verify it.
+
+### Let your coding agent do it
+
+The fastest path: an AI coding agent (Claude Code, Cursor, Codex, and the like) can implement and verify the handler in one shot. The prompt contains the complete spec plus a test vector to validate the implementation against, so paste it into your agent as-is:
+
+<button
+  type="button"
+  data-wcp-copy-prompt
+  style={{
+    padding: "0.5rem 1.25rem",
+    background: "#0988f0",
+    color: "#ffffff",
+    fontWeight: 600,
+    border: "none",
+    borderRadius: "0.5rem",
+    cursor: "pointer"
+  }}
+>
+  Copy prompt
+</button>
+
+### Or implement it by hand
+
+The signature arrives in three headers on every delivery:
 
 | Header | Contents |
 |---|---|
@@ -467,26 +491,6 @@ Two things trip people up:
 
 Reject anything that fails verification with a `400`, and never process an unverified payload. The scheme is the one implemented by [Svix libraries](https://docs.svix.com/receiving/verifying-payloads/how) (they accept the `webhook-*` header names too), so if you already use one, its `verify` function performs exactly these checks and is equally fine.
 
-### Or let your coding agent do it
-
-An AI coding agent (Claude Code, Cursor, Codex, and the like) can implement and verify the handler in one shot. The prompt contains the complete spec plus a test vector to validate the implementation against, so paste it into your agent as-is:
-
-<button
-  type="button"
-  data-wcp-copy-prompt
-  style={{
-    padding: "0.5rem 1.25rem",
-    background: "#0988f0",
-    color: "#ffffff",
-    fontWeight: 600,
-    border: "none",
-    borderRadius: "0.5rem",
-    cursor: "pointer"
-  }}
->
-  Copy prompt
-</button>
-
 </Step>
 
 <Step title="Test the delivery" stepNumber="3">
@@ -513,7 +517,7 @@ Webhook configuration does **not** carry over from test to live; they are separa
 1. Flip the dashboard to **Live** and register your production endpoint URL and event types again.
 2. Store the **live signing secret**, which is different from your test secret, and make sure your handler uses the secret matching the environment.
 3. Confirm your handler checks `data.live === true` before triggering real fulfillment. Test events and test-mode payments always carry `live: false`.
-4. Re-verify the critical path: dedupe by `id`, ordering by `payment_state_version`, and a status poll before anything irreversible.
+4. Re-verify the safety rails: dedupe by `id`, ordering by `payment_state_version`.
 
 ## Next steps
 
