@@ -165,7 +165,14 @@ export function PayWebView({gatewayUrl, appDeepLink, onSuccess, onFailure}: PayW
         Linking.openURL(request.url).catch(console.warn);
         return false;
       }
-      return true;
+      // Allow https (the checkout) and about:; block any other scheme so the
+      // page can't drive the OS into arbitrary native schemes (tel:, sms:, …).
+      try {
+        const scheme = new URL(request.url).protocol;
+        return scheme === 'https:' || scheme === 'about:';
+      } catch {
+        return false;
+      }
     },
     [],
   );
@@ -233,8 +240,10 @@ fun isWalletDeeplink(url: String): Boolean = try {
     Uri.parse(url).getQueryParameter("uri")?.startsWith("wc:") == true
 } catch (_: Exception) { false }
 
-// Shared by both shouldOverrideUrlLoading overloads: forward wc: wallet deeplinks to the OS
-// (return true = handled), load everything else in-place (return false).
+// Shared by both shouldOverrideUrlLoading overloads. Returns true = handled (don't load
+// in the WebView), false = let the WebView load it. Forward wc: wallet deeplinks to the OS;
+// allow https (the checkout) and about: to load; block any other scheme (tel:, sms:,
+// intent:, …) so the page can't drive the OS into arbitrary native apps.
 private fun handleWalletDeeplink(context: Context, url: String?): Boolean {
     if (url == null) return false
     if (isWalletDeeplink(url)) {
@@ -245,7 +254,8 @@ private fun handleWalletDeeplink(context: Context, url: String?): Boolean {
         }
         return true
     }
-    return false
+    val scheme = Uri.parse(url).scheme?.lowercase()
+    return scheme != "https" && scheme != "about"
 }
 
 @Composable
@@ -468,7 +478,13 @@ class _PayWebViewState extends State<PayWebView> {
             }
             return NavigationDecision.prevent;
           }
-          return NavigationDecision.navigate;
+          // Allow https (the checkout) and about:; block any other scheme so the
+          // page can't drive the OS into arbitrary native schemes (tel:, sms:, …).
+          final scheme = Uri.tryParse(request.url)?.scheme.toLowerCase();
+          if (scheme == 'https' || scheme == 'about') {
+            return NavigationDecision.navigate;
+          }
+          return NavigationDecision.prevent;
         },
       ))
       ..addJavaScriptChannel('ReactNativeWebView', onMessageReceived: (msg) {
