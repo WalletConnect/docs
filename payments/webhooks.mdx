@@ -436,64 +436,23 @@ Reject anything that fails verification with a `400`, and never process an unver
 
 ### Or let your coding agent do it
 
-The prompt below contains the complete spec plus a test vector, so an AI coding agent (Claude Code, Cursor, Codex, and the like) can implement and verify the handler in one shot. Copy it as-is:
+An AI coding agent (Claude Code, Cursor, Codex, and the like) can implement and verify the handler in one shot. The prompt contains the complete spec plus a test vector to validate the implementation against, so paste it into your agent as-is:
 
-````text Prompt: implement WalletConnect Pay webhook verification
-Implement a WalletConnect Pay webhook handler in this codebase, using the
-project's existing language and web framework.
-
-Requirements:
-
-1. Add a POST route for webhook deliveries (use /webhooks/walletconnect-pay
-   unless this project has its own convention). The handler must read the RAW
-   request body bytes before any JSON body-parsing middleware touches it.
-
-2. Verify the signature of every delivery before doing anything else:
-   - Read headers: svix-id, svix-timestamp, svix-signature.
-   - The signing secret comes from the environment variable WCP_WEBHOOK_SECRET
-     and looks like "whsec_<base64>". Base64-decode the part after "whsec_" to
-     get the HMAC key bytes. Do NOT use the secret string directly as the key.
-   - Compute HMAC-SHA256 over the UTF-8 bytes of:
-     "<svix-id>.<svix-timestamp>.<raw body>"
-     and base64-encode the digest.
-   - svix-signature contains space-separated entries of the form
-     "v1,<base64 digest>" (there can be several during secret rotation).
-     Verification succeeds if ANY v1 entry equals the expected digest, using a
-     constant-time comparison.
-   - Reject the delivery if |now - svix-timestamp| > 5 minutes
-     (svix-timestamp is unix seconds).
-   - On any verification failure, respond 400 and do not process the payload.
-
-3. On success, respond 200 immediately and hand the parsed event off for
-   asynchronous processing. Do not run business logic before responding.
-
-4. Process events idempotently and in order:
-   - Deduplicate on the top-level "id" field (format "evt_...").
-   - Drop stale events: track the highest data.payment_state_version seen per
-     data.payment_id and ignore events with a version <= that.
-
-5. Parse the payload tolerantly: ignore unknown fields, never fail on new
-   fields. Event types are payment.created, payment.processing,
-   payment.succeeded, payment.failed, payment.expired, payment.cancelled,
-   payment.settled.
-
-6. Use only the standard library for the crypto. Do not add a dependency.
-
-Verify the implementation against this test vector (skip the timestamp
-tolerance check for the vector only, since the timestamp is in the past):
-   - secret:         whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw
-   - svix-id:        msg_p5jXN8AQM9LWM0D4loKWxJek
-   - svix-timestamp: 1614265330
-   - raw body (exact bytes, including the space):
-     {"test": 2432232314}
-   - expected svix-signature entry:
-     v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=
-
-Write unit tests covering: the vector above verifies successfully; a wrong
-signature is rejected; an altered body is rejected; a svix-signature header
-with multiple entries where only the second matches is accepted; a timestamp
-outside the 5-minute tolerance is rejected.
-````
+<button
+  type="button"
+  data-wcp-copy-prompt
+  style={{
+    padding: "0.5rem 1.25rem",
+    background: "#0988f0",
+    color: "#ffffff",
+    fontWeight: 600,
+    border: "none",
+    borderRadius: "0.5rem",
+    cursor: "pointer"
+  }}
+>
+  Copy prompt
+</button>
 
 </Step>
 
