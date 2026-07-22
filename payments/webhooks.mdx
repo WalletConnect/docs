@@ -8,11 +8,11 @@ Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they
 
 ## Webhooks vs. polling
 
-Webhooks are for **notifications**. They tell you promptly that something happened, so you can react quickly: update the order status in your UI, notify a customer, kick off downstream processing.
+Polling [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) is the primary way to validate payment status during the purchase cycle: create the payment, then poll until the status is final. Webhooks come on top as an enhancement. They usually tell you first, and with far fewer requests, so you can update the order status in your UI, notify a customer, or kick off downstream processing the moment something happens.
 
-On the **critical path, always poll**. Before you do anything irreversible, such as releasing goods, crediting a balance, or marking an order paid, confirm the payment state with [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status). Webhooks let you relax the polling schedule (for example, to every 5 seconds instead of something more aggressive), and when a webhook event arrives, confirm it right away by fetching the payment state. Treat the webhook as the trigger to go check, not as the authorization itself.
+When a webhook event arrives, its payload already contains everything you need. Every event is a full signed snapshot of the payment and carries a monotonic `payment_state_version`, so verifying the signature, deduplicating by `id`, and applying the version guard is enough; there is no need to call the API from inside your handler.
 
-This matters because webhook delivery is **at-least-once** and **not guaranteed to be in order** (see [Delivery guarantees](#delivery-guarantees)). A well-built integration works correctly even if a webhook arrives twice, late, out of order, or not at all.
+Webhook delivery is **at-least-once** and **not guaranteed to be in order** (see [Delivery guarantees](#delivery-guarantees)). A well-built integration works correctly even if a webhook arrives twice, late, out of order, or not at all.
 
 ## Events
 
@@ -34,11 +34,17 @@ flowchart LR
     P --> S["payment.succeeded"] --> T["payment.settled"]
     P --> F["payment.failed"]
     P --> E["payment.expired"]
+    P --> X["payment.cancelled"]
+    C --> F
     C --> E
-    C --> X["payment.cancelled"]
+    C --> X
 ```
 
 When you register an endpoint you choose which event types it receives; by default it receives all seven.
+
+<Note>
+`payment.settled` carries `status: "succeeded"`. Settlement is a stage of a succeeded payment, not a seventh status, so don't look for a `settled` value in the `status` field.
+</Note>
 
 ## The event payload
 
@@ -62,24 +68,27 @@ The fields inside `data` you'll use most:
 | `payment_state_version` | Monotonically increasing integer per payment. **Your ordering key**; see [Out-of-order delivery](#out-of-order-delivery). |
 | `live` | `false` for test-mode payments and test deliveries. **Check `live === true` before driving real fulfillment.** |
 | `amount` | The requested amount: `{ "unit": "iso4217/USD", "value": "1000" }`, where `value` is an integer string in the smallest unit. |
-| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks, `null` until the payment reaches that stage. `success` and `settled` include the transaction hash (`tx_id`). |
+| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks, `null` until the payment reaches that stage. `success` and `settled` include `tx_id` (chain-specific transaction id, may be `null`); `failed` and `cancelled` include human-readable `failure_reason` / `cancellation_reason`. |
 
 A `payment.succeeded` event looks like this:
 
 ```json
 {
-  "id": "evt_01HZX4V9K3TQ2M8R6W0B5YD7FN",
+  "id": "evt_fixture_payment_succeeded",
   "type": "payment.succeeded",
   "api_version": "2026-05-18",
   "created_at": "2026-06-30T10:00:00Z",
   "data": {
-    "payment_id": "pay_01HZX4V9K3T",
-    "merchant_id": "mrch_7kBz2qR9xPvLmN4Yw",
+    "payment_id": "pay_fixture_01HZX4V9K3T",
+    "merchant_id": "merchant_fixture_01HZX4V9K3T",
     "live": true,
     "payment_state_version": 2,
-    "reference_id": "ORDER-1042",
+    "reference_id": "order_fixture_1042",
     "status": "succeeded",
-    "amount": { "unit": "iso4217/USD", "value": "1000" },
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "1000"
+    },
     "created_at": "2026-06-30T09:59:00Z",
     "expires_at": "2026-06-30T10:14:00Z",
     "processing": {
@@ -87,6 +96,25 @@ A `payment.succeeded` event looks like this:
       "option_amount": {
         "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "value": "10000000"
+      },
+      "fee": {
+        "kind": "base_plus_percent",
+        "base_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "0"
+        },
+        "percent": {
+          "numerator": "29",
+          "denominator": "1000"
+        },
+        "percent_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "290000"
+        },
+        "total_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "290000"
+        }
       },
       "settlement_amount": {
         "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -108,7 +136,11 @@ A `payment.succeeded` event looks like this:
 ```
 
 <Warning>
-**Parse tolerantly.** New fields are added to the payload over time without a version bump; that is the additive-only contract. Ignore fields you don't recognize, and never reject an event because it contains something new. Strict schema validation that fails on unknown fields **will** break your integration.
+**Parse tolerantly.** New fields are added to the payload over time without a version bump; that is the additive-only contract. Strict schema validation that fails on unknown fields **will** break your integration.
+
+- Ignore fields you don't recognize, and never reject an event because it contains something new.
+- Don't switch exhaustively on `fee.kind`. The only value today is `base_plus_percent`, and new kinds can be added within this `api_version`. Whatever the kind, `fee.total_amount` is always present.
+- Never branch on `failure_reason` or `cancellation_reason`. They are human-readable diagnostics that may change without notice. Display them if useful, and branch on `type` and `status` only.
 </Warning>
 
 ## Delivery guarantees
@@ -121,14 +153,11 @@ Every event is delivered *at least* once, which means occasionally more than onc
 
 ### Out-of-order delivery
 
-Events for the same payment can arrive out of order. A `payment.succeeded` may land before the `payment.processing` that preceded it, especially when retries are involved. Two rules keep you safe:
-
-1. **Compare `payment_state_version`.** It increases with every state change of a payment. Keep the highest version you've processed per `payment_id`, and ignore any event with a version less than or equal to it, because it is stale.
-2. **Poll for the critical path.** Since each event is a full snapshot, a late event never corrupts your state if you follow rule 1. For irreversible actions, though, confirm with [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) rather than acting on the webhook alone.
+Events for the same payment can arrive out of order. A `payment.succeeded` may land before the `payment.processing` that preceded it, especially when retries are involved. The version guard keeps you safe: **compare `payment_state_version`**. It increases with every state change of a payment, so keep the highest version you've processed per `payment_id` and ignore any event with a version less than or equal to it, because it is stale. Since every event is a full snapshot, a late event you process in version order can never corrupt your state.
 
 ### Retries
 
-An attempt counts as delivered only when your endpoint responds with a **2xx** status. Any other response, including redirects (which are not followed), or a timeout counts as a failure, and the delivery is retried with increasing back-off:
+An attempt counts as delivered only when your endpoint responds with a **2xx** status **within 15 seconds**. Any other response, including redirects (which are not followed), or a slower one counts as a failure, and the delivery is retried with increasing back-off:
 
 | Attempt | Time after previous attempt |
 |---|---|
@@ -141,12 +170,14 @@ An attempt counts as delivered only when your endpoint responds with a **2xx** s
 | 7 | 10 hours |
 | 8 | 10 hours |
 
-That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically**, so recovering from a longer outage is manual. Check your endpoint's delivery history in the dashboard, and reconcile missed payments by fetching their current state from the API.
+That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically**. And if every delivery to an endpoint keeps failing for **5 days**, the endpoint is **disabled** and stops receiving events.
+
+Because a misconfigured URL or a disabled endpoint drops deliveries silently, don't rely on noticing an outage. Run a **periodic reconciliation job**: poll [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) for any payment your records still show in a non-final state after its `expires_at` has passed. Use the endpoint's delivery history in the dashboard to debug what went wrong.
 
 To stop deliveries entirely (for example, when decommissioning an integration), delete the endpoint from the dashboard's **Webhooks** page. Deletion takes effect immediately and cannot be undone.
 
 <Tip>
-Acknowledge first, process later. Return `200` as soon as you've verified the signature and durably queued the event, and don't make the webhook response wait on your business logic. Slow responses time out, count as failed attempts, and cause redundant redeliveries.
+Process later, acknowledge fast. Verify the signature, durably persist or enqueue the event, then return `200`; don't run business logic before responding. Responses slower than 15 seconds count as failed attempts and cause redundant redeliveries.
 </Tip>
 
 ## Set up your endpoint
@@ -173,16 +204,16 @@ Every delivery is signed so you can confirm it came from WalletConnect Pay and w
 
 | Header | Contents |
 |---|---|
-| `svix-id` | The delivery's message ID. |
-| `svix-timestamp` | Unix timestamp (seconds) of the attempt. |
-| `svix-signature` | Space-separated list of signatures, each formatted `v1,<base64 digest>`. There can be more than one, for example during the 24-hour secret rotation overlap. |
+| `webhook-id` | The delivery's message ID. |
+| `webhook-timestamp` | Unix timestamp (seconds) of the attempt. |
+| `webhook-signature` | Space-separated list of signatures, each formatted `v1,<base64 digest>`. There can be more than one, for example during the 24-hour secret rotation overlap. |
 
 Verification is four steps:
 
 1. **Derive the key.** Take your signing secret, strip the `whsec_` prefix, and base64-decode the rest. The decoded bytes are the HMAC key (using the string itself is the most common mistake).
-2. **Compute the digest.** HMAC-SHA256 over the UTF-8 bytes of `{svix-id}.{svix-timestamp}.{raw body}`, then base64-encode it.
-3. **Compare.** The delivery is authentic if your digest equals any `v1` entry in `svix-signature`, using a constant-time comparison.
-4. **Check the timestamp.** Reject deliveries whose `svix-timestamp` is more than 5 minutes from the current time, to prevent replay attacks.
+2. **Compute the digest.** HMAC-SHA256 over the UTF-8 bytes of `{webhook-id}.{webhook-timestamp}.{raw body}`, then base64-encode it.
+3. **Compare.** The delivery is authentic if your digest equals any `v1` entry in `webhook-signature`, using a constant-time comparison.
+4. **Check the timestamp.** Reject deliveries whose `webhook-timestamp` is more than 5 minutes from the current time, to prevent replay attacks.
 
 Dependency-free implementations, standard library only:
 
@@ -194,9 +225,9 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const TOLERANCE_S = 5 * 60;
 
 export function verifyWebhook(secret: string, headers: Record<string, string>, rawBody: string) {
-  const id = headers["svix-id"];
-  const timestamp = headers["svix-timestamp"];
-  const signatures = headers["svix-signature"];
+  const id = headers["webhook-id"];
+  const timestamp = headers["webhook-timestamp"];
+  const signatures = headers["webhook-signature"];
   if (!id || !timestamp || !signatures) throw new Error("missing signature headers");
 
   const skew = Math.abs(Date.now() / 1000 - Number(timestamp));
@@ -230,9 +261,9 @@ import time
 TOLERANCE_S = 5 * 60
 
 def verify_webhook(secret: str, headers: dict, raw_body: bytes) -> dict:
-    msg_id = headers.get("svix-id")
-    timestamp = headers.get("svix-timestamp")
-    signatures = headers.get("svix-signature")
+    msg_id = headers.get("webhook-id")
+    timestamp = headers.get("webhook-timestamp")
+    signatures = headers.get("webhook-signature")
     if not (msg_id and timestamp and signatures):
         raise ValueError("missing signature headers")
 
@@ -269,9 +300,9 @@ import (
 const toleranceSeconds = 5 * 60
 
 func VerifyWebhook(secret string, headers http.Header, rawBody []byte) error {
-	id := headers.Get("svix-id")
-	timestamp := headers.Get("svix-timestamp")
-	signatures := headers.Get("svix-signature")
+	id := headers.Get("webhook-id")
+	timestamp := headers.Get("webhook-timestamp")
+	signatures := headers.Get("webhook-signature")
 	if id == "" || timestamp == "" || signatures == "" {
 		return errors.New("missing signature headers")
 	}
@@ -374,9 +405,9 @@ const TOLERANCE_S = 300;
 
 function verify_webhook(string $secret, array $headers, string $rawBody): array
 {
-    $id = $headers['svix-id'] ?? '';
-    $timestamp = $headers['svix-timestamp'] ?? '';
-    $signatures = $headers['svix-signature'] ?? '';
+    $id = $headers['webhook-id'] ?? '';
+    $timestamp = $headers['webhook-timestamp'] ?? '';
+    $signatures = $headers['webhook-signature'] ?? '';
     if ($id === '' || $timestamp === '' || $signatures === '') {
         throw new RuntimeException('missing signature headers');
     }
@@ -406,9 +437,9 @@ require "openssl"
 TOLERANCE_S = 5 * 60
 
 def verify_webhook(secret, headers, raw_body)
-  id = headers["svix-id"]
-  timestamp = headers["svix-timestamp"]
-  signatures = headers["svix-signature"]
+  id = headers["webhook-id"]
+  timestamp = headers["webhook-timestamp"]
+  signatures = headers["webhook-signature"]
   raise "missing signature headers" unless id && timestamp && signatures
 
   raise "timestamp outside tolerance" if (Time.now.to_i - timestamp.to_i).abs > TOLERANCE_S
@@ -434,7 +465,7 @@ Two things trip people up:
 - **Verify the raw request body**, byte for byte, before any body-parsing middleware runs. Parsing and re-serializing the JSON changes the bytes (even a whitespace difference) and the verification fails.
 - The timestamp check depends on your server clock being accurate.
 
-Reject anything that fails verification with a `400`, and never process an unverified payload. If you already use a [Svix library](https://docs.svix.com/receiving/verifying-payloads/how), its `verify` function performs exactly these checks and is equally fine.
+Reject anything that fails verification with a `400`, and never process an unverified payload. The scheme is the one implemented by [Svix libraries](https://docs.svix.com/receiving/verifying-payloads/how) (they accept the `webhook-*` header names too), so if you already use one, its `verify` function performs exactly these checks and is equally fine.
 
 ### Or let your coding agent do it
 
