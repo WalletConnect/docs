@@ -207,13 +207,18 @@ const styles = StyleSheet.create({webview: {flex: 1}});
 <Tab title="Android (Kotlin)">
 
 ```kotlin
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.viewinterop.AndroidView
 import org.json.JSONObject
 
@@ -234,43 +239,69 @@ fun PayWebView(
     onSuccess: (message: String?) -> Unit,
     onFailure: (error: String?) -> Unit
 ) {
-    AndroidView(factory = { context ->
-        WebView(context).apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.allowFileAccess = false
-            addJavascriptInterface(
-                object {
-                    @JavascriptInterface
-                    fun postMessage(json: String) {
-                        try {
-                            val msg = JSONObject(json)
+    // AndroidView's factory runs once, so the JS bridge closes over the callbacks captured
+    // at that moment. Wrap them so the bridge always invokes the latest lambdas instead of
+    // stale ones after recomposition.
+    val currentOnSuccess by rememberUpdatedState(onSuccess)
+    val currentOnFailure by rememberUpdatedState(onFailure)
+
+    AndroidView(
+        factory = { context ->
+            WebView(context).apply {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.allowFileAccess = false
+                addJavascriptInterface(
+                    object {
+                        @JavascriptInterface
+                        fun postMessage(json: String) {
+                            val msg = try { JSONObject(json) } catch (_: Exception) { return }
                             val type = msg.optString("type")
+                            val hasSuccess = msg.has("success")
                             val success = msg.optBoolean("success", false)
-                            when {
-                                type == "PAY_SUCCESS" || (success && type.isEmpty()) ->
-                                    onSuccess(msg.optString("message").ifEmpty { null })
-                                type == "PAY_FAILURE" || (!success && type.isNotEmpty()) ->
-                                    onFailure(msg.optString("error").ifEmpty { null })
+                            // @JavascriptInterface methods run on a background thread —
+                            // hop to the main thread before touching UI/navigation state.
+                            Handler(Looper.getMainLooper()).post {
+                                when {
+                                    type == "PAY_SUCCESS" || (hasSuccess && success) ->
+                                        currentOnSuccess(msg.optString("message").ifEmpty { null })
+                                    type == "PAY_FAILURE" || (hasSuccess && !success) ->
+                                        currentOnFailure(msg.optString("error").ifEmpty { null })
+                                }
                             }
-                        } catch (_: Exception) {}
+                        }
+                    },
+                    "ReactNativeWebView"
+                )
+                webViewClient = object : WebViewClient() {
+                    // This WebResourceRequest overload is API 24+. If you support minSdk < 24,
+                    // also override the deprecated shouldOverrideUrlLoading(view, url: String) and
+                    // run the same isWalletDeeplink check — otherwise deeplink interception
+                    // silently no-ops on API 23.
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                        val reqUrl = request?.url?.toString() ?: return false
+                        if (isWalletDeeplink(reqUrl)) {
+                            try {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reqUrl)))
+                            } catch (_: ActivityNotFoundException) {
+                                // No app can handle the wallet deeplink (wallet not installed).
+                            }
+                            return true
+                        }
+                        return false
                     }
-                },
-                "ReactNativeWebView"
-            )
-            webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                    val reqUrl = request?.url?.toString() ?: return false
-                    if (isWalletDeeplink(reqUrl)) {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reqUrl)))
-                        return true
-                    }
-                    return false
                 }
+                loadUrl(buildPayUrl(gatewayUrl, appDeepLink))
             }
-            loadUrl(buildPayUrl(gatewayUrl, appDeepLink))
+        },
+        onRelease = { webView ->
+            // Tear down the WebView when the screen leaves composition — otherwise it leaks and
+            // its JavaScript, timers, and network requests keep running in the background.
+            webView.stopLoading()
+            webView.loadUrl("about:blank")
+            webView.destroy()
         }
-    })
+    )
 }
 ```
 
@@ -293,6 +324,19 @@ struct PayWebView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> WKWebView {
         let cc = WKUserContentController()
+        // The checkout calls window.ReactNativeWebView.postMessage(...), which does NOT exist on a
+        // native WKWebView — registering the handler only creates
+        // window.webkit.messageHandlers.ReactNativeWebView.postMessage. Inject a shim at document
+        // start that maps window.ReactNativeWebView.postMessage onto it. Without this shim the bridge
+        // messages (PAY_SUCCESS / PAY_FAILURE) are silently dropped and the flow never completes.
+        let shim = """
+        window.ReactNativeWebView = {
+          postMessage: function (data) {
+            window.webkit.messageHandlers.ReactNativeWebView.postMessage(data);
+          }
+        };
+        """
+        cc.addUserScript(WKUserScript(source: shim, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         cc.add(context.coordinator, name: "ReactNativeWebView")
         let config = WKWebViewConfiguration()
         config.userContentController = cc
@@ -338,7 +382,14 @@ struct PayWebView: UIViewRepresentable {
             if let url = action.request.url, isWalletDeeplink(url) {
                 UIApplication.shared.open(url); decisionHandler(.cancel); return
             }
-            decisionHandler(.allow)
+            // Allow https and the initial/programmatic loads; block any other scheme so the page
+            // cannot drive the OS into arbitrary native schemes (tel:, sms:, intent:, …).
+            let scheme = action.request.url?.scheme?.lowercased()
+            if scheme == "https" || scheme == "about" || action.navigationType == .other {
+                decisionHandler(.allow)
+            } else {
+                decisionHandler(.cancel)
+            }
         }
 
         private func isWalletDeeplink(_ url: URL) -> Bool {
@@ -395,9 +446,16 @@ class _PayWebViewState extends State<PayWebView> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
-        onNavigationRequest: (r) {
-          if (isWalletDeeplink(r.url)) {
-            launchUrl(Uri.parse(r.url), mode: LaunchMode.externalApplication);
+        // onNavigationRequest accepts a FutureOr, so it can be async — await the
+        // launch and swallow failures (e.g. the wallet app isn't installed).
+        onNavigationRequest: (request) async {
+          if (isWalletDeeplink(request.url)) {
+            try {
+              await launchUrl(Uri.parse(request.url),
+                  mode: LaunchMode.externalApplication);
+            } catch (_) {
+              // No app can handle the wallet deeplink (wallet not installed).
+            }
             return NavigationDecision.prevent;
           }
           return NavigationDecision.navigate;
