@@ -96,7 +96,7 @@ Always verify the final payment status server-side via `GET /v1/payments/{paymen
 
 The checkout opens the user's wallet by navigating to a URL that carries a `?uri=wc:…` query parameter. WebViews don't handle these natively, so **your app must intercept these navigations and forward them to the OS**.
 
-This applies to both same-frame navigations and `window.open()` calls. Only forward URLs that carry a valid `wc:` URI — block any other non-`https:` navigation to prevent the page from driving `Linking.openURL` to arbitrary native schemes (`tel:`, `sms:`, `intent:`, etc.).
+The checkout triggers this as a same-frame navigation, so intercepting navigation requests is all you need. Only forward URLs that carry a valid `wc:` URI — block any other non-`https:` navigation to prevent the page from driving the OS into arbitrary native schemes (`tel:`, `sms:`, `intent:`, etc.).
 
 ```typescript
 function isWalletDeeplink(url: string): boolean {
@@ -124,10 +124,7 @@ npm install react-native-webview
 import React, {useCallback} from 'react';
 import {Linking, StyleSheet} from 'react-native';
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
-import type {
-  ShouldStartLoadRequest,
-  WebViewOpenWindowEvent,
-} from 'react-native-webview/lib/WebViewTypes';
+import type {ShouldStartLoadRequest} from 'react-native-webview/lib/WebViewTypes';
 
 type PayMessage = {
   type?: 'PAY_SUCCESS' | 'PAY_FAILURE';
@@ -173,13 +170,6 @@ export function PayWebView({gatewayUrl, appDeepLink, onSuccess, onFailure}: PayW
     [],
   );
 
-  const onOpenWindow = useCallback((event: WebViewOpenWindowEvent) => {
-    const {targetUrl} = event.nativeEvent;
-    if (isWalletDeeplink(targetUrl)) {
-      Linking.openURL(targetUrl).catch(console.warn);
-    }
-  }, []);
-
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       let msg: PayMessage;
@@ -204,9 +194,7 @@ export function PayWebView({gatewayUrl, appDeepLink, onSuccess, onFailure}: PayW
       startInLoadingState
       javaScriptEnabled
       domStorageEnabled
-      setSupportMultipleWindows
       onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-      onOpenWindow={onOpenWindow}
       onMessage={onMessage}
     />
   );
@@ -214,10 +202,6 @@ export function PayWebView({gatewayUrl, appDeepLink, onSuccess, onFailure}: PayW
 
 const styles = StyleSheet.create({webview: {flex: 1}});
 ```
-
-<Info>
-`setSupportMultipleWindows` must be `true` for `onOpenWindow` to receive `window.open()` calls. Without it, wallet deeplinks opened via `window.open()` are silently dropped.
-</Info>
 
 </Tab>
 <Tab title="Android (Kotlin)">
@@ -489,8 +473,8 @@ See the [Payments Status API](/api-reference/2026-02-18/get-v1-payments-id-statu
 
 ## Best Practices
 
-- **Enable JavaScript and DOM storage** — required; the WebView will not render correctly without them.
-- **Always intercept wallet deeplinks** — URLs with `?uri=wc:…` must be forwarded to the OS. Handle both same-frame navigations and `window.open()` calls.
+- **Enable JavaScript and DOM storage** — both required. JavaScript renders the checkout; DOM storage backs its session and wallet state.
+- **Always intercept wallet deeplinks** — URLs with `?uri=wc:…` must be forwarded to the OS. The checkout triggers these as same-frame navigations, so intercepting navigation requests covers it.
 - **Only intercept `wc:` deeplinks** — block other non-`https:` navigations to prevent arbitrary native app launches.
 - **Handle both message formats** — check `type === "PAY_SUCCESS"` **and** `success === true` for forward compatibility.
 - **Always verify server-side** — treat bridge messages as a trigger to check status, not as proof of payment.
@@ -498,6 +482,6 @@ See the [Payments Status API](/api-reference/2026-02-18/get-v1-payments-id-statu
 
 ## Reference Example
 
-<Card title="PayWebView — React Native example" icon="github" href="https://github.com/reown-com/react-native-examples/pull/570">
+<Card title="PayWebView — React Native example" icon="github" href="https://github.com/reown-com/react-native-examples/tree/main/dapps/appkit-wagmi/src/screens/PayWebView">
   Full implementation including success animation, wallet deeplink handling, and error recovery.
 </Card>
