@@ -6,6 +6,14 @@ metatags:
   description: "Build a branded WalletConnect Pay checkout with the @walletconnect/pay-* Headless SDK. A step-by-step walkthrough — server proxy, transport, zero-config AppKit, and rendering the snapshot — with React and JavaScript examples side by side."
 ---
 
+<Note>
+  **Prefer to let an AI agent build this?** Install the WalletConnect Pay Headless [skill](https://github.com/WalletConnect/skills/tree/main/skills/walletconnect-pay-headless) — with it loaded, Claude Code, Cursor, Codex, and other agents can scaffold the steps below directly in your codebase:
+
+  ```bash
+  npx skills add WalletConnect/skills/walletconnect-pay-headless
+  ```
+</Note>
+
 This page walks through building a complete checkout on the Headless SDK, with **React / Next.js** and **JavaScript** examples side by side. New to the SDK? Read [How it works](/payments/psps/headless-sdk/how-it-works) first for the architecture and the role of each seam.
 
 Wallet connection is now **zero-config**: the SDK owns the entire Reown AppKit setup. You install only the `@walletconnect/pay-*` packages and never touch `@reown/*`, `wagmi`, or `viem` directly.
