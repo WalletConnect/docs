@@ -52,7 +52,8 @@
               {
                 "group": "WalletConnect Pay for Merchants",
                 "pages": [
-                  "payments/merchant/quickstart"
+                  "payments/merchant/quickstart",
+                  "payments/merchant/add-networks"
                 ]
               },
               {
@@ -212,7 +213,8 @@
               {
                 "group": "WalletConnect Pay for Merchants",
                 "pages": [
-                  "payments/merchant/quickstart"
+                  "payments/merchant/quickstart",
+                  "payments/merchant/add-networks"
                 ]
               },
               {
