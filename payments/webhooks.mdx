@@ -62,7 +62,7 @@ The fields inside `data` you'll use most:
 | Field | Description |
 |---|---|
 | `payment_id` / `merchant_id` | The same identifiers you use across the Merchant API. |
-| `reference_id` | Your own order identifier, as passed when creating the payment (or `null`). |
+| `reference_id` | Your own order identifier, as passed when creating the payment. |
 | `status` | The payment status at event time: `requires_action`, `processing`, `succeeded`, `failed`, `expired`, or `cancelled`. |
 | `payment_state_version` | Monotonically increasing integer per payment, starting at `0` on the first event. **Your ordering key**; see [Out-of-order delivery](#out-of-order-delivery). |
 | `live` | `false` for test-mode payments and test deliveries. **Check `live === true` before driving real fulfillment.** |
