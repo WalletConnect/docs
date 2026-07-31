@@ -76,7 +76,7 @@ A `payment.succeeded` event looks like this:
   "id": "evt_fixture_payment_succeeded",
   "type": "payment.succeeded",
   "api_version": "2026-05-18",
-  "created_at": "2026-06-30T10:00:00Z",
+  "created_at": "2026-06-30T10:00:00.271Z",
   "data": {
     "payment_id": "pay_fixture_01HZX4V9K3T",
     "merchant_id": "merchant_fixture_01HZX4V9K3T",
@@ -88,10 +88,10 @@ A `payment.succeeded` event looks like this:
       "unit": "iso4217/USD",
       "value": "1000"
     },
-    "created_at": "2026-06-30T09:59:00Z",
-    "expires_at": "2026-06-30T10:14:00Z",
+    "created_at": "2026-06-30T09:59:00.084Z",
+    "expires_at": "2026-06-30T10:14:00.000Z",
     "processing": {
-      "processing_at": "2026-06-30T09:59:10Z",
+      "processing_at": "2026-06-30T09:59:10.512Z",
       "option_amount": {
         "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "value": "10000000"
@@ -123,7 +123,7 @@ A `payment.succeeded` event looks like this:
       "chain_caip2": "eip155:8453"
     },
     "success": {
-      "succeeded_at": "2026-06-30T10:00:00Z",
+      "succeeded_at": "2026-06-30T10:00:00.271Z",
       "tx_id": "0x8f1e5c1b9a4a1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c"
     },
     "failed": null,
@@ -138,7 +138,7 @@ A `payment.succeeded` event looks like this:
 **Parse tolerantly.** New fields are added to the payload over time without a version bump; that is the additive-only contract. Strict schema validation that fails on unknown fields **will** break your integration.
 
 - Ignore fields you don't recognize, and never reject an event because it contains something new.
-- Don't switch exhaustively on `fee.kind`. The only value today is `base_plus_percent`, and new kinds can be added within this `api_version`. Whatever the kind, `fee.total_amount` is always present.
+- Don't switch exhaustively on `fee.kind`. The only value today is `base_plus_percent`, and new kinds can be added within this `api_version`. Whatever the kind, `fee.total_amount` is always present when a fee applies; `processing.fee` is `null` when none is configured.
 - Never branch on `failure_reason` or `cancellation_reason`. They are human-readable diagnostics that may change without notice. Display them if useful, and branch on `type` and `status` only.
 </Warning>
 
@@ -153,6 +153,8 @@ Every event is delivered *at least* once, which means occasionally more than onc
 ### Out-of-order delivery
 
 Events for the same payment can arrive out of order. A `payment.succeeded` may land before the `payment.processing` that preceded it, especially when retries are involved. The version guard keeps you safe: **compare `payment_state_version`**. It increases with every state change of a payment, so keep the highest version you've processed per `payment_id` and ignore any event with a version less than or equal to it, because it is stale. Since every event is a full snapshot, a late event you process in version order can never corrupt your state.
+
+Drive side effects from the snapshot, not the event type. A `payment.settled` can arrive before the `payment.succeeded` it supersedes, and the guard then rightly drops the older event, so a handler that only fulfills on `type: "payment.succeeded"` never fulfills. Fulfill when `data.status` first becomes `succeeded`, whatever the event's type.
 
 <Warning>
 **The first event of every payment carries `payment_state_version: 0`.** Represent "no version processed yet" as an *absence* (a missing row or `NULL`), never as `0`. If you initialize a version counter to `0` — the natural default for an integer column or a `?? 0` fallback — the `less than or equal` guard silently drops the first event of every payment, and the integration still looks like it works because later events pass.
@@ -181,7 +183,7 @@ That's roughly **28 hours** of automatic retries. After the final attempt the de
 
 Replay operations reach back 14 days at most. And if every delivery to an endpoint keeps failing for **5 days**, the endpoint is **disabled** and stops receiving events.
 
-Because a misconfigured URL or a disabled endpoint drops deliveries silently, don't rely on noticing an outage. Run a **periodic reconciliation job**: poll [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) for any payment your records still show in a non-final state after its `expires_at` has passed. Use the endpoint's delivery history in the dashboard to debug what went wrong.
+Because a misconfigured URL or a disabled endpoint drops deliveries silently, don't rely on noticing an outage. Run a **periodic reconciliation job**: poll [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) for any payment your records still show in a non-final state after its `expires_at` has passed, and [`GET /v1/payments`](/api-reference/latest/get-v1-payments), which returns `settled`, for succeeded payments still awaiting settlement. Use the endpoint's delivery history in the dashboard to debug what went wrong.
 
 To stop deliveries entirely (for example, when decommissioning an integration), delete the endpoint from the dashboard's **Webhooks** page. Deletion takes effect immediately and cannot be undone.
 
@@ -507,7 +509,7 @@ Reject anything that fails verification with a `400`, and never process an unver
 Two ways to see events hit your endpoint before any real payment exists:
 
 - **Send a test event.** In the dashboard's **Webhooks** page, send a test event of any type to your endpoint. Test events carry sample data with `live: false`; use them to check signature verification and your 2xx response.
-- **Run the full flow in [test mode](/payments/test-mode).** Create a test payment and drive it through its lifecycle with the Test Console or the dashboard's simulation actions. Each transition emits the real webhook, from `payment.created` through `payment.succeeded` (or `failed`, `expired`, `cancelled`), so you can verify your handler against every path, including the ones that are hard to produce on demand with real payments.
+- **Run the full flow in [test mode](/payments/test-mode).** Create a test payment and drive it through its lifecycle with the Test Console or the dashboard's simulation actions. Each transition emits the real webhook, from `payment.created` through `payment.succeeded` (or `failed`, `expired`, `cancelled`), and a succeeded test payment settles automatically, so `payment.settled` arrives too. You can verify your handler against every path, including the ones that are hard to produce on demand with real payments.
 
 The dashboard shows each endpoint's recent deliveries with response status and timing, which is the first place to look when something doesn't arrive.
 
