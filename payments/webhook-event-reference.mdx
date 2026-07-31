@@ -38,7 +38,7 @@ Every event has the same top-level shape.
 | `status` | string | Payment status at event time: `requires_action`, `processing`, `succeeded`, `failed`, `expired`, or `cancelled`. There is no `settled` status; settlement is a stage of a succeeded payment. |
 | `amount` | [Amount](#amount) | The requested payment amount. |
 | `created_at` | string | When the payment was created. |
-| `expires_at` | string \| null | When the payment stops accepting buyer action, or `null` if it does not expire. |
+| `expires_at` | string | When the payment stops accepting buyer action. |
 | `processing` | [processing](#processing) \| null | Populated once the buyer has committed to a payment option. |
 | `success` | [success](#success) \| null | Populated once the payment succeeded. |
 | `failed` | [failed](#failed) \| null | Populated once the payment failed. |
