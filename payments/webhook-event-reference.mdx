@@ -34,7 +34,7 @@ Every event has the same top-level shape.
 | `merchant_id` | string | Merchant identifier, the same external merchant id used across the Merchant API. |
 | `live` | boolean | Whether this is a live payment. Test-mode payments carry `false` and are only delivered to test-mode endpoints. Verify `live` is `true` before driving real fulfillment. |
 | `payment_state_version` | integer | Monotonic per-payment version, starting at `0` on the first event. The ordering guard: ignore any event whose version is lower than or equal to one already processed for the same `payment_id`. See [Out-of-order delivery](/payments/webhooks#out-of-order-delivery). |
-| `reference_id` | string \| null | The merchant-provided order reference attached at payment creation, or `null`. Primary reconciliation key against your own records. |
+| `reference_id` | string | The merchant-provided order reference attached at payment creation. Primary reconciliation key against your own records. |
 | `status` | string | Payment status at event time: `requires_action`, `processing`, `succeeded`, `failed`, `expired`, or `cancelled`. There is no `settled` status; settlement is a stage of a succeeded payment. |
 | `amount` | [Amount](#amount) | The requested payment amount. |
 | `created_at` | string | When the payment was created. |
