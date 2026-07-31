@@ -55,7 +55,7 @@ Every event carries the same envelope, and `data` is always a **full snapshot of
 | `id` | Unique event ID (`evt_…`). **Your deduplication key**: the same event is always delivered with the same `id`. |
 | `type` | The event type, e.g. `payment.succeeded`. |
 | `api_version` | The payload schema version (e.g. `2026-05-18`). Within a version, changes are additive only. |
-| `created_at` | When the event occurred (ISO 8601, UTC), not when it was delivered. The number of fractional-second digits varies between events, from none up to nanosecond precision, so parse it with a full ISO 8601 parser, not a fixed format string. |
+| `created_at` | When the event occurred (ISO 8601, UTC, millisecond precision), not when it was delivered. Parse timestamps with a full ISO 8601 parser rather than a fixed format string; the fractional precision is not part of the contract. |
 | `data` | The full payment snapshot at event time. |
 
 The fields inside `data` you'll use most:
