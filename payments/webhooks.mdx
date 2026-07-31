@@ -68,7 +68,7 @@ The fields inside `data` you'll use most:
 | `payment_state_version` | Monotonically increasing integer per payment. **Your ordering key**; see [Out-of-order delivery](#out-of-order-delivery). |
 | `live` | `false` for test-mode payments and test deliveries. **Check `live === true` before driving real fulfillment.** |
 | `amount` | The requested amount: `{ "unit": "iso4217/USD", "value": "1000" }`, where `value` is an integer string in the smallest unit. |
-| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks, `null` until the payment reaches that stage. `success` and `settled` include `tx_id` (chain-specific transaction id, may be `null`); `failed` and `cancelled` include human-readable `failure_reason` / `cancellation_reason`. |
+| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks, `null` until the payment reaches that stage. Every field, with types and a full example per event type: [Webhook event reference](/payments/webhook-event-reference). |
 
 A `payment.succeeded` event looks like this:
 
@@ -522,6 +522,9 @@ Webhook configuration does **not** carry over from test to live; they are separa
 ## Next steps
 
 <CardGroup cols={2}>
+  <Card title="Webhook event reference" icon="list" href="/payments/webhook-event-reference">
+    Every field of every event type, with types, nullability, and examples.
+  </Card>
   <Card title="Test mode" icon="flask" href="/payments/test-mode">
     Simulate every payment status transition and watch the webhooks arrive.
   </Card>
