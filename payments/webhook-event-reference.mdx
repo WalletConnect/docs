@@ -57,10 +57,10 @@ Which stage objects are non-null depends on the event type.
 | `payment.succeeded` | `succeeded` | present | present | null | null | null | usually null |
 | `payment.failed` | `failed` | may be present | null | present | null | null | null |
 | `payment.expired` | `expired` | may be present | null | null | null | present | null |
-| `payment.cancelled` | `cancelled` | may be present | null | null | present | null | null |
+| `payment.cancelled` | `cancelled` | null | null | null | present | null | null |
 | `payment.settled` | `succeeded` | present | present | null | null | null | present |
 
-"May be present" means the payment can reach that outcome either before or after processing started: `processing` is `null` when the buyer never committed to a payment option, and populated otherwise. On `payment.succeeded`, `settled` is `null` unless settlement had already completed at snapshot time; settlement completion is carried by `payment.settled`.
+"May be present" means the payment can fail or expire either before or after processing started: `processing` is `null` when the buyer never committed to a payment option, and populated otherwise. Cancellation is only possible while the payment awaits buyer action, so `payment.cancelled` always carries `processing: null`. On `payment.succeeded`, `settled` is `null` unless settlement had already completed at snapshot time; settlement completion is carried by `payment.settled`.
 
 ## Objects
 
@@ -417,7 +417,7 @@ The payment expired before completing. `expired` is populated. A payment can exp
 
 ### payment.cancelled
 
-The payment was cancelled. `cancelled` is populated. `processing` is `null` when the payment was cancelled before the buyer committed, as in this example, and populated when the payment had started processing before cancellation.
+The payment was cancelled. `cancelled` is populated. A payment can only be cancelled while it awaits buyer action, so `processing` is always `null`.
 
 ```json payment.cancelled expandable
 {
