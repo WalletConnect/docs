@@ -58,7 +58,6 @@
               {
                 "group": "Merchant API",
                 "pages": [
-                  "payments/webhook-event-reference",
                   "payments/merchant-api/logo-specification"
                 ]
               },
@@ -218,7 +217,6 @@
               {
                 "group": "Merchant API",
                 "pages": [
-                  "payments/webhook-event-reference",
                   "payments/merchant-api/logo-specification"
                 ]
               },
