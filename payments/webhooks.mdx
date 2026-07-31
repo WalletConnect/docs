@@ -174,7 +174,13 @@ An attempt counts as delivered only when your endpoint responds with a **2xx** s
 | 7 | 10 hours |
 | 8 | 10 hours |
 
-That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically**, but you can resend it yourself from the endpoint's delivery history in the dashboard. And if every delivery to an endpoint keeps failing for **5 days**, the endpoint is **disabled** and stops receiving events.
+That's roughly **28 hours** of automatic retries. After the final attempt the delivery is marked failed and is **not retried automatically**, but you can recover it yourself from the dashboard:
+
+- **Resend one delivery** from the endpoint's delivery history.
+- **Bulk-resend every failed delivery** since a point in time.
+- **Replay events the endpoint never received**, for example events sent before the endpoint was created.
+
+Replay operations reach back 14 days at most. And if every delivery to an endpoint keeps failing for **5 days**, the endpoint is **disabled** and stops receiving events.
 
 Because a misconfigured URL or a disabled endpoint drops deliveries silently, don't rely on noticing an outage. Run a **periodic reconciliation job**: poll [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) for any payment your records still show in a non-final state after its `expires_at` has passed. Use the endpoint's delivery history in the dashboard to debug what went wrong.
 
