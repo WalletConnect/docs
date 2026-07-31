@@ -34,10 +34,9 @@ flowchart LR
     P --> S["payment.succeeded"] --> T["payment.settled"]
     P --> F["payment.failed"]
     P --> E["payment.expired"]
-    P --> X["payment.cancelled"]
     C --> F
     C --> E
-    C --> X
+    C --> X["payment.cancelled"]
 ```
 
 When you register an endpoint you choose which event types it receives; by default it receives all seven.
