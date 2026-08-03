@@ -1,0 +1,75 @@
+---
+title: "payment.expired"
+description: "The payment expired before completing. Payload reference and example for the payment.expired webhook event."
+sidebarTitle: "payment.expired"
+---
+
+`expired` is populated. In this example the payment expired after processing started, so `processing` is populated.
+
+| `data.status` | Stage objects populated | Stage objects always `null` |
+|---|---|---|
+| `expired` | [`expired`](/payments/webhook-event-reference#expired) ([`processing`](/payments/webhook-event-reference#processing) when the payment had started processing) | `success`, `failed`, `cancelled`, `settled` |
+
+Every field is documented in the [event overview](/payments/webhook-event-reference).
+
+```json payment.expired expandable
+{
+  "id": "evt_fixture_payment_expired_after_processing",
+  "type": "payment.expired",
+  "api_version": "2026-05-18",
+  "created_at": "2026-06-30T10:14:00.030Z",
+  "data": {
+    "payment_id": "pay_fixture_01HZX4V9K3T",
+    "merchant_id": "merchant_fixture_01HZX4V9K3T",
+    "live": true,
+    "payment_state_version": 2,
+    "reference_id": "order_fixture_1042",
+    "status": "expired",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "1000"
+    },
+    "created_at": "2026-06-30T09:59:00.084Z",
+    "expires_at": "2026-06-30T10:14:00.000Z",
+    "processing": {
+      "processing_at": "2026-06-30T09:59:10.512Z",
+      "option_amount": {
+        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "value": "10000000"
+      },
+      "fee": {
+        "kind": "base_plus_percent",
+        "base_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "0"
+        },
+        "percent": {
+          "numerator": "29",
+          "denominator": "1000"
+        },
+        "percent_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "290000"
+        },
+        "total_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "290000"
+        }
+      },
+      "settlement_amount": {
+        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "value": "9710000"
+      },
+      "buyer_caip10": "eip155:8453:0x000000000000000000000000000000000000dEaD",
+      "chain_caip2": "eip155:8453"
+    },
+    "success": null,
+    "failed": null,
+    "cancelled": null,
+    "expired": {
+      "expired_at": "2026-06-30T10:14:00.030Z"
+    },
+    "settled": null
+  }
+}
+```

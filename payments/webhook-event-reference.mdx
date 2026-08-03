@@ -1,7 +1,7 @@
 ---
 title: "Webhook event reference"
-description: "Field-level reference for every payment webhook event: the envelope, the payment snapshot, each stage object, and a full example payload per event type."
-sidebarTitle: "Webhook events"
+description: "Field-level reference for the payment webhook payload: the envelope, the payment snapshot, and each stage object."
+sidebarTitle: "Overview"
 ---
 
 This page is the field-level reference for the payment webhook payload, `api_version` `2026-05-18`. It documents every field, its type and nullability, and which stage objects are populated for each event type. For endpoint setup, signature verification, and delivery guarantees, see [Webhooks](/payments/webhooks).
@@ -19,7 +19,7 @@ Every event has the same top-level shape.
 | Field | Type | Description |
 |---|---|---|
 | `id` | string | Unique event identifier, prefixed `evt_`. The deduplication key: delivery is at-least-once, so the same `id` can arrive more than once. Do not deduplicate by `payment_id`; one payment emits multiple events. |
-| `type` | string | The event type. One of the seven [event types](#event-types) below. |
+| `type` | string | The event type. One of the seven `payment.*` event types; see [the matrix below](#stage-objects-by-event-type). |
 | `api_version` | string | The payload contract version, `2026-05-18`. Changes within a version are additive-only. |
 | `created_at` | string | When the event occurred, not when it was delivered. |
 | `data` | object | The [payment snapshot](#the-payment-snapshot-data) at event time. |
@@ -39,26 +39,26 @@ Every event has the same top-level shape.
 | `amount` | [Amount](#amount) | The requested payment amount. |
 | `created_at` | string | When the payment was created. |
 | `expires_at` | string | When the payment stops accepting buyer action. |
-| `processing` | [processing](#processing) \| null | Populated once the buyer has committed to a payment option. |
-| `success` | [success](#success) \| null | Populated once the payment succeeded. |
-| `failed` | [failed](#failed) \| null | Populated once the payment failed. |
-| `cancelled` | [cancelled](#cancelled) \| null | Populated once the payment was cancelled. |
-| `expired` | [expired](#expired) \| null | Populated once the payment expired. |
-| `settled` | [settled](#settled) \| null | Populated once merchant settlement completed. |
+| `processing` | [Processing](#processing) \| null | Populated once the buyer has committed to a payment option. |
+| `success` | [Success](#success) \| null | Populated once the payment succeeded. |
+| `failed` | [Failed](#failed) \| null | Populated once the payment failed. |
+| `cancelled` | [Cancelled](#cancelled) \| null | Populated once the payment was cancelled. |
+| `expired` | [Expired](#expired) \| null | Populated once the payment expired. |
+| `settled` | [Settled](#settled) \| null | Populated once merchant settlement completed. |
 
 ### Stage objects by event type
 
-Which stage objects are non-null depends on the event type.
+Which stage objects are non-null depends on the event type. Each event type's page carries a full example, taken verbatim from the golden fixtures the payload contract is tested against.
 
 | Event type | `status` | `processing` | `success` | `failed` | `cancelled` | `expired` | `settled` |
 |---|---|---|---|---|---|---|---|
-| `payment.created` | `requires_action` | null | null | null | null | null | null |
-| `payment.processing` | `processing` | present | null | null | null | null | null |
-| `payment.succeeded` | `succeeded` | present | present | null | null | null | usually null |
-| `payment.failed` | `failed` | may be present | null | present | null | null | null |
-| `payment.expired` | `expired` | may be present | null | null | null | present | null |
-| `payment.cancelled` | `cancelled` | null | null | null | present | null | null |
-| `payment.settled` | `succeeded` | present | present | null | null | null | present |
+| [payment.created](/payments/webhook-events/payment-created) | `requires_action` | null | null | null | null | null | null |
+| [payment.processing](/payments/webhook-events/payment-processing) | `processing` | present | null | null | null | null | null |
+| [payment.succeeded](/payments/webhook-events/payment-succeeded) | `succeeded` | present | present | null | null | null | usually null |
+| [payment.failed](/payments/webhook-events/payment-failed) | `failed` | may be present | null | present | null | null | null |
+| [payment.expired](/payments/webhook-events/payment-expired) | `expired` | may be present | null | null | null | present | null |
+| [payment.cancelled](/payments/webhook-events/payment-cancelled) | `cancelled` | null | null | null | present | null | null |
+| [payment.settled](/payments/webhook-events/payment-settled) | `succeeded` | present | present | null | null | null | present |
 
 "May be present" means the payment can fail or expire either before or after processing started: `processing` is `null` when the buyer never committed to a payment option, and populated otherwise. Cancellation is only possible while the payment awaits buyer action, so `payment.cancelled` always carries `processing: null`. On `payment.succeeded`, `settled` is `null` unless settlement had already completed at snapshot time; settlement completion is carried by `payment.settled`.
 
@@ -66,16 +66,16 @@ Which stage objects are non-null depends on the event type.
 
 ### Amount
 
-An asset amount. Used for `data.amount` and inside the [processing](#processing), [fee](#fee), and [settled](#settled) objects.
+An asset amount. Used for `data.amount` and inside the [Processing](#processing), [Fee](#fee), and [Settled](#settled) objects.
 
 | Field | Type | Description |
 |---|---|---|
 | `unit` | string | The asset: `iso4217/XXX` for fiat currencies (for example `iso4217/USD`) or `caip19/...` for on-chain assets. |
 | `value` | string | Integer string in the smallest unit of the asset: minor units for fiat, raw base units for tokens. Token decimals are not included in the payload. |
 
-### fee
+### Fee
 
-Fee applied to the payment, inside [processing](#processing).
+Fee applied to the payment, inside [Processing](#processing).
 
 | Field | Type | Description |
 |---|---|---|
@@ -85,7 +85,7 @@ Fee applied to the payment, inside [processing](#processing).
 | `percent_amount` | [Amount](#amount) | The percentage component of the fee. |
 | `total_amount` | [Amount](#amount) | The total fee charged. `base_amount` and `percent_amount` break it down. |
 
-### processing
+### Processing
 
 Present once the buyer has committed to a payment option.
 
@@ -93,12 +93,12 @@ Present once the buyer has committed to a payment option.
 |---|---|---|
 | `processing_at` | string | When the buyer committed to the payment option. |
 | `option_amount` | [Amount](#amount) | What the buyer pays gross, in the asset of the payment option they selected. |
-| `fee` | [fee](#fee) \| null | Fee applied to this payment, or `null` when no fee is configured. |
+| `fee` | [Fee](#fee) \| null | Fee applied to this payment, or `null` when no fee is configured. |
 | `settlement_amount` | [Amount](#amount) | What the merchant is expected to receive, net of `fee`. |
 | `buyer_caip10` | string \| null | The buyer's on-chain account ([CAIP-10](https://chainagnostic.org/CAIPs/caip-10)), or `null` when the payment has no on-chain buyer (for example, payments settled inside an exchange). |
 | `chain_caip2` | string | The chain the payment executes on ([CAIP-2](https://chainagnostic.org/CAIPs/caip-2)). Needed to interpret transaction ids. |
 
-### success
+### Success
 
 Present once the payment succeeded.
 
@@ -107,7 +107,7 @@ Present once the payment succeeded.
 | `succeeded_at` | string | When the payment succeeded. |
 | `tx_id` | string \| null | On-chain transaction id, or `null` when there is no on-chain transaction. Format is chain-specific; interpret with `processing.chain_caip2`. |
 
-### failed
+### Failed
 
 Present once the payment failed.
 
@@ -116,7 +116,7 @@ Present once the payment failed.
 | `failed_at` | string | When the payment failed. |
 | `failure_reason` | string \| null | Human-readable diagnostic, or `null`. Not machine-parseable: values may change without notice. Display it if useful, but never branch on it. |
 
-### cancelled
+### Cancelled
 
 Present once the payment was cancelled.
 
@@ -125,7 +125,7 @@ Present once the payment was cancelled.
 | `cancelled_at` | string | When the payment was cancelled. |
 | `cancellation_reason` | string \| null | Human-readable diagnostic, or `null`. Not machine-parseable: values may change without notice. Display it if useful, but never branch on it. |
 
-### expired
+### Expired
 
 Present once the payment expired.
 
@@ -133,7 +133,7 @@ Present once the payment expired.
 |---|---|---|
 | `expired_at` | string | When the payment expired. |
 
-### settled
+### Settled
 
 Present once merchant settlement completed.
 
@@ -142,388 +142,6 @@ Present once merchant settlement completed.
 | `settled_at` | string | When settlement completed. |
 | `tx_id` | string \| null | Settlement transaction id, or `null` when there is no on-chain settlement transaction. Format is chain-specific; interpret with `processing.chain_caip2`. |
 | `amount` | [Amount](#amount) | What actually settled to the merchant, as opposed to `processing.settlement_amount`, which is the expected net amount at processing time. |
-
-## Event types
-
-One example per event type. The examples are the golden fixtures the payload contract is tested against.
-
-### payment.created
-
-A payment was created and awaits buyer action. Initial snapshot: no lifecycle stage has happened yet, so every stage object is `null` and `payment_state_version` is `0`.
-
-```json payment.created expandable
-{
-  "id": "evt_fixture_payment_created",
-  "type": "payment.created",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T09:59:00.084Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 0,
-    "reference_id": "order_fixture_1042",
-    "status": "requires_action",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": null,
-    "success": null,
-    "failed": null,
-    "cancelled": null,
-    "expired": null,
-    "settled": null
-  }
-}
-```
-
-### payment.processing
-
-The buyer committed to a payment option and the payment started processing. `processing` is populated from this point on.
-
-In this example the buyer pays 10 USDC on Base for a $10.00 payment, a 2.9% fee applies, and the merchant is expected to receive 9.71 USDC. `processing.buyer_caip10` is `null` instead when the payment has no on-chain buyer, and `live` is `false` for test-mode payments.
-
-```json payment.processing expandable
-{
-  "id": "evt_fixture_payment_processing",
-  "type": "payment.processing",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T09:59:10.512Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 1,
-    "reference_id": "order_fixture_1042",
-    "status": "processing",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": {
-      "processing_at": "2026-06-30T09:59:10.512Z",
-      "option_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "10000000"
-      },
-      "fee": {
-        "kind": "base_plus_percent",
-        "base_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "0"
-        },
-        "percent": {
-          "numerator": "29",
-          "denominator": "1000"
-        },
-        "percent_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        },
-        "total_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        }
-      },
-      "settlement_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "9710000"
-      },
-      "buyer_caip10": "eip155:8453:0x000000000000000000000000000000000000dEaD",
-      "chain_caip2": "eip155:8453"
-    },
-    "success": null,
-    "failed": null,
-    "cancelled": null,
-    "expired": null,
-    "settled": null
-  }
-}
-```
-
-### payment.succeeded
-
-The payment succeeded. `success` is populated, and `processing` carries the committed option. `settled` is usually `null` here; settlement completion is carried by [`payment.settled`](#payment-settled). It may be non-null when settlement had already completed at snapshot time.
-
-```json payment.succeeded expandable
-{
-  "id": "evt_fixture_payment_succeeded",
-  "type": "payment.succeeded",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T10:00:00.271Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 2,
-    "reference_id": "order_fixture_1042",
-    "status": "succeeded",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": {
-      "processing_at": "2026-06-30T09:59:10.512Z",
-      "option_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "10000000"
-      },
-      "fee": {
-        "kind": "base_plus_percent",
-        "base_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "0"
-        },
-        "percent": {
-          "numerator": "29",
-          "denominator": "1000"
-        },
-        "percent_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        },
-        "total_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        }
-      },
-      "settlement_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "9710000"
-      },
-      "buyer_caip10": "eip155:8453:0x000000000000000000000000000000000000dEaD",
-      "chain_caip2": "eip155:8453"
-    },
-    "success": {
-      "succeeded_at": "2026-06-30T10:00:00.271Z",
-      "tx_id": "0x8f1e5c1b9a4a1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c"
-    },
-    "failed": null,
-    "cancelled": null,
-    "expired": null,
-    "settled": null
-  }
-}
-```
-
-### payment.failed
-
-The payment failed. `failed` is populated. `processing` is `null` when the payment failed before the buyer committed, as in this example, and populated when the payment had started processing before failing.
-
-```json payment.failed expandable
-{
-  "id": "evt_fixture_payment_failed",
-  "type": "payment.failed",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T10:00:00.271Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 1,
-    "reference_id": "order_fixture_1042",
-    "status": "failed",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": null,
-    "success": null,
-    "failed": {
-      "failed_at": "2026-06-30T10:00:00.271Z",
-      "failure_reason": "insufficient allowance"
-    },
-    "cancelled": null,
-    "expired": null,
-    "settled": null
-  }
-}
-```
-
-### payment.expired
-
-The payment expired before completing. `expired` is populated. A payment can expire after processing started, as in this example; `processing` is `null` when it expired while still awaiting buyer action.
-
-```json payment.expired expandable
-{
-  "id": "evt_fixture_payment_expired_after_processing",
-  "type": "payment.expired",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T10:14:00.030Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 2,
-    "reference_id": "order_fixture_1042",
-    "status": "expired",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": {
-      "processing_at": "2026-06-30T09:59:10.512Z",
-      "option_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "10000000"
-      },
-      "fee": {
-        "kind": "base_plus_percent",
-        "base_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "0"
-        },
-        "percent": {
-          "numerator": "29",
-          "denominator": "1000"
-        },
-        "percent_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        },
-        "total_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        }
-      },
-      "settlement_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "9710000"
-      },
-      "buyer_caip10": "eip155:8453:0x000000000000000000000000000000000000dEaD",
-      "chain_caip2": "eip155:8453"
-    },
-    "success": null,
-    "failed": null,
-    "cancelled": null,
-    "expired": {
-      "expired_at": "2026-06-30T10:14:00.030Z"
-    },
-    "settled": null
-  }
-}
-```
-
-### payment.cancelled
-
-The payment was cancelled. `cancelled` is populated. A payment can only be cancelled while it awaits buyer action, so `processing` is always `null`.
-
-```json payment.cancelled expandable
-{
-  "id": "evt_fixture_payment_cancelled",
-  "type": "payment.cancelled",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T10:00:00.271Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 1,
-    "reference_id": "order_fixture_1042",
-    "status": "cancelled",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": null,
-    "success": null,
-    "failed": null,
-    "cancelled": {
-      "cancelled_at": "2026-06-30T10:00:00.271Z",
-      "cancellation_reason": "merchant cancelled"
-    },
-    "expired": null,
-    "settled": null
-  }
-}
-```
-
-### payment.settled
-
-Merchant settlement completed for a succeeded payment. `settled` is populated, and `status` stays `succeeded`; settlement is a stage, not a status. `settled.amount` is what actually settled to the merchant.
-
-```json payment.settled expandable
-{
-  "id": "evt_fixture_payment_settled",
-  "type": "payment.settled",
-  "api_version": "2026-05-18",
-  "created_at": "2026-06-30T10:05:00.696Z",
-  "data": {
-    "payment_id": "pay_fixture_01HZX4V9K3T",
-    "merchant_id": "merchant_fixture_01HZX4V9K3T",
-    "live": true,
-    "payment_state_version": 3,
-    "reference_id": "order_fixture_1042",
-    "status": "succeeded",
-    "amount": {
-      "unit": "iso4217/USD",
-      "value": "1000"
-    },
-    "created_at": "2026-06-30T09:59:00.084Z",
-    "expires_at": "2026-06-30T10:14:00.000Z",
-    "processing": {
-      "processing_at": "2026-06-30T09:59:10.512Z",
-      "option_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "10000000"
-      },
-      "fee": {
-        "kind": "base_plus_percent",
-        "base_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "0"
-        },
-        "percent": {
-          "numerator": "29",
-          "denominator": "1000"
-        },
-        "percent_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        },
-        "total_amount": {
-          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-          "value": "290000"
-        }
-      },
-      "settlement_amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "9710000"
-      },
-      "buyer_caip10": "eip155:8453:0x000000000000000000000000000000000000dEaD",
-      "chain_caip2": "eip155:8453"
-    },
-    "success": {
-      "succeeded_at": "2026-06-30T10:00:00.271Z",
-      "tx_id": "0x8f1e5c1b9a4a1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c"
-    },
-    "failed": null,
-    "cancelled": null,
-    "expired": null,
-    "settled": {
-      "settled_at": "2026-06-30T10:05:00.696Z",
-      "tx_id": "0x93d2f1a0b9c8e7d6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2",
-      "amount": {
-        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "value": "9710000"
-      }
-    }
-  }
-}
-```
 
 ## Next steps
 

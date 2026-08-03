@@ -1,0 +1,42 @@
+---
+title: "payment.created"
+description: "A payment was created and awaits buyer action. Payload reference and example for the payment.created webhook event."
+sidebarTitle: "payment.created"
+---
+
+Initial snapshot: no lifecycle stage has happened yet, so every stage object is `null` and `payment_state_version` is `0`.
+
+| `data.status` | Stage objects populated | Stage objects always `null` |
+|---|---|---|
+| `requires_action` | none | `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` |
+
+Every field is documented in the [event overview](/payments/webhook-event-reference).
+
+```json payment.created expandable
+{
+  "id": "evt_fixture_payment_created",
+  "type": "payment.created",
+  "api_version": "2026-05-18",
+  "created_at": "2026-06-30T09:59:00.084Z",
+  "data": {
+    "payment_id": "pay_fixture_01HZX4V9K3T",
+    "merchant_id": "merchant_fixture_01HZX4V9K3T",
+    "live": true,
+    "payment_state_version": 0,
+    "reference_id": "order_fixture_1042",
+    "status": "requires_action",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "1000"
+    },
+    "created_at": "2026-06-30T09:59:00.084Z",
+    "expires_at": "2026-06-30T10:14:00.000Z",
+    "processing": null,
+    "success": null,
+    "failed": null,
+    "cancelled": null,
+    "expired": null,
+    "settled": null
+  }
+}
+```
