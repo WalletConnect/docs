@@ -29,109 +29,112 @@
   },
   "favicon": "/favicon.ico",
   "navigation": {
-    "versions": [
+    "tabs": [
       {
-        "version": "2026-02-18",
-        "tabs": [
+        "tab": "Payments",
+        "icon": "credit-card",
+        "groups": [
           {
-            "tab": "Payments",
-            "icon": "credit-card",
-            "groups": [
+            "group": "WalletConnect Pay",
+            "pages": [
+              "payments/overview",
+              "payments/for-users",
+              "payments/token-and-chain-coverage",
+              "payments/fiat-coverage",
+              "payments/wallet-coverage",
+              "payments/cex-coverage",
+              "payments/test-mode",
+              "payments/webhooks"
+            ]
+          },
+          {
+            "group": "WalletConnect Pay for Merchants",
+            "pages": [
+              "payments/merchant/quickstart"
+            ]
+          },
+          {
+            "group": "Merchant API",
+            "pages": [
+              "payments/merchant-api/logo-specification"
+            ]
+          },
+          {
+            "group": "WalletConnect Pay for Wallets",
+            "pages": [
+              "payments/wallets/overview",
               {
-                "group": "WalletConnect Pay",
+                "group": "Standalone integration",
                 "pages": [
-                  "payments/overview",
-                  "payments/for-users",
-                  "payments/token-and-chain-coverage",
-                  "payments/fiat-coverage",
-                  "payments/wallet-coverage",
-                  "payments/cex-coverage",
-                  "payments/test-mode"
+                  "payments/wallets/standalone/kotlin",
+                  "payments/wallets/standalone/swift",
+                  "payments/wallets/standalone/react-native",
+                  "payments/wallets/standalone/flutter",
+                  "payments/wallets/standalone/web"
                 ]
               },
               {
-                "group": "WalletConnect Pay for Merchants",
+                "group": "Integrate using the Wallet SDK",
                 "pages": [
-                  "payments/merchant/quickstart"
+                  "payments/wallets/walletkit/kotlin",
+                  "payments/wallets/walletkit/swift",
+                  "payments/wallets/walletkit/react-native",
+                  "payments/wallets/walletkit/flutter",
+                  "payments/wallets/walletkit/web"
                 ]
               },
+              "payments/wallets/api-first",
+              "payments/wallets/webview",
               {
-                "group": "Merchant API",
+                "group": "Token & Chain Support",
                 "pages": [
-                  "payments/merchant-api/logo-specification"
+                  "payments/wallets/token-chain-support",
+                  "payments/wallets/token-chain-support/usdt-support",
+                  "payments/wallets/token-chain-support/solana-support"
                 ]
               },
+              "payments/wallets/tap-to-pay"
+            ]
+          },
+          {
+            "group": "WalletConnect Pay for PSPs",
+            "pages": [
+              "payments/psps/overview",
               {
-                "group": "WalletConnect Pay for Wallets",
+                "group": "Headless SDK",
                 "pages": [
-                  "payments/wallets/overview",
-                  {
-                    "group": "Standalone integration",
-                    "pages": [
-                      "payments/wallets/standalone/kotlin",
-                      "payments/wallets/standalone/swift",
-                      "payments/wallets/standalone/react-native",
-                      "payments/wallets/standalone/flutter",
-                      "payments/wallets/standalone/web"
-                    ]
-                  },
-                  {
-                    "group": "Integrate using the Wallet SDK",
-                    "pages": [
-                      "payments/wallets/walletkit/kotlin",
-                      "payments/wallets/walletkit/swift",
-                      "payments/wallets/walletkit/react-native",
-                      "payments/wallets/walletkit/flutter",
-                      "payments/wallets/walletkit/web"
-                    ]
-                  },
-                  "payments/wallets/api-first",
-                "payments/wallets/webview",
-                  {
-                    "group": "Token & Chain Support",
-                    "pages": [
-                      "payments/wallets/token-chain-support",
-                      "payments/wallets/token-chain-support/usdt-support",
-                      "payments/wallets/token-chain-support/solana-support"
-                    ]
-                  },
-                  "payments/wallets/tap-to-pay"
-                ]
-              },
-              {
-                "group": "WalletConnect Pay for PSPs",
-                "pages": [
-                  "payments/psps/overview",
-                  {
-                    "group": "Headless SDK",
-                    "pages": [
-                      "payments/psps/headless-sdk/overview",
-                      "payments/psps/headless-sdk/how-it-works",
-                      "payments/psps/headless-sdk/implementation",
-                      "payments/psps/headless-sdk/packages-reference"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "Ecommerce and Online Checkout",
-                "pages": [
-                  "payments/ecommerce/overview",
-                  "payments/ecommerce/integration",
-                  "payments/ecommerce/api-reference"
-                ]
-              },
-              {
-                "group": "WalletConnect AI Agent SDK",
-                "pages": [
-                  "agents/overview"
+                  "payments/psps/headless-sdk/overview",
+                  "payments/psps/headless-sdk/how-it-works",
+                  "payments/psps/headless-sdk/implementation",
+                  "payments/psps/headless-sdk/packages-reference"
                 ]
               }
             ]
           },
           {
-            "tab": "API Reference",
-            "icon": "code",
+            "group": "Ecommerce and Online Checkout",
+            "pages": [
+              "payments/ecommerce/overview",
+              "payments/ecommerce/integration",
+              "payments/ecommerce/api-reference"
+            ]
+          },
+          {
+            "group": "WalletConnect AI Agent SDK",
+            "pages": [
+              "agents/overview"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "icon": "code",
+        "versions": [
+          {
+            "version": "2026-02-18",
+            "tag": "Latest",
+            "default": true,
             "groups": [
               {
                 "group": "Overview",
@@ -185,113 +188,9 @@
                 ]
               }
             ]
-          }
-        ],
-        "tag": "Latest",
-        "default": true
-      },
-      {
-        "version": "2026-02-19.preview",
-        "tabs": [
-          {
-            "tab": "Payments",
-            "icon": "credit-card",
-            "groups": [
-              {
-                "group": "WalletConnect Pay",
-                "pages": [
-                  "payments/overview",
-                  "payments/for-users",
-                  "payments/token-and-chain-coverage",
-                  "payments/fiat-coverage",
-                  "payments/wallet-coverage",
-                  "payments/cex-coverage",
-                  "payments/test-mode"
-                ]
-              },
-              {
-                "group": "WalletConnect Pay for Merchants",
-                "pages": [
-                  "payments/merchant/quickstart"
-                ]
-              },
-              {
-                "group": "Merchant API",
-                "pages": [
-                  "payments/merchant-api/logo-specification"
-                ]
-              },
-              {
-                "group": "WalletConnect Pay for Wallets",
-                "pages": [
-                  "payments/wallets/overview",
-                  {
-                    "group": "Standalone integration",
-                    "pages": [
-                      "payments/wallets/standalone/kotlin",
-                      "payments/wallets/standalone/swift",
-                      "payments/wallets/standalone/react-native",
-                      "payments/wallets/standalone/flutter",
-                      "payments/wallets/standalone/web"
-                    ]
-                  },
-                  {
-                    "group": "Integrate using the Wallet SDK",
-                    "pages": [
-                      "payments/wallets/walletkit/kotlin",
-                      "payments/wallets/walletkit/swift",
-                      "payments/wallets/walletkit/react-native",
-                      "payments/wallets/walletkit/flutter",
-                      "payments/wallets/walletkit/web"
-                    ]
-                  },
-                  "payments/wallets/api-first",
-                "payments/wallets/webview",
-                  {
-                    "group": "Token & Chain Support",
-                    "pages": [
-                      "payments/wallets/token-chain-support",
-                      "payments/wallets/token-chain-support/usdt-support",
-                      "payments/wallets/token-chain-support/solana-support"
-                    ]
-                  },
-                  "payments/wallets/tap-to-pay"
-                ]
-              },
-              {
-                "group": "WalletConnect Pay for PSPs",
-                "pages": [
-                  "payments/psps/overview",
-                  {
-                    "group": "Headless SDK",
-                    "pages": [
-                      "payments/psps/headless-sdk/overview",
-                      "payments/psps/headless-sdk/how-it-works",
-                      "payments/psps/headless-sdk/implementation",
-                      "payments/psps/headless-sdk/packages-reference"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "Ecommerce and Online Checkout",
-                "pages": [
-                  "payments/ecommerce/overview",
-                  "payments/ecommerce/integration",
-                  "payments/ecommerce/api-reference"
-                ]
-              },
-              {
-                "group": "WalletConnect AI Agent SDK",
-                "pages": [
-                  "agents/overview"
-                ]
-              }
-            ]
           },
           {
-            "tab": "API Reference",
-            "icon": "code",
+            "version": "2026-02-19.preview",
             "groups": [
               {
                 "group": "Overview",
@@ -346,24 +245,28 @@
               }
             ]
           }
-        ],
-        "tag": "Preview"
+        ]
+      },
+      {
+        "tab": "Webhook Reference",
+        "icon": "webhook",
+        "groups": [
+          {
+            "group": "Payment events",
+            "pages": [
+              "payments/webhook-event-reference",
+              "payments/webhook-events/payment-created",
+              "payments/webhook-events/payment-processing",
+              "payments/webhook-events/payment-succeeded",
+              "payments/webhook-events/payment-failed",
+              "payments/webhook-events/payment-expired",
+              "payments/webhook-events/payment-cancelled",
+              "payments/webhook-events/payment-settled"
+            ]
+          }
+        ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "WalletConnect Pay",
-          "href": "https://walletconnect.com",
-          "icon": "globe"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://walletconnect.network/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
