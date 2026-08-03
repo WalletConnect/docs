@@ -49,25 +49,14 @@ When you register an endpoint you choose which event types it receives; by defau
 
 Every event carries the same envelope, and `data` is always a **full snapshot of the payment at the moment the event occurred**, never a delta. You never need a previous event to interpret the current one.
 
-| Field | Description |
-|---|---|
-| `id` | Unique event ID (`evt_…`). **Your deduplication key**: the same event is always delivered with the same `id`. |
-| `type` | The event type, e.g. `payment.succeeded`. |
-| `api_version` | The payload schema version (e.g. `2026-05-18`). Within a version, changes are additive only. |
-| `created_at` | When the event occurred (ISO 8601, UTC, millisecond precision), not when it was delivered. Parse timestamps with a full ISO 8601 parser rather than a fixed format string; the fractional precision is not part of the contract. |
-| `data` | The full payment snapshot at event time. |
+Four fields decide whether your handler is correct:
 
-The fields inside `data` you'll use most:
+- **`id`** — the event id (`evt_…`). **Your deduplication key**: the same event can arrive more than once.
+- **`data.payment_state_version`** — a per-payment counter starting at `0`. **Your ordering key**; see [Out-of-order delivery](#out-of-order-delivery).
+- **`data.status`** — `requires_action`, `processing`, `succeeded`, `failed`, `expired`, or `cancelled`. Branch on this rather than on the event type.
+- **`data.live`** — `false` for test-mode payments and test deliveries. **Check `live === true` before driving real fulfillment.**
 
-| Field | Description |
-|---|---|
-| `payment_id` / `merchant_id` | The same identifiers you use across the Merchant API. |
-| `reference_id` | Your own order identifier, as passed when creating the payment. |
-| `status` | The payment status at event time: `requires_action`, `processing`, `succeeded`, `failed`, `expired`, or `cancelled`. |
-| `payment_state_version` | Monotonically increasing integer per payment, starting at `0` on the first event. **Your ordering key**; see [Out-of-order delivery](#out-of-order-delivery). |
-| `live` | `false` for test-mode payments and test deliveries. **Check `live === true` before driving real fulfillment.** |
-| `amount` | The requested amount: `{ "unit": "iso4217/USD", "value": "1000" }`, where `value` is an integer string in the smallest unit. |
-| `processing`, `success`, `failed`, `cancelled`, `expired`, `settled` | Stage detail blocks, `null` until the payment reaches that stage. Every field, with types and a full example per event type: [Webhook event reference](/payments/webhook-event-reference). |
+Every other field, with types, nullability, and a full example per event type: [Webhook event reference](/payments/webhook-event-reference).
 
 A `payment.succeeded` event looks like this:
 
@@ -138,6 +127,7 @@ A `payment.succeeded` event looks like this:
 **Parse tolerantly.** New fields are added to the payload over time without a version bump; that is the additive-only contract. Strict schema validation that fails on unknown fields **will** break your integration.
 
 - Ignore fields you don't recognize, and never reject an event because it contains something new.
+- Parse timestamps with a full ISO 8601 parser, not a fixed format string. They are UTC with millisecond precision today, but the fractional precision is not part of the contract.
 - Don't switch exhaustively on `fee.kind`. The only value today is `base_plus_percent`, and new kinds can be added within this `api_version`. Whatever the kind, `fee.total_amount` is always present when a fee applies; `processing.fee` is `null` when none is configured.
 - Never branch on `failure_reason` or `cancellation_reason`. They are human-readable diagnostics that may change without notice. Display them if useful, and branch on `type` and `status` only.
 </Warning>
