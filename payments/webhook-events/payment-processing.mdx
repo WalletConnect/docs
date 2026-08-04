@@ -1,0 +1,75 @@
+---
+title: "payment.processing"
+description: "The buyer committed to a payment option and the payment started processing. Payload reference and example for the payment.processing webhook event."
+sidebarTitle: "payment.processing"
+---
+
+`processing` is populated from this point on.
+
+In this example the buyer pays 10 USDC on Base for a $10.00 payment, a 2.9% fee applies, and the merchant is expected to receive 9.71 USDC. `processing.buyer_caip10` is `null` instead when the payment has no on-chain buyer, and `live` is `false` for test-mode payments.
+
+| `data.status` | Stage objects populated | Stage objects always `null` |
+|---|---|---|
+| `processing` | [`processing`](/payments/webhook-event-reference#processing) | `success`, `failed`, `cancelled`, `expired`, `settled` |
+
+Every field is documented in the [event overview](/payments/webhook-event-reference).
+
+```json
+{
+  "id": "evt_fixture_payment_processing",
+  "type": "payment.processing",
+  "api_version": "2026-05-18",
+  "created_at": "2026-06-30T09:59:10.512Z",
+  "data": {
+    "payment_id": "pay_fixture_01HZX4V9K3T",
+    "merchant_id": "merchant_fixture_01HZX4V9K3T",
+    "live": true,
+    "payment_state_version": 1,
+    "reference_id": "order_fixture_1042",
+    "status": "processing",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "1000"
+    },
+    "created_at": "2026-06-30T09:59:00.084Z",
+    "expires_at": "2026-06-30T10:14:00.000Z",
+    "processing": {
+      "processing_at": "2026-06-30T09:59:10.512Z",
+      "option_amount": {
+        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "value": "10000000"
+      },
+      "fee": {
+        "kind": "base_plus_percent",
+        "base_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "0"
+        },
+        "percent": {
+          "numerator": "29",
+          "denominator": "1000"
+        },
+        "percent_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "290000"
+        },
+        "total_amount": {
+          "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "value": "290000"
+        }
+      },
+      "settlement_amount": {
+        "unit": "caip19/eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "value": "9710000"
+      },
+      "buyer_caip10": "eip155:8453:0x000000000000000000000000000000000000dEaD",
+      "chain_caip2": "eip155:8453"
+    },
+    "success": null,
+    "failed": null,
+    "cancelled": null,
+    "expired": null,
+    "settled": null
+  }
+}
+```

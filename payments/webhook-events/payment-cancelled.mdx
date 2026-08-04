@@ -1,0 +1,45 @@
+---
+title: "payment.cancelled"
+description: "The payment was cancelled. Payload reference and example for the payment.cancelled webhook event."
+sidebarTitle: "payment.cancelled"
+---
+
+`cancelled` is populated. A payment can only be cancelled while it awaits buyer action, so `processing` is always `null`.
+
+| `data.status` | Stage objects populated | Stage objects always `null` |
+|---|---|---|
+| `cancelled` | [`cancelled`](/payments/webhook-event-reference#cancelled) | `processing`, `success`, `failed`, `expired`, `settled` |
+
+Every field is documented in the [event overview](/payments/webhook-event-reference).
+
+```json
+{
+  "id": "evt_fixture_payment_cancelled",
+  "type": "payment.cancelled",
+  "api_version": "2026-05-18",
+  "created_at": "2026-06-30T10:00:00.271Z",
+  "data": {
+    "payment_id": "pay_fixture_01HZX4V9K3T",
+    "merchant_id": "merchant_fixture_01HZX4V9K3T",
+    "live": true,
+    "payment_state_version": 1,
+    "reference_id": "order_fixture_1042",
+    "status": "cancelled",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "1000"
+    },
+    "created_at": "2026-06-30T09:59:00.084Z",
+    "expires_at": "2026-06-30T10:14:00.000Z",
+    "processing": null,
+    "success": null,
+    "failed": null,
+    "cancelled": {
+      "cancelled_at": "2026-06-30T10:00:00.271Z",
+      "cancellation_reason": "merchant cancelled"
+    },
+    "expired": null,
+    "settled": null
+  }
+}
+```
