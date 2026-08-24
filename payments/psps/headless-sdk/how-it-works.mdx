@@ -3,10 +3,10 @@ title: "How it works"
 sidebarTitle: "How it works"
 
 metatags:
-  description: "How the WalletConnect Pay Headless SDK works — the payment lifecycle, the headless runtime + host model with five injectable seams, and how the Engine API key stays server-side."
+  description: "How the WalletConnect Pay Headless SDK works — the payment lifecycle, the headless runtime + host model with five injectable seams, and how the WCP API key stays server-side."
 ---
 
-Before you install anything, it helps to understand the shape of the SDK: the stages a payment moves through, how the runtime plugs into your app, and why your Engine API key never reaches the browser.
+Before you install anything, it helps to understand the shape of the SDK: the stages a payment moves through, how the runtime plugs into your app, and why your WCP API key never reaches the browser.
 
 ## The payment lifecycle
 
@@ -20,7 +20,7 @@ Whatever UI you build, the runtime moves a payment through the same stages. Your
     The buyer connects a wallet through the `WalletProvider` seam. The runtime reads their accounts across the supported networks.
   </Step>
   <Step title="Fetch payment options" icon="list">
-    Given the connected accounts, the Engine returns the concrete ways to pay — token, network, amount, fees, and whether compliance data is required.
+    Given the connected accounts, WCP returns the concrete ways to pay — token, network, amount, fees, and whether compliance data is required.
   </Step>
   <Step title="Select & build" icon="hammer">
     The buyer picks an option. The runtime builds the transaction(s) and the exact wallet-RPC actions to sign.
@@ -56,7 +56,7 @@ flowchart TD
         Telemetry["Telemetry"]
     end
 
-    Transport --> T2["your server → Engine API"]
+    Transport --> T2["your server → WCP API"]
     Wallet --> W2["AppKit / your wallet"]
     Signer --> S2["signing strategy"]
     Clock --> C2["timers / polling"]
@@ -67,7 +67,7 @@ The five seams the runtime depends on:
 
 | Seam             | What it abstracts                          | Provided by                                          |
 | ---------------- | ------------------------------------------ | ---------------------------------------------------- |
-| `Transport`      | Engine HTTP calls                          | `pay-core` `createHttpTransport` → your server route |
+| `Transport`      | WCP HTTP calls                             | `pay-core` `createHttpTransport` → your server route |
 | `WalletProvider` | connect / accounts / provider / switch     | `pay-appkit`, or your own wallet integration         |
 | `Signer`         | sign a payment option's wallet-RPC actions | `pay-appkit` `createAppKitSigner` — one call (wraps `pay-state`'s signing; drop to its raw strategies only for a custom, non-AppKit wallet) |
 | `Clock`          | intervals + page visibility (for polling)  | browser timers (the SDK ships a default)             |
@@ -77,21 +77,21 @@ The five seams the runtime depends on:
   `@walletconnect/pay-state` ships browser-ready `Clock` and `Telemetry` defaults (`browserClock`, `noopTelemetry`). In practice a React/Next.js gateway wires just the `Transport` (pointed at your server route); the `WalletProvider` and `Signer` come ready-made from `pay-appkit` (`<PayAppKitProvider>` + `createAppKitSigner`), and it reuses `browserClock` for the rest. `Telemetry` is optional.
 </Note>
 
-## The Engine API key never reaches the browser
+## The WCP API key never reaches the browser
 
-WalletConnect Pay's Engine API is authenticated with a secret API key that **must stay server-side**. The SDK enforces this split: the browser talks to *your* server, and your server talks to the Engine.
+The WCP API is authenticated with a secret API key that **must stay server-side**. The SDK enforces this split: the browser talks to *your* server, and your server talks to WCP.
 
 ```mermaid
 flowchart LR
     Browser["Browser<br/>Transport seam<br/>(no secret)"]
-    Server["Your server route<br/>createEngineClient<br/>(holds the API key)"]
-    Engine["WalletConnect Pay<br/>Engine API"]
+    Server["Your server route<br/>createWcpClient<br/>(holds the API key)"]
+    Wcp["WalletConnect Pay<br/>API"]
 
     Browser -->|"fetch /api/wcp/payment/:id/*"| Server
-    Server -->|"Api-Key header"| Engine
+    Server -->|"Api-Key header"| Wcp
 ```
 
-`pay-core` exposes two entry points for exactly this: `createHttpTransport` for the browser (talks to *your* server) and `createEngineClient` (imported from `@walletconnect/pay-core/server`) which holds the API key and talks to the Engine. In a Next.js app, your Route Handler sits in the middle.
+`pay-core` exposes two entry points for exactly this: `createHttpTransport` for the browser (talks to *your* server) and `createWcpClient` (imported from `@walletconnect/pay-core/server`) which holds the API key and talks to WCP. In a Next.js app, your Route Handler sits in the middle.
 
 ## Next steps
 

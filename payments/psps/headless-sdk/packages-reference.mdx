@@ -3,7 +3,7 @@ title: "Packages Reference"
 sidebarTitle: "Packages Reference"
 
 metatags:
-  description: "The @walletconnect/pay-* Headless SDK packages and their full public API — pay-core (Engine client + Transport seam), pay-state (runtime + seams + snapshot), pay-react (usePaymentSession), and pay-appkit (Reown AppKit wallet adapter)."
+  description: "The @walletconnect/pay-* Headless SDK packages and their full public API — pay-core (WCP client + Transport seam), pay-state (runtime + seams + snapshot), pay-react (usePaymentSession), and pay-appkit (Reown AppKit wallet adapter)."
 ---
 
 The runtime is split into layered packages. Each is independently consumable, and lower layers never depend on higher ones — so you can take only what you need.
@@ -21,7 +21,7 @@ The runtime is split into layered packages. Each is independently consumable, an
       <td style={{ whiteSpace: "nowrap" }}>
         <a href="https://www.npmjs.com/package/@walletconnect/pay-core"><code>@walletconnect/pay-core</code></a>
       </td>
-      <td>Engine API client — contract types, CAIP utilities, the browser <code>Transport</code> seam (<code>createHttpTransport</code>), and the server-side <code>createEngineClient</code> that holds your API key. The foundation.</td>
+      <td>WCP API client — contract types, CAIP utilities, the browser <code>Transport</code> seam (<code>createHttpTransport</code>), and the server-side <code>createWcpClient</code> that holds your API key. The foundation.</td>
       <td>—</td>
     </tr>
     <tr>
@@ -50,7 +50,7 @@ The runtime is split into layered packages. Each is independently consumable, an
 
 ## `@walletconnect/pay-core`
 
-The foundation: Engine contract types, CAIP utilities, and the `Transport` seam. Zero runtime dependencies. Two entry points — a browser-safe main entry and a server-only `/server` entry that holds the key.
+The foundation: WCP contract types, CAIP utilities, and the `Transport` seam. Zero runtime dependencies. Two entry points — a browser-safe main entry and a server-only `/server` entry that holds the key.
 
 ### Browser entry — `@walletconnect/pay-core`
 
@@ -66,26 +66,26 @@ interface HttpTransportConfig {
 function createHttpTransport(config?: HttpTransportConfig): Transport
 ```
 
-The `Transport` contract (the seam the runtime depends on) — five methods, each resolving to an `EngineResponse<T>` envelope (never throwing):
+The `Transport` contract (the seam the runtime depends on) — five methods, each resolving to a `WcpResponse<T>` envelope (never throwing):
 
 ```typescript
 interface Transport {
-  getPayment(paymentId): Promise<EngineResponse<GetPaymentResponse>>
-  getPaymentOptions(paymentId, request): Promise<EngineResponse<GetPaymentOptionsResponseExtended>>
-  fetchOptionActions(paymentId, request): Promise<EngineResponse<EngineBuildData>>
-  confirmPayment(paymentId, request): Promise<EngineResponse<unknown>>
-  getPaymentStatus(paymentId): Promise<EngineResponse<GetPaymentStatusResponse>>
+  getPayment(paymentId): Promise<WcpResponse<GetPaymentResponse>>
+  getPaymentOptions(paymentId, request): Promise<WcpResponse<GetPaymentOptionsResponseExtended>>
+  fetchOptionActions(paymentId, request): Promise<WcpResponse<WcpBuildData>>
+  confirmPayment(paymentId, request): Promise<WcpResponse<unknown>>
+  getPaymentStatus(paymentId): Promise<WcpResponse<GetPaymentStatusResponse>>
 }
 ```
 
-Also exported: all Engine contract types (`GetPaymentResponse`, `PaymentOptionExtended`, `Amount`, `CollectData`, `PaymentStatus`, …), CAIP utilities (`parseCaip2`, `parseCaip10`, …), and transport error helpers (`TRANSPORT_ERROR_CODES`, `isAbortError`, `DEFAULT_TIMEOUT_MS`).
+Also exported: all WCP contract types (`GetPaymentResponse`, `PaymentOptionExtended`, `Amount`, `CollectData`, `PaymentStatus`, …), CAIP utilities (`parseCaip2`, `parseCaip10`, …), and transport error helpers (`TRANSPORT_ERROR_CODES`, `isAbortError`, `DEFAULT_TIMEOUT_MS`).
 
 ### Server entry — `@walletconnect/pay-core/server`
 
 ```typescript
-import { createEngineClient, type EngineClient, type EngineClientConfig, DEFAULT_VERSION } from '@walletconnect/pay-core/server'
+import { createWcpClient, type WcpClient, type WcpClientConfig, DEFAULT_VERSION } from '@walletconnect/pay-core/server'
 
-interface EngineClientConfig {
+interface WcpClientConfig {
   apiUrl: string        // e.g. https://staging.api.pay.walletconnect.org (no trailing slash)
   apiKey: string        // your Gateway Api-Key — keep secret, server-side only
   version?: string      // WCP API version; defaults to DEFAULT_VERSION
@@ -93,10 +93,10 @@ interface EngineClientConfig {
   timeoutMs?: number    // default 30_000
 }
 
-function createEngineClient(config: EngineClientConfig): EngineClient
+function createWcpClient(config: WcpClientConfig): WcpClient
 ```
 
-`EngineClient` exposes the same five methods as `Transport`, but attaches the secret `Api-Key` and `Wcp-Version` headers and calls the Engine directly. Use it only on the server.
+`WcpClient` exposes the same five methods as `Transport`, but attaches the secret `Api-Key` and `Wcp-Version` headers and calls WCP directly. Use it only on the server.
 
 ## `@walletconnect/pay-state`
 
@@ -139,7 +139,7 @@ The runtime reaches the outside world only through these contracts:
 
 ```typescript
 interface PaymentSessionSeams {
-  transport: Transport          // Engine calls (from pay-core)
+  transport: Transport          // WCP calls (from pay-core)
   clock: Clock                  // intervals + page visibility (for status polling)
   signer?: Signer               // signing capability — required for an end-to-end payment
   telemetry?: Telemetry         // optional analytics breadcrumbs

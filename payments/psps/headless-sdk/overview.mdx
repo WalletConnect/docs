@@ -14,9 +14,9 @@ metatags:
   ```
 </Note>
 
-The Headless SDK is a set of framework-agnostic [`@walletconnect/pay-*`](https://www.npmjs.com/org/walletconnect) packages that own the WalletConnect Pay payment flow while you own the UI. It's the exact runtime that powers our own hosted Buyer Experience — extracted so you can build a fully branded, fully owned checkout on the same engine.
+The Headless SDK is a set of framework-agnostic [`@walletconnect/pay-*`](https://www.npmjs.com/org/walletconnect) packages that own the WalletConnect Pay (WCP) payment flow while you own the UI. It's the exact runtime that powers our own hosted Buyer Experience — extracted so you can build a fully branded, fully owned checkout on the same runtime.
 
-You get the payment state machine, Engine API client, and wallet orchestration; you bring your own UI, branding, routing, and infrastructure.
+You get the payment state machine, WCP API client, and wallet orchestration; you bring your own UI, branding, routing, and infrastructure.
 
 <Note>
   **Beta (v0.1.x)** — The Headless SDK is under active development. Public APIs may change between minor releases until 1.0. [Talk to us](https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s) before going to production.
@@ -34,10 +34,10 @@ If you just want to accept payments with the least effort, use the [hosted gatew
 
 <CardGroup cols={2}>
   <Card title="A headless payment runtime" icon="diagram-project">
-    The full payment state machine (load → connect → quote → sign → confirm → settle) as a framework-agnostic engine. No UI imposed.
+    The full payment state machine (load → connect → quote → sign → confirm → settle), fully framework-agnostic. No UI imposed.
   </Card>
-  <Card title="A typed Engine API client" icon="code">
-    A zero-dependency client for the WalletConnect Pay Engine, with the secret API key safely held server-side.
+  <Card title="A typed WCP API client" icon="code">
+    A zero-dependency client for the WalletConnect Pay API, with the secret API key safely held server-side.
   </Card>
   <Card title="A React binding" icon="react">
     A single `usePaymentSession` hook that projects the runtime into a clean, serializable snapshot plus named actions — zero state-machine internals leak into your components.

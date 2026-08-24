@@ -20,21 +20,21 @@ Wallet connection is now **zero-config**: the SDK owns the entire Reown AppKit s
 
 You build three things:
 
-1. A **server proxy** — routes that forward to the Engine with your secret key.
+1. A **server proxy** — routes that forward to WCP with your secret key.
 2. A **browser transport** — points the runtime at those routes.
 3. The **AppKit provider** — one component (`<PayAppKitProvider>` in React) or one factory call (`createPayAppKit` in JavaScript).
 
 The wallet seam, the signer, and the clock all come from the SDK. Then `usePaymentSession` (React) or `createPaymentController` (JavaScript) ties everything together and gives you a snapshot to render.
 
 <Note>
-  The browser never holds the Engine API key. It talks to *your* server, and your server talks to the WalletConnect Pay Engine — see [The Engine API key never reaches the browser](/payments/psps/headless-sdk/how-it-works#the-engine-api-key-never-reaches-the-browser).
+  The browser never holds the WCP API key. It talks to *your* server, and your server talks to WCP — see [The WCP API key never reaches the browser](/payments/psps/headless-sdk/how-it-works#the-wcp-api-key-never-reaches-the-browser).
 </Note>
 
 ## Prerequisites
 
 - **Node 18+**. The React example uses **Next.js** (App Router); the JavaScript example is framework-neutral.
 - A **Reown Project ID** — create one at [dashboard.reown.com](https://dashboard.reown.com). Enable the **headless** feature on the project.
-- A **WalletConnect Pay Gateway API key** for the Engine (server-side). [Talk to us](https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s) to get onboarded.
+- A **WalletConnect Pay Gateway API key** for the WCP API (server-side). [Talk to us](https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s) to get onboarded.
 
 ## Install
 
@@ -49,19 +49,19 @@ npm install @walletconnect/pay-core @walletconnect/pay-state \
 
 ## Step 1 — Server proxy (keep the API key server-side)
 
-Create a server-only module that constructs the Engine client once and forwards calls. The key comes from server env and never ships to the browser. This is framework-agnostic — any server works; the example uses Next.js Route Handlers.
+Create a server-only module that constructs the WCP client once and forwards calls. The key comes from server env and never ships to the browser. This is framework-agnostic — any server works; the example uses Next.js Route Handlers.
 
-```typescript lib/server/engine.ts
+```typescript lib/server/wcp.ts
 import 'server-only'
-import { createEngineClient } from '@walletconnect/pay-core/server'
+import { createWcpClient } from '@walletconnect/pay-core/server'
 
-const client = createEngineClient({
+const client = createWcpClient({
   apiUrl: process.env.WCP_API_URL ?? 'https://staging.api.pay.walletconnect.org',
   apiKey: process.env.WCP_WALLET_API_KEY ?? '' // secret — server-side only
 })
 
-/** Forward a browser call to the Engine and return an EngineResponse-shaped Response. */
-export async function callEngine(
+/** Forward a browser call to WCP and return a WcpResponse-shaped Response. */
+export async function callWcp(
   path: string,
   init: { method: 'GET' | 'POST'; body?: unknown }
 ): Promise<Response> {
@@ -84,30 +84,30 @@ export async function callEngine(
 }
 ```
 
-Then expose one route per Engine call under `/api/wcp/payment/[id]`. The browser transport (Step 2) calls exactly these paths:
+Then expose one route per WCP call under `/api/wcp/payment/[id]`. The browser transport (Step 2) calls exactly these paths:
 
 ```typescript app/api/wcp/payment/[id]/options/route.ts
-import { callEngine } from '@/lib/server/engine'
+import { callWcp } from '@/lib/server/wcp'
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json()
-  return callEngine(`/v1/gateway/payment/${id}/options`, { method: 'POST', body })
+  return callWcp(`/v1/gateway/payment/${id}/options`, { method: 'POST', body })
 }
 ```
 
 ```typescript app/api/wcp/payment/[id]/status/route.ts
-import { callEngine } from '@/lib/server/engine'
+import { callWcp } from '@/lib/server/wcp'
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  return callEngine(`/v1/gateway/payment/${id}/status`, { method: 'GET' })
+  return callWcp(`/v1/gateway/payment/${id}/status`, { method: 'GET' })
 }
 ```
 
 Create the same handler for each route the transport uses:
 
-| Route Handler                          | Method | Engine call         |
+| Route Handler                          | Method | WCP call             |
 | -------------------------------------- | ------ | ------------------- |
 | `app/api/wcp/payment/[id]/route.ts`    | `GET`  | `getPayment`        |
 | `app/api/wcp/payment/[id]/options/route.ts` | `POST` | `getPaymentOptions` |
@@ -116,7 +116,7 @@ Create the same handler for each route the transport uses:
 | `app/api/wcp/payment/[id]/status/route.ts`  | `GET`  | `getPaymentStatus`  |
 
 <Warning>
-  These proxy routes are a **starting point**, not production-ready — add your own origin allowlist, rate limiting, and auth before shipping. Their only job here is to keep the Engine key off the browser.
+  These proxy routes are a **starting point**, not production-ready — add your own origin allowlist, rate limiting, and auth before shipping. Their only job here is to keep the WCP key off the browser.
 </Warning>
 
 ## Step 2 — Browser transport
@@ -343,7 +343,7 @@ That's a full gateway. Connect → options → (optional KYC) → confirm → si
 # Reown AppKit project ID — required for wallet connection / QR pairing (public)
 NEXT_PUBLIC_APPKIT_PROJECT_ID=
 
-# WalletConnect Pay Engine — server-side only, NEVER exposed to the browser
+# WalletConnect Pay (WCP) API — server-side only, NEVER exposed to the browser
 WCP_API_URL=https://staging.api.pay.walletconnect.org
 WCP_WALLET_API_KEY=
 ```
