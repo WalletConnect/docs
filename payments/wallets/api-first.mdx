@@ -215,7 +215,11 @@ Data collection is per-option — each payment option may independently have a `
 
 If the selected option's `collectData` has a `url` field, display it in a WebView before confirming. The URL is already scoped to that option's account. The WebView handles form rendering, validation, and T&C acceptance. When the WebView signals completion (`IC_COMPLETE` via JS bridge), proceed to confirm — no need to include `collectedData` in the request.
 
-If you choose not to use the WebView and instead build your own form, use the `collectData.schema` JSON schema to determine the required fields, collect the values, and pass them as `collectedData` in the confirm request.
+If you choose not to use the WebView and instead build your own form, `collectData.schema` is the single source of truth for which fields to render. Parse the JSON Schema: render an input for each entry in `properties`, treat every field in the top-level `required` array as mandatory, and honor conditional `anyOf` groups (for example, the schema may require **either** place-of-birth or place-of-residence fields). Collect the values and pass them as `collectedData` in the confirm request.
+
+<Warning>
+Do not build forms from the deprecated `collectData.fields` array. It is retained for backward compatibility only and does not include all required fields (for example, country of residence or birth) — forms built from it will collect incomplete compliance data.
+</Warning>
 
 ### Expiration handling
 

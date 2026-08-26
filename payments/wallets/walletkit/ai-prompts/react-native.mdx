@@ -550,7 +550,7 @@ interface PayAmount {
 
 interface CollectDataAction {
   url: string;                  // WebView URL for data collection
-  schema?: string;              // JSON schema describing required fields
+  schema?: string;              // JSON Schema — source of truth for native-UI forms (parse required + anyOf); never use the deprecated `fields` array
 }
 
 interface Action {
