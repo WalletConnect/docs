@@ -341,7 +341,7 @@ That's a full gateway. Connect → options → (optional KYC) → confirm → si
 
 Build and click through the whole flow **without a real wallet or real funds** — two pieces:
 
-1. **A test API key** on your server proxy. Create a `wcp_test_…` key in the [dashboard](https://merchant.pay.walletconnect.com/en/api-keys) and use it as `WCP_WALLET_API_KEY`. Payments created and driven with a test key settle synthetically — nothing runs on-chain (see [Test mode](/payments/test-mode)).
+1. **A test API key** on your server proxy. In the [dashboard](https://merchant.pay.walletconnect.com), switch to **Test** with the navbar Live/Test dropdown, then open **Developers → API Keys** and create a `wcp_test_…` key; use it as `WCP_WALLET_API_KEY`. Payments created and driven with a test key settle synthetically — nothing runs on-chain (see [Test mode](/payments/test-mode)).
 2. **The `testMode` flag** on the session. Pass your normal `seams` + `wallet` and set `testMode`; the SDK swaps in a mock wallet (already connected to a funded address, so options load with no wallet-connect step), a mock signer, and commits via the test `/transition` endpoint instead of `/confirm` (auto-settling to `succeeded`). Remove the flag for the real flow — the same code.
 
 <CodeGroup>
