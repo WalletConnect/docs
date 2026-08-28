@@ -48,6 +48,8 @@
     "   payment.settled.",
     "",
     "6. Use only the standard library for the crypto. Do not add a dependency.",
+    "   (Exception: Rust's standard library has no crypto; use the hmac, sha2,",
+    "   and base64 crates.)",
     "",
     "Verify the implementation against this test vector (skip the timestamp",
     "tolerance check for the vector only, since the timestamp is in the past):",

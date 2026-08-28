@@ -6,13 +6,19 @@ description: "Get notified in real time as payments move through their lifecycle
 
 Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they happen. Enhance your integration by registering an endpoint once: we `POST` an event to it whenever a payment is created, starts processing, succeeds, fails, expires, is cancelled, or settles.
 
+<Warning>
+**Never gate a payment's outcome on receiving a webhook.** Webhooks are a fast notification layer, not your system of record. Delivery is best-effort: an event can arrive late, out of order, more than once, or, after an outage longer than the retry window, not at all. Critical actions such as releasing goods, crediting a balance, or marking an order paid must be driven by payment state, never by whether a webhook showed up.
+</Warning>
+
 ## Webhooks vs. polling
 
-Polling [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) is the primary way to validate payment status during the purchase cycle: create the payment, then poll until the status is final. Webhooks come on top as an enhancement. They usually tell you first, and with far fewer requests, so you can update the order status in your UI, notify a customer, or kick off downstream processing the moment something happens.
+A robust integration uses three layers:
 
-When a webhook event arrives, its payload already contains everything you need. Every event is a full signed snapshot of the payment and carries a monotonic `payment_state_version`, so verifying the signature, deduplicating by `id`, and applying the version guard is enough; there is no need to call the API from inside your handler.
+1. **Source of truth: polling.** [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) is the primary way to validate payment status during the purchase cycle: create the payment, then poll until the status is final.
+2. **Speed: webhooks.** They usually tell you first, and with far fewer requests, so you can update the order status in your UI, notify a customer, or kick off downstream processing the moment something happens. When an event arrives, its payload already contains everything you need: every event is a full signed snapshot of the payment with a monotonic `payment_state_version`, so verifying the signature, deduplicating by `id`, and applying the version guard is enough. There is no need to call the API from inside your handler.
+3. **Backstop: reconciliation.** A periodic job that re-checks any payment your records still show in a non-final state after its `expires_at` has passed (see [Retries](#retries)) catches anything the other two layers missed.
 
-Webhook delivery is **at-least-once** and **not guaranteed to be in order** (see [Delivery guarantees](#delivery-guarantees)). A well-built integration works correctly even if a webhook arrives twice, late, out of order, or not at all.
+Webhook delivery is **at-least-once** and **not guaranteed to be in order**; the [Delivery guarantees](#delivery-guarantees) section shows how to handle both.
 
 ## Events
 
@@ -240,7 +246,7 @@ Verification is four steps:
 3. **Compare.** The delivery is authentic if your digest equals any `v1` entry in `webhook-signature`, using a constant-time comparison.
 4. **Check the timestamp.** Reject deliveries whose `webhook-timestamp` is more than 5 minutes from the current time, to prevent replay attacks.
 
-Dependency-free implementations, standard library only:
+Implementations with no webhook SDK, using each language's standard library (Rust's standard library has no crypto, so it uses the `hmac`, `sha2`, and `base64` crates):
 
 <CodeGroup>
 
@@ -354,6 +360,56 @@ func VerifyWebhook(secret string, headers http.Header, rawBody []byte) error {
 		}
 	}
 	return errors.New("no matching signature")
+}
+```
+
+```rust Rust
+// crates: hmac = "0.12", sha2 = "0.10", base64 = "0.22"
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+use hmac::{Hmac, Mac};
+use sha2::Sha256;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+const TOLERANCE_S: i64 = 5 * 60;
+
+pub fn verify_webhook(
+    secret: &str,
+    id: &str,
+    timestamp: &str,
+    signatures: &str,
+    raw_body: &[u8],
+) -> Result<(), &'static str> {
+    let ts: i64 = timestamp.parse().map_err(|_| "invalid timestamp")?;
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| "clock error")?
+        .as_secs() as i64;
+    if (now - ts).abs() > TOLERANCE_S {
+        return Err("timestamp outside tolerance");
+    }
+
+    let key = BASE64
+        .decode(secret.strip_prefix("whsec_").ok_or("missing whsec_ prefix")?)
+        .map_err(|_| "invalid secret")?;
+
+    let mut mac = Hmac::<Sha256>::new_from_slice(&key).map_err(|_| "invalid key")?;
+    mac.update(id.as_bytes());
+    mac.update(b".");
+    mac.update(timestamp.as_bytes());
+    mac.update(b".");
+    mac.update(raw_body);
+
+    for entry in signatures.split(' ') {
+        if let Some(sig) = entry.strip_prefix("v1,") {
+            if let Ok(sig_bytes) = BASE64.decode(sig) {
+                // verify_slice is constant-time
+                if mac.clone().verify_slice(&sig_bytes).is_ok() {
+                    return Ok(());
+                }
+            }
+        }
+    }
+    Err("no matching signature")
 }
 ```
 
