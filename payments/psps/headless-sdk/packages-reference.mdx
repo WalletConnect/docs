@@ -21,7 +21,7 @@ The runtime is split into layered packages. Each is independently consumable, an
       <td style={{ whiteSpace: "nowrap" }}>
         <a href="https://www.npmjs.com/package/@walletconnect/pay-core"><code>@walletconnect/pay-core</code></a>
       </td>
-      <td>WCP API client — contract types, CAIP utilities, the browser <code>Transport</code> seam (<code>createHttpTransport</code>), and the server-side <code>createWcpClient</code> that holds your API key. The foundation.</td>
+      <td>WCP API client — contract types, CAIP utilities, the browser <code>Transport</code> seam (<code>createHttpTransport</code>), and the server-side <code>createEngineClient</code> that holds your API key. The foundation.</td>
       <td>—</td>
     </tr>
     <tr>
@@ -83,9 +83,9 @@ Also exported: all WCP contract types (`GetPaymentResponse`, `PaymentOptionExten
 ### Server entry — `@walletconnect/pay-core/server`
 
 ```typescript
-import { createWcpClient, type WcpClient, type WcpClientConfig, DEFAULT_VERSION } from '@walletconnect/pay-core/server'
+import { createEngineClient, type EngineClient, type EngineClientConfig, DEFAULT_VERSION } from '@walletconnect/pay-core/server'
 
-interface WcpClientConfig {
+interface EngineClientConfig {
   apiUrl: string        // e.g. https://staging.api.pay.walletconnect.org (no trailing slash)
   apiKey: string        // your Gateway Api-Key — keep secret, server-side only
   version?: string      // WCP API version; defaults to DEFAULT_VERSION
@@ -93,10 +93,10 @@ interface WcpClientConfig {
   timeoutMs?: number    // default 30_000
 }
 
-function createWcpClient(config: WcpClientConfig): WcpClient
+function createEngineClient(config: EngineClientConfig): EngineClient
 ```
 
-`WcpClient` exposes the same five methods as `Transport`, but attaches the secret `Api-Key` and `Wcp-Version` headers and calls WCP directly. Use it only on the server.
+`EngineClient` exposes the same five methods as `Transport`, but attaches the secret `Api-Key` and `Wcp-Version` headers and calls WCP directly. Use it only on the server.
 
 ## `@walletconnect/pay-state`
 
