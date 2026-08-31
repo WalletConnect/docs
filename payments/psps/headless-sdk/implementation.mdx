@@ -53,9 +53,9 @@ Create a server-only module that constructs the WCP client once and forwards cal
 
 ```typescript lib/server/wcp.ts
 import 'server-only'
-import { createWcpClient } from '@walletconnect/pay-core/server'
+import { createEngineClient } from '@walletconnect/pay-core/server'
 
-const client = createWcpClient({
+const client = createEngineClient({
   apiUrl: process.env.WCP_API_URL ?? 'https://staging.api.pay.walletconnect.org',
   apiKey: process.env.WCP_WALLET_API_KEY ?? '' // secret — server-side only
 })

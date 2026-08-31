@@ -84,14 +84,14 @@ The WCP API is authenticated with a secret API key that **must stay server-side*
 ```mermaid
 flowchart LR
     Browser["Browser<br/>Transport seam<br/>(no secret)"]
-    Server["Your server route<br/>createWcpClient<br/>(holds the API key)"]
+    Server["Your server route<br/>createEngineClient<br/>(holds the API key)"]
     Wcp["WalletConnect Pay<br/>API"]
 
     Browser -->|"fetch /api/wcp/payment/:id/*"| Server
     Server -->|"Api-Key header"| Wcp
 ```
 
-`pay-core` exposes two entry points for exactly this: `createHttpTransport` for the browser (talks to *your* server) and `createWcpClient` (imported from `@walletconnect/pay-core/server`) which holds the API key and talks to WCP. In a Next.js app, your Route Handler sits in the middle.
+`pay-core` exposes two entry points for exactly this: `createHttpTransport` for the browser (talks to *your* server) and `createEngineClient` (imported from `@walletconnect/pay-core/server`) which holds the API key and talks to WCP. In a Next.js app, your Route Handler sits in the middle.
 
 ## Next steps
 
