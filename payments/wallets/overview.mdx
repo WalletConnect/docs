@@ -1,6 +1,6 @@
 ---
 title: "WalletConnect Pay - Wallet Integration"
-sidebarTitle: "Wallet Integration"
+sidebarTitle: "Quickstart"
 ---
 
 Your users hold crypto and stablecoins. WalletConnect Pay gives them somewhere to spend it.
@@ -13,71 +13,11 @@ What's included
 - Cashback in $WCT for your users on every purchase
 - Check [Token and Chain coverage](/payments/token-and-chain-coverage) for supported tokens and chains
 
-WalletConnect provides three integration approaches for enabling WalletConnect Pay in your wallet:
+WalletConnect provides four integration approaches for enabling WalletConnect Pay in your wallet: the Wallet SDK (WalletKit), the standalone Pay SDK, an API-first integration, and an embedded WebView checkout.
 
-## Integration Options
-
-### Integrate using the Wallet SDK (Recommended)
-
-If your wallet already uses the WalletConnect Wallet SDK (WalletKit), WalletConnect Pay is automatically available when you initialize WalletKit. This is the recommended approach as it provides a unified API and automatic configuration.
-
-<CardGroup cols={2}>
-  <Card title="Kotlin" icon="android" href="/payments/wallets/walletkit/kotlin">
-    WalletKit integration for Android wallets.
-  </Card>
-  <Card title="Swift" icon="apple" href="/payments/wallets/walletkit/swift">
-    WalletKit integration for iOS wallets.
-  </Card>
-  <Card title="React Native" icon="react" href="/payments/wallets/walletkit/react-native">
-    WalletKit integration for React Native wallets.
-  </Card>
-  <Card title="Flutter" icon="flutter" href="/payments/wallets/walletkit/flutter">
-    WalletKit integration for Flutter wallets.
-  </Card>
-  <Card title="Web/Node.js" icon="js" href="/payments/wallets/walletkit/web">
-    WalletKit integration for Web/Node.js wallets.
-  </Card>
-</CardGroup>
-
-### Standalone Integration
-
-For wallets that don't currently use the WalletConnect Wallet SDK, you can integrate the standalone Pay SDK directly. This approach requires configuring the SDK with your WalletConnect Project ID.
-
-<CardGroup cols={2}>
-  <Card title="Kotlin" icon="android" href="/payments/wallets/standalone/kotlin">
-    Standalone Pay SDK for Android wallets.
-  </Card>
-  <Card title="Swift" icon="apple" href="/payments/wallets/standalone/swift">
-    Standalone Pay SDK for iOS wallets.
-  </Card>
-  <Card title="React Native" icon="react" href="/payments/wallets/standalone/react-native">
-    Standalone Pay SDK for React Native wallets.
-  </Card>
-  <Card title="Flutter" icon="flutter" href="/payments/wallets/standalone/flutter">
-    Standalone Pay SDK for Flutter wallets.
-  </Card>
-  <Card title="Web/Node.js" icon="js" href="/payments/wallets/standalone/web">
-    Standalone Pay SDK for Web/Node.js wallets.
-  </Card>
-</CardGroup>
-
-### API-First Integration
-
-For wallets that prefer direct API integration without using an SDK, you can use the Gateway API directly.
-
-<CardGroup cols={2}>
-  <Card title="API-first integration" icon="code" href="/payments/wallets/api-first">
-    Integrate WalletConnect Pay using the Gateway API.
-  </Card>
-</CardGroup>
-
-### WebView Integration
-
-For apps that want to embed the full WalletConnect Pay checkout UI inside a native WebView — without redirecting to an external browser. The hosted checkout handles everything; your app supplies two query parameters and listens for bridge messages.
-
-<CardGroup cols={2}>
-  <Card title="WebView integration" icon="window" href="/payments/wallets/webview">
-    Embed the checkout portal in a native WebView (iOS, Android, React Native, Flutter).
+<CardGroup cols={1}>
+  <Card title="Integration Options" icon="list-checks" href="/payments/wallets/integration-options">
+    Compare the four approaches and jump to the guide for your platform.
   </Card>
 </CardGroup>
 
