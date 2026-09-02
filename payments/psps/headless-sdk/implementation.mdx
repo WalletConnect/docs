@@ -230,7 +230,8 @@ export function Checkout({ paymentId }: { paymentId: string }) {
     disconnectWallet,
     selectOption,
     confirmSelection,
-    submitInfoCapture
+    submitInfoCapture,
+    notifyInfoCaptureSubmitted
   } = usePaymentSession({ paymentId, seams, wallet })
 
   return <div>{/* render per snapshot.state — see Step 5 */}</div>
@@ -306,8 +307,12 @@ switch (snapshot.state) {
     return <Empty label="No payment options for this wallet." />
 
   case 'InformationCapture':
-    // Render snapshot.collectData.fields, then:
-    return <KycForm fields={snapshot.collectData?.fields} onSubmit={submitInfoCapture} />
+    // Identity capture — see "Information capture" below. Prefer the hosted form:
+    return snapshot.collectData?.url ? (
+      <HostedForm url={snapshot.collectData.url} onDone={notifyInfoCaptureSubmitted} />
+    ) : (
+      <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
+    )
 
   case 'OptionSelected':
   case 'RequiresApproval':
@@ -336,6 +341,38 @@ switch (snapshot.state) {
 ```
 
 That's a full gateway. Connect → options → (optional KYC) → confirm → sign → settle, all driven by the runtime; you only render and call actions. Once a wallet is connected, `disconnectWallet(namespace?)` drops one namespace or all of them.
+
+## Information capture
+
+Some payments require identity details (name, date of birth, country, terms acceptance) before they can settle — usually for regulatory reasons, often only on a buyer's first payment. When the selected option needs it, the runtime enters the `InformationCapture` state and describes what to collect on `snapshot.collectData`. There are **two ways** to satisfy it.
+
+### Hosted form (recommended)
+
+`snapshot.collectData.url` is a WalletConnect-hosted page that renders the exact, always-current identity form and submits it for you. Open it (a new tab, webview, or iframe); when the buyer finishes, call `notifyInfoCaptureSubmitted()` to advance the flow:
+
+```tsx
+const { collectData } = snapshot
+
+if (collectData?.url) {
+  // Open the hosted form, e.g. window.open(collectData.url, '_blank')
+  // …then, once the buyer completes it:
+  notifyInfoCaptureSubmitted()
+}
+```
+
+You build **no form UI** and never touch identity data yourself — the hosted form submits it to WalletConnect Pay directly, and the payment confirms against the record it already holds. This is the recommended path.
+
+### Native form (custom UI)
+
+If you'd rather render the identity form inside your own UI, build it from `snapshot.collectData.schema` — a JSON Schema (`properties`, `required`, `anyOf` for proof-of-birth / proof-of-residence, and a `tosConfirmed` checkbox) — and submit the collected values with `submitInfoCapture(data)`. The runtime sends them with the payment confirmation.
+
+```tsx
+<KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
+```
+
+<Note>
+  `collectData.fields` (name + date of birth only) is **deprecated** — it under-collects. Drive your form from `collectData.url` (hosted) or `collectData.schema` (native).
+</Note>
 
 ## Environment variables
 
