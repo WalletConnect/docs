@@ -337,6 +337,33 @@ switch (snapshot.state) {
 
 That's a full gateway. Connect → options → (optional KYC) → confirm → sign → settle, all driven by the runtime; you only render and call actions. Once a wallet is connected, `disconnectWallet(namespace?)` drops one namespace or all of them.
 
+## Test mode
+
+Build and click through the whole flow **without a real wallet or real funds** — two pieces:
+
+1. **A test payment.** Create it with a **test merchant key** (`wcp_test_…`): in the [dashboard](https://merchant.pay.walletconnect.com), switch to **Test** with the navbar Live/Test dropdown, then open **Developers → API Keys**. Payments created with a test key are test payments — they settle synthetically, nothing runs on-chain (see [Test mode](/payments/test-mode)). Your proxy's own wallet/gateway key is unchanged; test vs live is a property of the payment, not the gateway key.
+2. **The `testMode` flag** on the session. Pass your normal `seams` + `wallet` and set `testMode`; the SDK swaps in a mock wallet (already connected to a funded address, so options load with no wallet-connect step), a mock signer, and commits via the test `/transition` endpoint instead of `/confirm` (auto-settling to `succeeded`). Remove the flag for the real flow — the same code.
+
+<CodeGroup>
+```tsx React
+usePaymentSession({ paymentId, seams, wallet, testMode: true })
+```
+
+```typescript JavaScript
+createPaymentController({ paymentId, seams, wallet, testMode: true })
+```
+</CodeGroup>
+
+Your proxy must also expose the transition route the test transport calls (alongside the five from [Step 1](#step-1-—-server-proxy-keep-the-api-key-server-side)):
+
+| Route Handler                                   | Method | WCP call     |
+| ----------------------------------------------- | ------ | ------------ |
+| `app/api/wcp/payment/[id]/transition/route.ts`  | `POST` | `transition` |
+
+<Note>
+  Test mode is client **and** server: the flag mocks the wallet + signer in the browser, and the **test API key** makes WCP treat the payment as a test payment (and allow `/transition`). Both are required — a test key alone still runs the real wallet/sign path, and the flag alone hits a live key that rejects `/transition`.
+</Note>
+
 ## Environment variables
 
 ```bash .env.local
