@@ -230,8 +230,7 @@ export function Checkout({ paymentId }: { paymentId: string }) {
     disconnectWallet,
     selectOption,
     confirmSelection,
-    submitInfoCapture,
-    openInfoCapture
+    submitInfoCapture
   } = usePaymentSession({ paymentId, seams, wallet })
 
   return <div>{/* render per snapshot.state — see Step 5 */}</div>
@@ -307,13 +306,8 @@ switch (snapshot.state) {
     return <Empty label="No payment options for this wallet." />
 
   case 'InformationCapture':
-    // Identity capture — see "Information capture" below. Prefer the hosted form:
-    return snapshot.collectData?.url ? (
-      // The SDK opens the hosted form, detects completion, and advances — you wire nothing.
-      <button onClick={() => openInfoCapture()}>Complete verification</button>
-    ) : (
-      <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
-    )
+    // Identity capture — render from collectData.schema (see "Information capture" below).
+    return <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
 
   case 'OptionSelected':
   case 'RequiresApproval':
@@ -345,28 +339,16 @@ That's a full gateway. Connect → options → (optional KYC) → confirm → si
 
 ## Information capture
 
-Some payments require identity details (name, date of birth, country, terms acceptance) before they can settle — usually for regulatory reasons, often only on a buyer's first payment. When the selected option needs it, the runtime enters the `InformationCapture` state and describes what to collect on `snapshot.collectData`. There are **two ways** to satisfy it.
+Some payments require identity details (name, date of birth, country, terms acceptance) before they can settle — usually for regulatory reasons, often only on a buyer's first payment. When the selected option needs it, the runtime enters the `InformationCapture` state and describes what to collect on `snapshot.collectData`.
 
-### Hosted form (recommended)
-
-When `snapshot.collectData.url` is set, the option wants the WalletConnect-hosted identity form. Call `openInfoCapture()` — from a user gesture (a click) so the popup opens:
-
-```tsx
-<button onClick={() => openInfoCapture()}>Complete verification</button>
-```
-
-That's the whole integration. The SDK opens the hosted form, **detects when the buyer finishes it, and advances the flow itself** — you build no form UI, handle no completion events, and never touch identity data (the hosted form submits it to WalletConnect Pay directly, and the payment confirms against the record it already holds). This is the recommended path.
-
-### Native form (custom UI)
-
-If you'd rather render the identity form inside your own UI, build it from `snapshot.collectData.schema` — a JSON Schema (`properties`, `required`, `anyOf` for proof-of-birth / proof-of-residence, and a `tosConfirmed` checkbox) — and submit the collected values with `submitInfoCapture(data)`. The runtime sends them with the payment confirmation.
+Render the form from **`snapshot.collectData.schema`** — a JSON Schema (`properties`, `required`, `anyOf` for proof-of-birth / proof-of-residence, and a `tosConfirmed` checkbox) — and submit the collected values with `submitInfoCapture(data)`. The runtime sends them with the payment confirmation; the flow advances on its own.
 
 ```tsx
 <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
 ```
 
 <Note>
-  `collectData.fields` (name + date of birth only) is **deprecated** — it under-collects. Drive your form from `collectData.url` (hosted) or `collectData.schema` (native).
+  `collectData.fields` (name + date of birth only) is **deprecated** — it under-collects. Drive your form from `collectData.schema`.
 </Note>
 
 ## Environment variables
