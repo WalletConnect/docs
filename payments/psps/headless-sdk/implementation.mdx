@@ -231,7 +231,7 @@ export function Checkout({ paymentId }: { paymentId: string }) {
     selectOption,
     confirmSelection,
     submitInfoCapture,
-    notifyInfoCaptureSubmitted
+    openInfoCapture
   } = usePaymentSession({ paymentId, seams, wallet })
 
   return <div>{/* render per snapshot.state — see Step 5 */}</div>
@@ -309,7 +309,8 @@ switch (snapshot.state) {
   case 'InformationCapture':
     // Identity capture — see "Information capture" below. Prefer the hosted form:
     return snapshot.collectData?.url ? (
-      <HostedForm url={snapshot.collectData.url} onDone={notifyInfoCaptureSubmitted} />
+      // The SDK opens the hosted form, detects completion, and advances — you wire nothing.
+      <button onClick={() => openInfoCapture()}>Complete verification</button>
     ) : (
       <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
     )
@@ -348,19 +349,13 @@ Some payments require identity details (name, date of birth, country, terms acce
 
 ### Hosted form (recommended)
 
-`snapshot.collectData.url` is a WalletConnect-hosted page that renders the exact, always-current identity form and submits it for you. Open it (a new tab, webview, or iframe); when the buyer finishes, call `notifyInfoCaptureSubmitted()` to advance the flow:
+When `snapshot.collectData.url` is set, the option wants the WalletConnect-hosted identity form. Call `openInfoCapture()` — from a user gesture (a click) so the popup opens:
 
 ```tsx
-const { collectData } = snapshot
-
-if (collectData?.url) {
-  // Open the hosted form, e.g. window.open(collectData.url, '_blank')
-  // …then, once the buyer completes it:
-  notifyInfoCaptureSubmitted()
-}
+<button onClick={() => openInfoCapture()}>Complete verification</button>
 ```
 
-You build **no form UI** and never touch identity data yourself — the hosted form submits it to WalletConnect Pay directly, and the payment confirms against the record it already holds. This is the recommended path.
+That's the whole integration. The SDK opens the hosted form, **detects when the buyer finishes it, and advances the flow itself** — you build no form UI, handle no completion events, and never touch identity data (the hosted form submits it to WalletConnect Pay directly, and the payment confirms against the record it already holds). This is the recommended path.
 
 ### Native form (custom UI)
 
