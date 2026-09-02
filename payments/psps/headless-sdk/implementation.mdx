@@ -306,8 +306,8 @@ switch (snapshot.state) {
     return <Empty label="No payment options for this wallet." />
 
   case 'InformationCapture':
-    // Render snapshot.collectData.fields, then:
-    return <KycForm fields={snapshot.collectData?.fields} onSubmit={submitInfoCapture} />
+    // Identity capture — render from collectData.schema (see "Information capture" below).
+    return <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
 
   case 'OptionSelected':
   case 'RequiresApproval':
@@ -336,6 +336,20 @@ switch (snapshot.state) {
 ```
 
 That's a full gateway. Connect → options → (optional KYC) → confirm → sign → settle, all driven by the runtime; you only render and call actions. Once a wallet is connected, `disconnectWallet(namespace?)` drops one namespace or all of them.
+
+## Information capture
+
+Some payments require identity details (name, date of birth, country, terms acceptance) before they can settle — usually for regulatory reasons, often only on a buyer's first payment. When the selected option needs it, the runtime enters the `InformationCapture` state and describes what to collect on `snapshot.collectData`.
+
+Render the form from **`snapshot.collectData.schema`** — a JSON Schema (`properties`, `required`, `anyOf` for proof-of-birth / proof-of-residence, and a `tosConfirmed` checkbox) — and submit the collected values with `submitInfoCapture(data)`. The runtime sends them with the payment confirmation; the flow advances on its own.
+
+```tsx
+<KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
+```
+
+<Note>
+  `collectData.fields` (name + date of birth only) is **deprecated** — it under-collects. Drive your form from `collectData.schema`.
+</Note>
 
 ## Environment variables
 
