@@ -194,7 +194,7 @@ Wallets can earn interchange-like revenue on eligible WalletConnect Pay payments
     - [WalletConnect Terms and Conditions](https://walletconnect.com/terms)
     - [WalletConnect Privacy Policy](https://walletconnect.com/privacy)
 
-    The required user information can be sent to WalletConnect using schema in the `collect_data` object.
+    When building custom UI, the JSON Schema in `collectData.schema` is the single source of truth for which fields to render: treat every field in its top-level `required` array as mandatory and honor conditional `anyOf` groups (for example, the schema may require either place-of-birth or place-of-residence fields). Do **not** build forms from the deprecated `fields` array — it does not include all required fields. Submit the collected values as `collectedData` when confirming the payment.
 
     We strongly recommend using the WebView-based flow over building custom native UI. Data collection requirements are driven by regulation and can evolve. The hosted WebView form is maintained and updated centrally so that wallets can automatically pick up changes.
   </Accordion>

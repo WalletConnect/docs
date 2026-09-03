@@ -306,8 +306,10 @@ switch (snapshot.state) {
     return <Empty label="No payment options for this wallet." />
 
   case 'InformationCapture':
-    // Render snapshot.collectData.fields, then:
-    return <KycForm fields={snapshot.collectData?.fields} onSubmit={submitInfoCapture} />
+    // Render a form from snapshot.collectData.schema — a JSON Schema whose top-level
+    // "required" array and conditional "anyOf" groups define every mandatory field.
+    // Do not render from the deprecated collectData.fields array: it omits required fields.
+    return <KycForm schema={snapshot.collectData?.schema} onSubmit={submitInfoCapture} />
 
   case 'OptionSelected':
   case 'RequiresApproval':

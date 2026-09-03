@@ -659,10 +659,14 @@ struct WalletRpcAction {
 
 ```swift
 struct CollectDataAction {
-    let url: String                    // WebView URL for data collection
-    let schema: String?                // JSON schema describing required fields
+    let url: String                    // WebView URL for data collection (recommended)
+    let schema: String?                // JSON Schema — source of truth for native-UI forms (parse required + anyOf)
 }
 ```
+
+<Warning>
+`CollectDataAction` also exposes a deprecated `fields` property. Do not use it to build native UI — it does not include all required fields. Use `url` for the WebView flow (recommended) or parse `schema` for native forms.
+</Warning>
 
 **ConfirmPaymentResultResponse**
 
