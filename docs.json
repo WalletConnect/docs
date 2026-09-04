@@ -17,8 +17,12 @@
       "destination": "/payments/merchant/quickstart"
     },
     {
-      "source": "/api-reference/latest/:slug*",
-      "destination": "/api-reference/2026-02-18/:slug*"
+      "source": "/api-reference/:slug*",
+      "destination": "/payments/api-reference/:slug*"
+    },
+    {
+      "source": "/payments/api-reference/latest/:slug*",
+      "destination": "/payments/api-reference/2026-02-18/:slug*"
     }
   ],
   "integrations": {
@@ -139,52 +143,52 @@
               {
                 "group": "Overview",
                 "pages": [
-                  "api-reference/index",
-                  "api-reference/authentication",
-                  "api-reference/versioning"
+                  "payments/api-reference/index",
+                  "payments/api-reference/authentication",
+                  "payments/api-reference/versioning"
                 ]
               },
               {
                 "group": "Gateway",
                 "pages": [
-                  "api-reference/2026-02-18/get-v1-gateway-payment-id",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-cancel",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-confirm",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-fetch",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-options",
-                  "api-reference/2026-02-18/get-v1-gateway-payment-id-status"
+                  "payments/api-reference/2026-02-18/get-v1-gateway-payment-id",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-cancel",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-confirm",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-fetch",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-options",
+                  "payments/api-reference/2026-02-18/get-v1-gateway-payment-id-status"
                 ]
               },
               {
                 "group": "Payments",
                 "pages": [
-                  "api-reference/2026-02-18/post-v1-payments",
-                  "api-reference/2026-02-18/get-v1-payments",
-                  "api-reference/2026-02-18/get-v1-payments-id",
-                  "api-reference/2026-02-18/post-v1-payments-id-cancel",
-                  "api-reference/2026-02-18/get-v1-payments-id-status"
+                  "payments/api-reference/2026-02-18/post-v1-payments",
+                  "payments/api-reference/2026-02-18/get-v1-payments",
+                  "payments/api-reference/2026-02-18/get-v1-payments-id",
+                  "payments/api-reference/2026-02-18/post-v1-payments-id-cancel",
+                  "payments/api-reference/2026-02-18/get-v1-payments-id-status"
                 ]
               },
               {
                 "group": "Refunds",
                 "pages": [
-                  "api-reference/2026-02-18/post-v1-refunds"
+                  "payments/api-reference/2026-02-18/post-v1-refunds"
                 ]
               },
               {
                 "group": "Merchants",
                 "pages": [
-                  "api-reference/2026-02-18/get-v1-merchants-payments",
-                  "api-reference/2026-02-18/post-v1-merchants",
-                  "api-reference/2026-02-18/get-v1-merchants",
-                  "api-reference/2026-02-18/get-v1-merchants-merchantid",
-                  "api-reference/2026-02-18/patch-v1-merchants-merchantid",
-                  "api-reference/2026-02-18/delete-v1-merchants-merchantid",
-                  "api-reference/2026-02-18/get-v1-merchants-merchantid-settlements",
-                  "api-reference/2026-02-18/post-v1-merchants-merchantid-settlements-crypto",
-                  "api-reference/2026-02-18/put-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-18/delete-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
+                  "payments/api-reference/2026-02-18/get-v1-merchants-payments",
+                  "payments/api-reference/2026-02-18/post-v1-merchants",
+                  "payments/api-reference/2026-02-18/get-v1-merchants",
+                  "payments/api-reference/2026-02-18/get-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-18/patch-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-18/delete-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-18/get-v1-merchants-merchantid-settlements",
+                  "payments/api-reference/2026-02-18/post-v1-merchants-merchantid-settlements-crypto",
+                  "payments/api-reference/2026-02-18/put-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-18/delete-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
                 ]
               }
             ]
@@ -195,52 +199,52 @@
               {
                 "group": "Overview",
                 "pages": [
-                  "api-reference/index",
-                  "api-reference/authentication",
-                  "api-reference/versioning"
+                  "payments/api-reference/index",
+                  "payments/api-reference/authentication",
+                  "payments/api-reference/versioning"
                 ]
               },
               {
                 "group": "Gateway",
                 "pages": [
-                  "api-reference/2026-02-19.preview/get-v1-gateway-payment-id",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-cancel",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
-                  "api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
+                  "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-cancel",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
+                  "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
                 ]
               },
               {
                 "group": "Payments",
                 "pages": [
-                  "api-reference/2026-02-19.preview/post-v1-payments",
-                  "api-reference/2026-02-19.preview/get-v1-payments",
-                  "api-reference/2026-02-19.preview/get-v1-payments-id",
-                  "api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
-                  "api-reference/2026-02-19.preview/get-v1-payments-id-status"
+                  "payments/api-reference/2026-02-19.preview/post-v1-payments",
+                  "payments/api-reference/2026-02-19.preview/get-v1-payments",
+                  "payments/api-reference/2026-02-19.preview/get-v1-payments-id",
+                  "payments/api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
+                  "payments/api-reference/2026-02-19.preview/get-v1-payments-id-status"
                 ]
               },
               {
                 "group": "Refunds",
                 "pages": [
-                  "api-reference/2026-02-19.preview/post-v1-refunds"
+                  "payments/api-reference/2026-02-19.preview/post-v1-refunds"
                 ]
               },
               {
                 "group": "Merchants",
                 "pages": [
-                  "api-reference/2026-02-19.preview/get-v1-merchants-payments",
-                  "api-reference/2026-02-19.preview/post-v1-merchants",
-                  "api-reference/2026-02-19.preview/get-v1-merchants",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
-                  "api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
-                  "api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-merchantid-settlements",
-                  "api-reference/2026-02-19.preview/post-v1-merchants-merchantid-settlements-crypto",
-                  "api-reference/2026-02-19.preview/put-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-19.preview/delete-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-payments",
+                  "payments/api-reference/2026-02-19.preview/post-v1-merchants",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid-settlements",
+                  "payments/api-reference/2026-02-19.preview/post-v1-merchants-merchantid-settlements-crypto",
+                  "payments/api-reference/2026-02-19.preview/put-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
                 ]
               }
             ]
