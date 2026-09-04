@@ -705,11 +705,6 @@
           "icon": "book"
         },
         {
-          "anchor": "API Reference",
-          "href": "/payments/api-reference",
-          "icon": "code"
-        },
-        {
           "anchor": "Report an Issue",
           "href": "/report-an-issue",
           "icon": "bug"
