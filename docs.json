@@ -432,18 +432,8 @@
           {
             "group": "Participants",
             "pages": [
-              "network/wallets",
-              "apps/overview",
-              {
-                "group": "Custodians and Institutions",
-                "pages": [
-                  "wallets/custodians/overview",
-                  "wallets/custodians/app-access-control",
-                  "wallets/custodians/contract-access-control",
-                  "wallets/custodians/extended-sessions"
-                ]
-              },
-              "network/service-nodes"
+              "network/service-nodes",
+              "network/wallets"
             ]
           },
           {
