@@ -178,10 +178,10 @@ async function buildNavigation(
     ...previewVersions.map((v) => makeVersionEntry(v, { tag: "Preview" })),
   ]);
 
-  const apiReferenceTab = { tab: "API Reference", icon: "code", versions };
+  const apiReferenceTab = { tab: "Payments API Reference", icon: "code", versions };
 
   const tabs = currentConfig.navigation.tabs.map((t) =>
-    t.tab === "API Reference" ? apiReferenceTab : t
+    t.tab === "Payments API Reference" ? apiReferenceTab : t
   );
 
   return {
