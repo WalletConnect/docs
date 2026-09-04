@@ -475,7 +475,20 @@
                 ]
               },
               "payments/test-mode",
-              "payments/webhooks"
+              "payments/webhooks",
+              {
+                "group": "Webhook Reference",
+                "pages": [
+                  "payments/webhook-event-reference",
+                  "payments/webhook-events/payment-created",
+                  "payments/webhook-events/payment-processing",
+                  "payments/webhook-events/payment-succeeded",
+                  "payments/webhook-events/payment-failed",
+                  "payments/webhook-events/payment-expired",
+                  "payments/webhook-events/payment-cancelled",
+                  "payments/webhook-events/payment-settled"
+                ]
+              }
             ]
           },
           {
@@ -549,25 +562,6 @@
             "group": "AI Agents",
             "pages": [
               "agents/overview"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Webhook Reference",
-        "icon": "webhook",
-        "groups": [
-          {
-            "group": "Payment events",
-            "pages": [
-              "payments/webhook-event-reference",
-              "payments/webhook-events/payment-created",
-              "payments/webhook-events/payment-processing",
-              "payments/webhook-events/payment-succeeded",
-              "payments/webhook-events/payment-failed",
-              "payments/webhook-events/payment-expired",
-              "payments/webhook-events/payment-cancelled",
-              "payments/webhook-events/payment-settled"
             ]
           }
         ]
