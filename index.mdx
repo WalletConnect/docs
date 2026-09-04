@@ -1,197 +1,100 @@
 ---
 mode: "frame"
-title: "WalletConnect Pay Documentation"
+title: "WalletConnect Documentation"
 sidebarTitle: "Home"
-description: "Documentation for WalletConnect Pay. Integrate secure crypto payments into your app with step-by-step guides, APIs, and best practices."
+description: "The Connectivity Layer for the Financial Internet"
 ---
 
-import { Container, Title} from '/snippets/home/utility.mdx';
-import { ProductTiles } from '/snippets/home/product-tiles.mdx';
-import { appCategories } from '/snippets/home/data.mdx';
+import { Container, Title } from '/snippets/home/utility.mdx';
 import { ProductCard } from '/snippets/home/product-cards.mdx';
 
 <div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
   <Container>
     <div className="w-full flex flex-col">
       <div className="flex flex-col items-start justify-center w-full max-w-4xl text-left">
-        <div
-          className="text-gray-900 dark:text-gray-200 text-4xl tracking-tight"
-        >
-          WalletConnect Pay
+        <div className="text-gray-900 dark:text-gray-200 text-4xl tracking-tight">
+          WalletConnect
         </div>
-        <p
-          className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4"
-        >
-        The easiest way to enable crypto payments from any wallet, any asset, anywhere.
+        <p className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4">
+          The Connectivity Layer for the Financial Internet
         </p>
-        <div className="flex flex-row gap-4 mt-5">
-        <a href="/payments/overview">
-          <button
-            type="button"
-            className="px-5 flex items-center font-medium text-sm rounded-full py-2 shadow-sm text-white dark:text-gray-900 bg-primary-dark dark:bg-primary-light hover:opacity-[0.9] hover:bg-primary justify-center"
-          >
-            Get started
-            <svg
-              className="size-3 ml-2 bg-white dark:bg-gray-900"
-              style={{
-                maskImage: 'url("https://mintlify.b-cdn.net/solid/arrow-right-long.svg")',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center center'
-              }}
-            />
-          </button>
-          </a>
-        </div>
       </div>
     </div>
-
   </Container>
-   <Container>
+
+  <Container>
     <div className="flex flex-col w-full mb-8">
-      <div className="flex items-center justify-between w-full">
-        <Title>
-          Introducing WalletConnect Pay
-        </Title>
-      </div>
-      <p
-        className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3"
-      >
-      **[WalletConnect Pay](/payments/overview)** is a complete, end-to-end crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration.
+      <Title>
+        WalletConnect Ecosystem Quickstart
+      </Title>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
+        WalletConnect powers apps, wallets and end-users via the WalletConnect network.
+      </p>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mt-4">
+        <strong>Check out our quickstart guides to get started!</strong>
       </p>
     </div>
-    <div className="dark:hidden block">
-    <CardGroup cols={3}>
-        <ProductCard
-          title="Ecommerce (Checkout)"
-          description="Add crypto and stablecoin payments to your online checkout, offering a wallet-based experience for users worldwide."
-          href="/payments/ecommerce/overview"
-          img="/images/ecommerce.png"
-          model="For Checkout"
-          type="Get started"
-        />
-        <ProductCard
-          title="Wallet Integration"
-          description="Add built in support for WalletConnect Pay and allow your users to pay in real-world context, retaining custody and control of the UX."
-          href="/payments/wallets/overview"
-          img="/images/wallet.png"
-          model="For Wallets"
-          type="Get started"
-        />
-        <ProductCard
-          title="Merchant Dashboard"
-          description="Monitor transactions, off-ramps, KYB, and more via the WalletConnect Pay Merchant Dashboard."
-          href="/payments/merchant/onboarding"
-          img="/images/merchant.png"
-          model="For Merchants"
-          type="Get started"
-        />
-    </CardGroup>
-    </div>
-    <div className="dark:block hidden">
-    <CardGroup cols={3}>
-        <ProductCard
-          title="Ecommerce (Checkout)"
-          description="Add crypto and stablecoin payments to your online checkout, offering a wallet-based experience for users worldwide."
-          href="/payments/ecommerce/overview"
-          img="/images/ecommerce.png"
-          model="For Checkout"
-          type="Get started"
-        />
-         <ProductCard
-        title="Wallet Integration"
-        description="Add built in support for WalletConnect Pay and allow your users to pay in real-world context, retaining custody and control of the UX."
-        href="/payments/wallets/overview"
+    <CardGroup cols={2}>
+      <ProductCard
+        title="Wallets"
+        description="Reach users on the network by joining our ecosystem of wallets."
+        href="/wallets/overview"
         img="/images/wallet.png"
-        model="For Wallets"
-        type="Get started"
-        /> 
-        <ProductCard
-          title="Merchant Dashboard"
-          description="Monitor transactions, off-ramps, KYB, and more via the WalletConnect Pay Merchant Dashboard."
-          href="/payments/merchant/onboarding"
-          img="/images/merchant-dark.png"
-          model="For Merchants"
-          type="Get started"
-        />
+        type="Wallet SDK"
+      />
+      <ProductCard
+        title="Apps"
+        description="Provide wallet connections and user authentication for your app."
+        href="/apps/overview"
+        img="/images/app.svg"
+        type="App SDK"
+      />
+      <ProductCard
+        title="Payments"
+        description="Enable stablecoin and crypto payments as a wallet, app, PSP or merchant."
+        href="/payments"
+        img="/images/credit-card.svg"
+        type="Payments"
+      />
+      <ProductCard
+        title="WalletConnect Network"
+        description="Discover the network powering 700+ wallets and 80,000+ apps."
+        href="/network"
+        img="/images/network.svg"
+        type="Network"
+      />
     </CardGroup>
-    </div>
-    <ul class="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
+    <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
   </Container>
 
   <Container>
     <div className="flex flex-col w-full mb-5">
       <Title>
-        Learn more about WalletConnect Pay
+        Resources
       </Title>
-      <p
-        className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3"
-      >
-      A curated list of educational resources about WalletConnect Pay and crypto payments.
-      </p>
-
     </div>
     <Columns cols={3}>
       <Card
-        title="What are Crypto Payments?"
-        icon="credit-card"
-        href="https://walletconnect.com/blog/what-are-crypto-payments-a-clear-guide-to-how-stablecoin-and-wallet-payments-work"
+        title="WalletConnect Blog"
+        icon="newspaper"
+        href="https://walletconnect.com/blog"
       >
-        A clear guide to how Stablecoin and Wallet payments work.
+        Read the latest news and updates from the WalletConnect team
       </Card>
       <Card
-        title="Why Crypto Payments Are Finally Ready for the Real World"
-        icon="globe"
-        href="https://walletconnect.com/blog/payments-pulse-why-crypto-payments-are-finally-ready-for-the-real-world"
+        title="Join the WalletConnect Community"
+        icon="discord"
+        href="https://discord.walletconnect.network/"
       >
-      Learn what it takes to make crypto payments usable in the real world.
+        Discord community for WalletConnect Network and WCT Token
       </Card>
       <Card
-        title="Accept USDC Payments Anywhere"
-        icon="dollar-sign"
-        href="https://walletconnect.com/blog/how-to-accept-usdc-payments-anywhere-a-guide-for-merchants-and-psps"
+        title="Twitter"
+        icon="twitter"
+        href="https://x.com/WalletConnect"
       >
-      Learn how to accept USDC anywhere with WalletConnect Pay.
-      </Card>
-      <Card
-        title="What’s stopping you from receiving Stablecoins?"
-        icon="money-bill"
-        href="https://walletconnect.com/blog/what-s-stopping-you-from-receiving-stablecoins"
-      >
-      A legal deep dive into why stablecoins are not yet mainstream.
-      </Card>
-      <Card
-        title="The Infrastructure Behind Crypto Payments"
-        icon="network-wired"
-        href="https://walletconnect.com/blog/walletconnect-the-infrastructure-behind-crypto-payments"
-      >
-      Learn what’s hindering adoption today, what’s changing globally, and the infra behind crypto payments.
+        Follow WalletConnect on X (Twitter) to stay updated on the announcements
       </Card>
     </Columns>
-  </Container>
-
-
-  <Container>
-    <div className="flex flex-col w-full mb-5">
-    <Title>
-      Resources
-    </Title>
-
-  </div>
-  <Columns cols={3}>
-    <Card
-      title="WalletConnect Blog"
-      icon="newspaper"
-      href="https://walletconnect.com/blog"
-    >
-    Read the latest news and updates from the WalletConnect team
-    </Card>
-    <Card
-      title="Twitter"
-      icon="twitter"
-      href="https://x.com/WalletConnect"
-    >
-    Follow WalletConnect on X (Twitter) to stay updated on the announcements
-    </Card>
-  </Columns>
   </Container>
 </div>
