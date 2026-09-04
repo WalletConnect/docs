@@ -567,7 +567,7 @@
         ]
       },
       {
-        "tab": "Payments API Reference",
+        "tab": "Payments API reference",
         "icon": "code",
         "versions": [
           {
@@ -705,7 +705,7 @@
           "icon": "book"
         },
         {
-          "anchor": "Payments API Reference",
+          "anchor": "Payments API reference",
           "href": "/payments/api-reference",
           "icon": "code"
         },
