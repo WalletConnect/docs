@@ -9,16 +9,144 @@
   },
   "redirects": [
     {
-      "source": "/guides/**",
-      "destination": "/custodians/**"
-    },
-    {
       "source": "/payments/merchant/onboarding",
       "destination": "/payments/merchant/quickstart"
     },
     {
-      "source": "/api-reference/latest/:slug*",
-      "destination": "/api-reference/2026-02-18/:slug*"
+      "source": "/api-reference/:slug*",
+      "destination": "/payments/api-reference/:slug*"
+    },
+    {
+      "source": "/payments/api-reference/latest/:slug*",
+      "destination": "/payments/api-reference/2026-02-18/:slug*"
+    },
+    {
+      "source": "/wallet-sdk/chain-support/:slug*",
+      "destination": "/wallets/chains/:slug*"
+    },
+    {
+      "source": "/wallet-sdk/best-practices",
+      "destination": "/wallets/more/best-practices"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/staying-up-to-date",
+      "destination": "/wallets/more/updating-wallet-sdk"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-to-reown",
+      "destination": "/wallets/more/web3wallet-migration/quickstart"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-web",
+      "destination": "/wallets/more/web3wallet-migration/web"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-react-native",
+      "destination": "/wallets/more/web3wallet-migration/react-native"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-flutter",
+      "destination": "/wallets/more/web3wallet-migration/flutter"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-android",
+      "destination": "/wallets/more/web3wallet-migration/android"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-ios",
+      "destination": "/wallets/more/web3wallet-migration/ios"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-unity",
+      "destination": "/wallets/more/web3wallet-migration/unity"
+    },
+    {
+      "source": "/wallet-sdk/:slug*",
+      "destination": "/wallets/:slug*"
+    },
+    {
+      "source": "/app-sdk/:slug*",
+      "destination": "/apps/:slug*"
+    },
+    {
+      "source": "/guides/:slug*",
+      "destination": "/wallets/guides/:slug*"
+    },
+    {
+      "source": "/custodians/:slug*",
+      "destination": "/wallets/custodians/:slug*"
+    },
+    {
+      "source": "/walletguide/explorer-submission",
+      "destination": "/wallets/walletguide/submit-wallet"
+    },
+    {
+      "source": "/walletguide/explorer",
+      "destination": "/wallets/walletguide/explorer-api"
+    },
+    {
+      "source": "/walletguide/chains/overview",
+      "destination": "/wallets/walletguide/submit-chain"
+    },
+    {
+      "source": "/walletguide/chains/chain-list",
+      "destination": "/wallets/walletguide/chain-list"
+    },
+    {
+      "source": "/walletguide/wallets/wallet-list",
+      "destination": "/wallets/walletguide/wallet-list"
+    },
+    {
+      "source": "/walletguide/:slug*",
+      "destination": "/wallets/walletguide/:slug*"
+    },
+    {
+      "source": "/token-dynamics/intro",
+      "destination": "/network/WCT-token/overview"
+    },
+    {
+      "source": "/token-dynamics/fees",
+      "destination": "/network/WCT-token/overview"
+    },
+    {
+      "source": "/token-dynamics/wallet-rewards",
+      "destination": "/network/WCT-token/rewards"
+    },
+    {
+      "source": "/token-dynamics/rewards",
+      "destination": "/network/WCT-token/rewards"
+    },
+    {
+      "source": "/token-dynamics/service-node-rewards",
+      "destination": "/network/WCT-token/service-node-rewards"
+    },
+    {
+      "source": "/wct-staking/overview",
+      "destination": "/network/WCT-token/staking"
+    },
+    {
+      "source": "/wct-staking/faq",
+      "destination": "/network/WCT-token/faq"
+    },
+    {
+      "source": "/governance",
+      "destination": "/network/WCT-token/governance"
+    },
+    {
+      "source": "/contracts",
+      "destination": "/network/WCT-token/contracts"
+    },
+    {
+      "source": "/service-nodes",
+      "destination": "/network/service-nodes"
+    },
+    {
+      "source": "/wallets",
+      "destination": "/network/wallets"
+    },
+    {
+      "source": "/overview",
+      "destination": "/network"
     }
   ],
   "integrations": {
@@ -31,73 +159,340 @@
   "navigation": {
     "tabs": [
       {
+        "tab": "Wallets",
+        "icon": "wallet",
+        "dropdowns": [
+          {
+            "dropdown": "Wallet SDK - Overview",
+            "icon": "wallet",
+            "pages": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "wallets/overview"
+                ]
+              },
+              {
+                "group": "Features",
+                "pages": [
+                  "wallets/features/verify",
+                  "wallets/features/link-mode",
+                  "wallets/features/one-click-auth"
+                ]
+              },
+              {
+                "group": "Chain Support",
+                "pages": [
+                  "wallets/chains/overview",
+                  "wallets/chains/evm",
+                  "wallets/chains/solana",
+                  "wallets/chains/bitcoin",
+                  "wallets/chains/sui",
+                  "wallets/chains/stacks",
+                  "wallets/chains/ton",
+                  "wallets/chains/tron",
+                  "wallets/chains/adi",
+                  "wallets/chains/canton",
+                  "wallets/chains/stellar"
+                ]
+              },
+              {
+                "group": "WalletGuide",
+                "pages": [
+                  "wallets/walletguide/submit-wallet",
+                  "wallets/walletguide/wallet-list",
+                  "wallets/walletguide/submit-chain",
+                  "wallets/walletguide/chain-list",
+                  "wallets/walletguide/explorer-api"
+                ]
+              },
+              {
+                "group": "More",
+                "pages": [
+                  "wallets/more/best-practices",
+                  "wallets/more/updating-wallet-sdk",
+                  {
+                    "group": "Web3Wallet to Wallet SDK",
+                    "pages": [
+                      "wallets/more/web3wallet-migration/quickstart",
+                      "wallets/more/web3wallet-migration/web",
+                      "wallets/more/web3wallet-migration/react-native",
+                      "wallets/more/web3wallet-migration/flutter",
+                      "wallets/more/web3wallet-migration/android",
+                      "wallets/more/web3wallet-migration/ios",
+                      "wallets/more/web3wallet-migration/unity"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Custodians & Institutions",
+                "pages": [
+                  "wallets/custodians/overview",
+                  "wallets/custodians/app-access-control",
+                  "wallets/custodians/contract-access-control",
+                  "wallets/custodians/extended-sessions"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Web",
+            "icon": "js",
+            "description": "Wallet SDK on Web",
+            "pages": [
+              "wallets/web/installation",
+              "wallets/web/usage",
+              "wallets/web/one-click-auth",
+              "wallets/web/verify",
+              "wallets/web/eip5792",
+              "wallets/web/chain-abstraction",
+              "wallets/web/best-practices",
+              "wallets/web/resources",
+              {
+                "group": "Cloud",
+                "pages": [
+                  "wallets/web/cloud/explorer-submission",
+                  "wallets/web/cloud/relay",
+                  "wallets/web/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Android",
+            "icon": "android",
+            "description": "Wallet SDK on Android",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "wallets/android/installation",
+                  "wallets/android/usage",
+                  "wallets/android/one-click-auth",
+                  "wallets/android/mobile-linking",
+                  "wallets/android/link-mode",
+                  "wallets/android/verify",
+                  "wallets/android/eip5792",
+                  "wallets/android/chain-abstraction",
+                  "wallets/android/best-practices",
+                  "wallets/android/resources"
+                ]
+              },
+              {
+                "group": "Cloud",
+                "pages": [
+                  "wallets/android/cloud/explorer-submission",
+                  "wallets/android/cloud/relay",
+                  "wallets/android/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "iOS",
+            "icon": "apple",
+            "description": "Wallet SDK on iOS",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "wallets/ios/installation",
+                  "wallets/ios/usage",
+                  "wallets/ios/one-click-auth",
+                  "wallets/ios/mobile-linking",
+                  "wallets/ios/link-mode",
+                  "wallets/ios/verify",
+                  "wallets/ios/eip5792",
+                  "wallets/ios/chain-abstraction",
+                  "wallets/ios/best-practices",
+                  "wallets/ios/resources"
+                ]
+              },
+              {
+                "group": "Cloud",
+                "pages": [
+                  "wallets/ios/cloud/explorer-submission",
+                  "wallets/ios/cloud/relay",
+                  "wallets/ios/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Flutter",
+            "icon": "flutter",
+            "description": "Wallet SDK on Flutter",
+            "pages": [
+              "wallets/flutter/installation",
+              "wallets/flutter/usage",
+              "wallets/flutter/one-click-auth",
+              "wallets/flutter/mobile-linking",
+              "wallets/flutter/link-mode",
+              "wallets/flutter/verify",
+              "wallets/flutter/eip5792",
+              "wallets/flutter/chain-abstraction",
+              {
+                "group": "Cloud",
+                "pages": [
+                  "wallets/flutter/cloud/explorer-submission",
+                  "wallets/flutter/cloud/relay",
+                  "wallets/flutter/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "React Native",
+            "icon": "mobile-screen-button",
+            "description": "Wallet SDK on React Native",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "wallets/react-native/installation",
+                  "wallets/react-native/usage",
+                  "wallets/react-native/one-click-auth",
+                  "wallets/react-native/mobile-linking",
+                  "wallets/react-native/link-mode",
+                  "wallets/react-native/verify",
+                  "wallets/react-native/eip5792",
+                  "wallets/react-native/chain-abstraction",
+                  "wallets/react-native/best-practices",
+                  "wallets/react-native/resources"
+                ]
+              },
+              {
+                "group": "Cloud",
+                "pages": [
+                  "wallets/react-native/cloud/explorer-submission",
+                  "wallets/react-native/cloud/relay",
+                  "wallets/react-native/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": ".NET",
+            "icon": "code",
+            "description": "Wallet SDK on .NET",
+            "pages": [
+              "wallets/c-sharp/installation",
+              "wallets/c-sharp/usage",
+              "wallets/c-sharp/verify",
+              {
+                "group": "Cloud",
+                "pages": [
+                  "wallets/c-sharp/cloud/explorer-submission",
+                  "wallets/c-sharp/cloud/relay",
+                  "wallets/c-sharp/cloud/analytics"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Apps",
+        "icon": "layer-group",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "apps/overview"
+            ]
+          },
+          {
+            "group": "Installation",
+            "pages": [
+              "apps/react/installation",
+              "apps/next/installation",
+              "apps/vue/installation",
+              "apps/javascript/installation"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "wallets/guides/tonconnect-walletconnect"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Network",
+        "icon": "globe",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "network/index"
+            ]
+          },
+          {
+            "group": "Participants",
+            "pages": [
+              "network/service-nodes",
+              "network/wallets"
+            ]
+          },
+          {
+            "group": "WCT Token",
+            "pages": [
+              "network/WCT-token/overview",
+              "network/WCT-token/rewards",
+              "network/WCT-token/service-node-rewards",
+              "network/WCT-token/staking",
+              "network/WCT-token/governance",
+              "network/WCT-token/contracts",
+              "network/WCT-token/faq"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "network/specs"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Payments",
         "icon": "credit-card",
         "groups": [
           {
-            "group": "WalletConnect Pay",
+            "group": "Get Started",
             "pages": [
               "payments/overview",
               "payments/for-users",
-              "payments/token-and-chain-coverage",
-              "payments/fiat-coverage",
-              "payments/wallet-coverage",
-              "payments/cex-coverage",
+              {
+                "group": "Coverage & Reference",
+                "pages": [
+                  "payments/token-and-chain-coverage",
+                  "payments/fiat-coverage",
+                  "payments/wallet-coverage",
+                  "payments/cex-coverage"
+                ]
+              },
               "payments/test-mode",
-              "payments/webhooks"
-            ]
-          },
-          {
-            "group": "WalletConnect Pay for Merchants",
-            "pages": [
-              "payments/merchant/quickstart"
-            ]
-          },
-          {
-            "group": "Merchant API",
-            "pages": [
-              "payments/merchant-api/logo-specification"
-            ]
-          },
-          {
-            "group": "WalletConnect Pay for Wallets",
-            "pages": [
-              "payments/wallets/overview",
+              "payments/webhooks",
               {
-                "group": "Standalone integration",
+                "group": "Webhook Reference",
                 "pages": [
-                  "payments/wallets/standalone/kotlin",
-                  "payments/wallets/standalone/swift",
-                  "payments/wallets/standalone/react-native",
-                  "payments/wallets/standalone/flutter",
-                  "payments/wallets/standalone/web"
+                  "payments/webhook-event-reference",
+                  "payments/webhook-events/payment-created",
+                  "payments/webhook-events/payment-processing",
+                  "payments/webhook-events/payment-succeeded",
+                  "payments/webhook-events/payment-failed",
+                  "payments/webhook-events/payment-expired",
+                  "payments/webhook-events/payment-cancelled",
+                  "payments/webhook-events/payment-settled"
                 ]
-              },
-              {
-                "group": "Integrate using the Wallet SDK",
-                "pages": [
-                  "payments/wallets/walletkit/kotlin",
-                  "payments/wallets/walletkit/swift",
-                  "payments/wallets/walletkit/react-native",
-                  "payments/wallets/walletkit/flutter",
-                  "payments/wallets/walletkit/web"
-                ]
-              },
-              "payments/wallets/api-first",
-              "payments/wallets/webview",
-              {
-                "group": "Token & Chain Support",
-                "pages": [
-                  "payments/wallets/token-chain-support",
-                  "payments/wallets/token-chain-support/usdt-support",
-                  "payments/wallets/token-chain-support/solana-support"
-                ]
-              },
-              "payments/wallets/tap-to-pay"
+              }
             ]
           },
           {
-            "group": "WalletConnect Pay for PSPs",
+            "group": "For PSPs",
             "pages": [
               "payments/psps/overview",
               {
@@ -112,7 +507,51 @@
             ]
           },
           {
-            "group": "Ecommerce and Online Checkout",
+            "group": "For Merchants",
+            "pages": [
+              "payments/merchant/quickstart",
+              "payments/merchant-api/logo-specification"
+            ]
+          },
+          {
+            "group": "For Wallets",
+            "pages": [
+              "payments/wallets/overview",
+              {
+                "group": "Standalone integration",
+                "pages": [
+                  "payments/wallets/standalone/kotlin",
+                  "payments/wallets/standalone/swift",
+                  "payments/wallets/standalone/react-native",
+                  "payments/wallets/standalone/flutter",
+                  "payments/wallets/standalone/web"
+                ]
+              },
+              {
+                "group": "Integrate Wallet SDK",
+                "pages": [
+                  "payments/wallets/walletkit/kotlin",
+                  "payments/wallets/walletkit/swift",
+                  "payments/wallets/walletkit/react-native",
+                  "payments/wallets/walletkit/flutter",
+                  "payments/wallets/walletkit/web"
+                ]
+              },
+              "payments/wallets/api-first",
+              "payments/wallets/tap-to-pay",
+              "payments/wallets/webview",
+              {
+                "group": "Token & Chain Support",
+                "pages": [
+                  "payments/wallets/token-chain-support",
+                  "payments/wallets/token-chain-support/usdt-support",
+                  "payments/wallets/token-chain-support/solana-support"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "For Checkout",
             "pages": [
               "payments/ecommerce/overview",
               "payments/ecommerce/integration",
@@ -120,7 +559,7 @@
             ]
           },
           {
-            "group": "WalletConnect AI Agent SDK",
+            "group": "AI Agents",
             "pages": [
               "agents/overview"
             ]
@@ -139,52 +578,52 @@
               {
                 "group": "Overview",
                 "pages": [
-                  "api-reference/index",
-                  "api-reference/authentication",
-                  "api-reference/versioning"
+                  "payments/api-reference/index",
+                  "payments/api-reference/authentication",
+                  "payments/api-reference/versioning"
                 ]
               },
               {
                 "group": "Gateway",
                 "pages": [
-                  "api-reference/2026-02-18/get-v1-gateway-payment-id",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-cancel",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-confirm",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-fetch",
-                  "api-reference/2026-02-18/post-v1-gateway-payment-id-options",
-                  "api-reference/2026-02-18/get-v1-gateway-payment-id-status"
+                  "payments/api-reference/2026-02-18/get-v1-gateway-payment-id",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-cancel",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-confirm",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-fetch",
+                  "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-options",
+                  "payments/api-reference/2026-02-18/get-v1-gateway-payment-id-status"
                 ]
               },
               {
                 "group": "Payments",
                 "pages": [
-                  "api-reference/2026-02-18/post-v1-payments",
-                  "api-reference/2026-02-18/get-v1-payments",
-                  "api-reference/2026-02-18/get-v1-payments-id",
-                  "api-reference/2026-02-18/post-v1-payments-id-cancel",
-                  "api-reference/2026-02-18/get-v1-payments-id-status"
+                  "payments/api-reference/2026-02-18/post-v1-payments",
+                  "payments/api-reference/2026-02-18/get-v1-payments",
+                  "payments/api-reference/2026-02-18/get-v1-payments-id",
+                  "payments/api-reference/2026-02-18/post-v1-payments-id-cancel",
+                  "payments/api-reference/2026-02-18/get-v1-payments-id-status"
                 ]
               },
               {
                 "group": "Refunds",
                 "pages": [
-                  "api-reference/2026-02-18/post-v1-refunds"
+                  "payments/api-reference/2026-02-18/post-v1-refunds"
                 ]
               },
               {
                 "group": "Merchants",
                 "pages": [
-                  "api-reference/2026-02-18/get-v1-merchants-payments",
-                  "api-reference/2026-02-18/post-v1-merchants",
-                  "api-reference/2026-02-18/get-v1-merchants",
-                  "api-reference/2026-02-18/get-v1-merchants-merchantid",
-                  "api-reference/2026-02-18/patch-v1-merchants-merchantid",
-                  "api-reference/2026-02-18/delete-v1-merchants-merchantid",
-                  "api-reference/2026-02-18/get-v1-merchants-merchantid-settlements",
-                  "api-reference/2026-02-18/post-v1-merchants-merchantid-settlements-crypto",
-                  "api-reference/2026-02-18/put-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-18/delete-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
+                  "payments/api-reference/2026-02-18/get-v1-merchants-payments",
+                  "payments/api-reference/2026-02-18/post-v1-merchants",
+                  "payments/api-reference/2026-02-18/get-v1-merchants",
+                  "payments/api-reference/2026-02-18/get-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-18/patch-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-18/delete-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-18/get-v1-merchants-merchantid-settlements",
+                  "payments/api-reference/2026-02-18/post-v1-merchants-merchantid-settlements-crypto",
+                  "payments/api-reference/2026-02-18/put-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-18/delete-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
                 ]
               }
             ]
@@ -195,78 +634,83 @@
               {
                 "group": "Overview",
                 "pages": [
-                  "api-reference/index",
-                  "api-reference/authentication",
-                  "api-reference/versioning"
+                  "payments/api-reference/index",
+                  "payments/api-reference/authentication",
+                  "payments/api-reference/versioning"
                 ]
               },
               {
                 "group": "Gateway",
                 "pages": [
-                  "api-reference/2026-02-19.preview/get-v1-gateway-payment-id",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-cancel",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
-                  "api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
-                  "api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
+                  "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-cancel",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
+                  "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
+                  "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
                 ]
               },
               {
                 "group": "Payments",
                 "pages": [
-                  "api-reference/2026-02-19.preview/post-v1-payments",
-                  "api-reference/2026-02-19.preview/get-v1-payments",
-                  "api-reference/2026-02-19.preview/get-v1-payments-id",
-                  "api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
-                  "api-reference/2026-02-19.preview/get-v1-payments-id-status"
+                  "payments/api-reference/2026-02-19.preview/post-v1-payments",
+                  "payments/api-reference/2026-02-19.preview/get-v1-payments",
+                  "payments/api-reference/2026-02-19.preview/get-v1-payments-id",
+                  "payments/api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
+                  "payments/api-reference/2026-02-19.preview/get-v1-payments-id-status"
                 ]
               },
               {
                 "group": "Refunds",
                 "pages": [
-                  "api-reference/2026-02-19.preview/post-v1-refunds"
+                  "payments/api-reference/2026-02-19.preview/post-v1-refunds"
                 ]
               },
               {
                 "group": "Merchants",
                 "pages": [
-                  "api-reference/2026-02-19.preview/get-v1-merchants-payments",
-                  "api-reference/2026-02-19.preview/post-v1-merchants",
-                  "api-reference/2026-02-19.preview/get-v1-merchants",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
-                  "api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
-                  "api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-merchantid-settlements",
-                  "api-reference/2026-02-19.preview/post-v1-merchants-merchantid-settlements-crypto",
-                  "api-reference/2026-02-19.preview/put-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-19.preview/delete-v1-merchants-merchantid-settlements-crypto-id",
-                  "api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-payments",
+                  "payments/api-reference/2026-02-19.preview/post-v1-merchants",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid-settlements",
+                  "payments/api-reference/2026-02-19.preview/post-v1-merchants-merchantid-settlements-crypto",
+                  "payments/api-reference/2026-02-19.preview/put-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid-settlements-crypto-id",
+                  "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
                 ]
               }
             ]
           }
         ]
-      },
-      {
-        "tab": "Webhook Reference",
-        "icon": "webhook",
-        "groups": [
-          {
-            "group": "Payment events",
-            "pages": [
-              "payments/webhook-event-reference",
-              "payments/webhook-events/payment-created",
-              "payments/webhook-events/payment-processing",
-              "payments/webhook-events/payment-succeeded",
-              "payments/webhook-events/payment-failed",
-              "payments/webhook-events/payment-expired",
-              "payments/webhook-events/payment-cancelled",
-              "payments/webhook-events/payment-settled"
-            ]
-          }
-        ]
       }
-    ]
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "WalletConnect",
+          "href": "https://walletconnect.com",
+          "icon": "globe"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://walletconnect.com/blog",
+          "icon": "newspaper"
+        },
+        {
+          "anchor": "Whitepaper",
+          "href": "https://whitepaper.walletconnect.network/",
+          "icon": "book"
+        },
+        {
+          "anchor": "Report an Issue",
+          "href": "/report-an-issue",
+          "icon": "bug"
+        }
+      ]
+    }
   },
   "logo": {
     "light": "/logo/light.svg",

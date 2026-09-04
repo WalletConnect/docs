@@ -86,7 +86,7 @@ function slugify(method, path) {
 }
 
 async function generatePages(version, spec) {
-  const dir = join(ROOT, "api-reference", version);
+  const dir = join(ROOT, "payments", "api-reference", version);
   await mkdir(dir, { recursive: true });
 
   // Group by second path segment: /v1/{segment}/...
@@ -112,7 +112,7 @@ async function generatePages(version, spec) {
       const title = (op.summary || `${method} ${path}`).replace(/["\\]/g, "\\$&");
       const mdx = `---\ntitle: "${title}"\nopenapi: "api/${version}.json ${method} ${path}"\n---\n`;
       writes.push(writeFile(join(dir, filename), mdx));
-      pages.push(`api-reference/${version}/${slug}`);
+      pages.push(`payments/api-reference/${version}/${slug}`);
     }
     groups.push({ group, pages });
   }
@@ -143,25 +143,12 @@ async function generateSpec(version) {
   return { version, spec: merged };
 }
 
-function findPaymentsTab(navigation) {
-  if (navigation.versions) {
-    const tabs = navigation.versions[0]?.tabs || [];
-    return tabs.find((t) => t.tab === "Payments");
-  }
-  if (navigation.tabs) {
-    return navigation.tabs.find((t) => t.tab === "Payments");
-  }
-  return null;
-}
-
 async function buildNavigation(
   currentConfig,
   stableVersions,
   previewVersions,
   versionSpecs
 ) {
-  const paymentsTab = findPaymentsTab(currentConfig.navigation);
-
   const makeVersionEntry = async (version, { tag, isDefault } = {}) => {
     const spec = versionSpecs.get(version);
     const groups = await generatePages(version, spec);
@@ -171,16 +158,9 @@ async function buildNavigation(
 
     const entry = {
       version,
-      tabs: [
-        paymentsTab,
-        {
-          tab: "API Reference",
-          icon: "code",
-          groups: [
-            { group: "Overview", pages: ["api-reference/index", "api-reference/versioning"] },
-            ...groups,
-          ],
-        },
+      groups: [
+        { group: "Overview", pages: ["payments/api-reference/index", "payments/api-reference/versioning"] },
+        ...groups,
       ],
     };
     if (tag) entry.tag = tag;
@@ -198,8 +178,14 @@ async function buildNavigation(
     ...previewVersions.map((v) => makeVersionEntry(v, { tag: "Preview" })),
   ]);
 
+  const apiReferenceTab = { tab: "API Reference", icon: "code", versions };
+
+  const tabs = currentConfig.navigation.tabs.map((t) =>
+    t.tab === "API Reference" ? apiReferenceTab : t
+  );
+
   return {
-    versions,
+    tabs,
     global: currentConfig.navigation.global,
   };
 }
@@ -208,14 +194,14 @@ function buildManagedRedirects(latestStableVersion) {
   if (!latestStableVersion) return [];
   return [
     {
-      source: "/api-reference/latest/:slug*",
-      destination: `/api-reference/${latestStableVersion}/:slug*`,
+      source: "/payments/api-reference/latest/:slug*",
+      destination: `/payments/api-reference/${latestStableVersion}/:slug*`,
     },
   ];
 }
 
 const MANAGED_REDIRECT_SOURCES = new Set([
-  "/api-reference/latest/:slug*",
+  "/payments/api-reference/latest/:slug*",
 ]);
 
 function mergeRedirects(existing, latestStableVersion) {
@@ -232,14 +218,14 @@ async function main() {
   const allVersions = [...stable, ...preview];
   validateVersions(allVersions);
 
-  const apiRefDir = join(ROOT, "api-reference");
+  const apiRefDir = join(ROOT, "payments", "api-reference");
   const apiDir = join(ROOT, "api");
   const versionSet = new Set(allVersions);
 
   const staleRefs = (await readdir(apiRefDir, { withFileTypes: true }))
     .filter((e) => e.isDirectory() && !versionSet.has(e.name))
     .map((e) => {
-      console.log(`Removed stale directory api-reference/${e.name}`);
+      console.log(`Removed stale directory payments/api-reference/${e.name}`);
       return rm(join(apiRefDir, e.name), { recursive: true });
     });
 

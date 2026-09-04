@@ -1,0 +1,121 @@
+---
+mode: "frame"
+title: "WalletConnect Pay Documentation"
+sidebarTitle: "Home"
+description: "Documentation for WalletConnect Pay. Integrate secure crypto payments into your app with step-by-step guides, APIs, and best practices."
+---
+
+import { Container, Title } from '/snippets/home/utility.mdx';
+import { ProductCard } from '/snippets/home/product-cards.mdx';
+
+<div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
+  <Container>
+    <div className="w-full flex flex-col">
+      <div className="flex flex-col items-start justify-center w-full max-w-4xl text-left">
+        <div className="text-gray-900 dark:text-gray-200 text-4xl tracking-tight">
+          WalletConnect Pay
+        </div>
+        <p className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4">
+          <strong>WalletConnect Pay</strong> is a complete, end-to-end stablecoin and crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration.
+        </p>
+      </div>
+    </div>
+  </Container>
+
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
+        WalletConnect Pay serves Merchants, PSPs, Wallets and eCommerce. Choose your integration method below to quickstart.
+      </p>
+    </div>
+    <CardGroup cols={4}>
+      <ProductCard
+        title="Wallet Integration"
+        description="Integrate WalletConnect Pay as a wallet provider."
+        href="/payments/wallets/overview"
+        img="/images/wallet.png"
+        type="Get started"
+      />
+      <ProductCard
+        title="Payment Service Providers (PSPs)"
+        description="Enable stablecoin payments in your payments product."
+        href="/payments/psps/overview"
+        img="/images/merchant.png"
+        type="Get started"
+      />
+      <ProductCard
+        title="Ecommerce (Checkout)"
+        description="Add stablecoin and crypto payments to your online checkout."
+        href="/payments/ecommerce/overview"
+        img="/images/ecommerce.png"
+        type="Get started"
+      />
+      <ProductCard
+        title="Merchant Dashboard"
+        description="Integrate WalletConnect Pay in your business as a Merchant."
+        href="/payments/merchant/quickstart"
+        img="/images/merchant.png"
+        type="Get started"
+      />
+    </CardGroup>
+    <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
+  </Container>
+
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        How does WalletConnect Pay work?
+      </Title>
+    </div>
+
+<video
+  className="w-full"
+  src="/images/videos/wc-pay.mp4"
+  poster="/images/videos/wc-pay-poster.png"
+  aria-label="Animated walkthrough of a WalletConnect Pay payment, from merchant QR code to settlement."
+  controls
+  autoPlay
+  muted
+  loop
+  playsInline
+/>
+
+1. The merchant presents a WalletConnect QR code with the payment intent.
+2. The customer scans the QR code, either with their wallet or with a standard QR scanner:
+   * Scanning with a wallet opens the wallet directly on the payment intent.
+   * Scanning with a QR scanner opens a payment gateway URL pre-filled with the payment intent, where the customer connects their wallet using WalletConnect.
+3. The wallet displays the payment intent.
+4. The customer picks the token and network of their choice (e.g., USDC on Ethereum) and approves the payment.
+5. The wallet builds the transaction and sends it to the network.
+6. The merchant receives the transaction result and the customer is notified.
+7. The merchant then receives stablecoin or fiat settlement from the PSP.
+
+  </Container>
+
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        Resources
+      </Title>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
+        Learn more about WalletConnect Pay and the wider WalletConnect brand.
+      </p>
+    </div>
+    <Columns cols={3}>
+      <Card
+        title="API Reference"
+        icon="code"
+        href="/payments/api-reference"
+      >
+        Dive into the API reference to explore more
+      </Card>
+      <Card
+        title="WalletConnect Blog"
+        icon="newspaper"
+        href="https://walletconnect.com/blog"
+      >
+        Read the latest news and updates from the WalletConnect team
+      </Card>
+    </Columns>
+  </Container>
+</div>
