@@ -9,10 +9,6 @@
   },
   "redirects": [
     {
-      "source": "/guides/**",
-      "destination": "/custodians/**"
-    },
-    {
       "source": "/payments/merchant/onboarding",
       "destination": "/payments/merchant/quickstart"
     },
@@ -23,6 +19,82 @@
     {
       "source": "/payments/api-reference/latest/:slug*",
       "destination": "/payments/api-reference/2026-02-18/:slug*"
+    },
+    {
+      "source": "/wallet-sdk/chain-support/:slug*",
+      "destination": "/network/wallets/chains/:slug*"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/:slug*",
+      "destination": "/network/wallets/more/:slug*"
+    },
+    {
+      "source": "/wallet-sdk/:slug*",
+      "destination": "/network/wallets/:slug*"
+    },
+    {
+      "source": "/app-sdk/:slug*",
+      "destination": "/network/apps/:slug*"
+    },
+    {
+      "source": "/guides/:slug*",
+      "destination": "/network/wallets/guides/:slug*"
+    },
+    {
+      "source": "/custodians/:slug*",
+      "destination": "/network/wallets/custodians/:slug*"
+    },
+    {
+      "source": "/walletguide/:slug*",
+      "destination": "/network/wallets/walletguide/:slug*"
+    },
+    {
+      "source": "/token-dynamics/intro",
+      "destination": "/network/WCT-token/overview"
+    },
+    {
+      "source": "/token-dynamics/fees",
+      "destination": "/network/WCT-token/overview"
+    },
+    {
+      "source": "/token-dynamics/wallet-rewards",
+      "destination": "/network/WCT-token/rewards"
+    },
+    {
+      "source": "/token-dynamics/rewards",
+      "destination": "/network/WCT-token/rewards"
+    },
+    {
+      "source": "/token-dynamics/service-node-rewards",
+      "destination": "/network/WCT-token/service-node-rewards"
+    },
+    {
+      "source": "/wct-staking/overview",
+      "destination": "/network/WCT-token/staking"
+    },
+    {
+      "source": "/wct-staking/faq",
+      "destination": "/network/WCT-token/faq"
+    },
+    {
+      "source": "/governance",
+      "destination": "/network/WCT-token/governance"
+    },
+    {
+      "source": "/contracts",
+      "destination": "/network/WCT-token/contracts"
+    },
+    {
+      "source": "/service-nodes",
+      "destination": "/network/service-nodes"
+    },
+    {
+      "source": "/wallets",
+      "destination": "/network/wallets"
+    },
+    {
+      "source": "/overview",
+      "destination": "/network"
     }
   ],
   "integrations": {
@@ -34,6 +106,323 @@
   "favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
+      {
+        "tab": "Wallets",
+        "icon": "wallet",
+        "dropdowns": [
+          {
+            "dropdown": "Wallet SDK - Overview",
+            "icon": "wallet",
+            "pages": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "network/wallets/overview"
+                ]
+              },
+              {
+                "group": "Features",
+                "pages": [
+                  "network/wallets/features/verify",
+                  "network/wallets/features/link-mode",
+                  "network/wallets/features/one-click-auth"
+                ]
+              },
+              {
+                "group": "Chain Support",
+                "pages": [
+                  "network/wallets/chains/overview",
+                  "network/wallets/chains/evm",
+                  "network/wallets/chains/solana",
+                  "network/wallets/chains/bitcoin",
+                  "network/wallets/chains/sui",
+                  "network/wallets/chains/stacks",
+                  "network/wallets/chains/ton",
+                  "network/wallets/chains/tron",
+                  "network/wallets/chains/adi",
+                  "network/wallets/chains/canton",
+                  "network/wallets/chains/stellar"
+                ]
+              },
+              {
+                "group": "WalletGuide",
+                "pages": [
+                  "network/wallets/walletguide/explorer-submission",
+                  {
+                    "group": "WalletGuide Chains",
+                    "pages": [
+                      "network/wallets/walletguide/overview",
+                      "network/wallets/walletguide/chain-list"
+                    ]
+                  },
+                  {
+                    "group": "WalletGuide Wallets",
+                    "pages": [
+                      "network/wallets/walletguide/wallet-list"
+                    ]
+                  },
+                  "network/wallets/walletguide/explorer"
+                ]
+              },
+              {
+                "group": "Production",
+                "pages": [
+                  "network/wallets/best-practices"
+                ]
+              },
+              {
+                "group": "Upgrade",
+                "pages": [
+                  "network/wallets/more/staying-up-to-date",
+                  {
+                    "group": "Web3Wallet to Wallet SDK",
+                    "pages": [
+                      "network/wallets/more/from-web3wallet-to-reown",
+                      "network/wallets/more/from-web3wallet-web",
+                      "network/wallets/more/from-web3wallet-react-native",
+                      "network/wallets/more/from-web3wallet-flutter",
+                      "network/wallets/more/from-web3wallet-android",
+                      "network/wallets/more/from-web3wallet-ios",
+                      "network/wallets/more/from-web3wallet-unity"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Custodians and Institutions",
+                "pages": [
+                  "network/wallets/custodians/overview",
+                  "network/wallets/custodians/app-access-control",
+                  "network/wallets/custodians/contract-access-control",
+                  "network/wallets/custodians/extended-sessions"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Web",
+            "icon": "js",
+            "description": "Wallet SDK on Web",
+            "pages": [
+              "network/wallets/web/installation",
+              "network/wallets/web/usage",
+              "network/wallets/web/one-click-auth",
+              "network/wallets/web/verify",
+              "network/wallets/web/eip5792",
+              "network/wallets/web/chain-abstraction",
+              "network/wallets/web/best-practices",
+              "network/wallets/web/resources",
+              {
+                "group": "Cloud",
+                "pages": [
+                  "network/wallets/web/cloud/explorer-submission",
+                  "network/wallets/web/cloud/relay",
+                  "network/wallets/web/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Android",
+            "icon": "android",
+            "description": "Wallet SDK on Android",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "network/wallets/android/installation",
+                  "network/wallets/android/usage",
+                  "network/wallets/android/one-click-auth",
+                  "network/wallets/android/mobile-linking",
+                  "network/wallets/android/link-mode",
+                  "network/wallets/android/verify",
+                  "network/wallets/android/eip5792",
+                  "network/wallets/android/chain-abstraction",
+                  "network/wallets/android/best-practices",
+                  "network/wallets/android/resources"
+                ]
+              },
+              {
+                "group": "Cloud",
+                "pages": [
+                  "network/wallets/android/cloud/explorer-submission",
+                  "network/wallets/android/cloud/relay",
+                  "network/wallets/android/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "iOS",
+            "icon": "apple",
+            "description": "Wallet SDK on iOS",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "network/wallets/ios/installation",
+                  "network/wallets/ios/usage",
+                  "network/wallets/ios/one-click-auth",
+                  "network/wallets/ios/mobile-linking",
+                  "network/wallets/ios/link-mode",
+                  "network/wallets/ios/verify",
+                  "network/wallets/ios/eip5792",
+                  "network/wallets/ios/chain-abstraction",
+                  "network/wallets/ios/best-practices",
+                  "network/wallets/ios/resources"
+                ]
+              },
+              {
+                "group": "Cloud",
+                "pages": [
+                  "network/wallets/ios/cloud/explorer-submission",
+                  "network/wallets/ios/cloud/relay",
+                  "network/wallets/ios/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "Flutter",
+            "icon": "flutter",
+            "description": "Wallet SDK on Flutter",
+            "pages": [
+              "network/wallets/flutter/installation",
+              "network/wallets/flutter/usage",
+              "network/wallets/flutter/one-click-auth",
+              "network/wallets/flutter/mobile-linking",
+              "network/wallets/flutter/link-mode",
+              "network/wallets/flutter/verify",
+              "network/wallets/flutter/eip5792",
+              "network/wallets/flutter/chain-abstraction",
+              {
+                "group": "Cloud",
+                "pages": [
+                  "network/wallets/flutter/cloud/explorer-submission",
+                  "network/wallets/flutter/cloud/relay",
+                  "network/wallets/flutter/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": "React Native",
+            "icon": "mobile-screen-button",
+            "description": "Wallet SDK on React Native",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "network/wallets/react-native/installation",
+                  "network/wallets/react-native/usage",
+                  "network/wallets/react-native/one-click-auth",
+                  "network/wallets/react-native/mobile-linking",
+                  "network/wallets/react-native/link-mode",
+                  "network/wallets/react-native/verify",
+                  "network/wallets/react-native/eip5792",
+                  "network/wallets/react-native/chain-abstraction",
+                  "network/wallets/react-native/best-practices",
+                  "network/wallets/react-native/resources"
+                ]
+              },
+              {
+                "group": "Cloud",
+                "pages": [
+                  "network/wallets/react-native/cloud/explorer-submission",
+                  "network/wallets/react-native/cloud/relay",
+                  "network/wallets/react-native/cloud/analytics"
+                ]
+              }
+            ]
+          },
+          {
+            "dropdown": ".NET",
+            "icon": "code",
+            "description": "Wallet SDK on .NET",
+            "pages": [
+              "network/wallets/c-sharp/installation",
+              "network/wallets/c-sharp/usage",
+              "network/wallets/c-sharp/verify",
+              {
+                "group": "Cloud",
+                "pages": [
+                  "network/wallets/c-sharp/cloud/explorer-submission",
+                  "network/wallets/c-sharp/cloud/relay",
+                  "network/wallets/c-sharp/cloud/analytics"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Apps",
+        "icon": "layer-group",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "network/apps/overview"
+            ]
+          },
+          {
+            "group": "Installation",
+            "pages": [
+              "network/apps/react/installation",
+              "network/apps/next/installation",
+              "network/apps/vue/installation",
+              "network/apps/javascript/installation"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "network/wallets/guides/tonconnect-walletconnect"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Network",
+        "icon": "globe",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "network/index"
+            ]
+          },
+          {
+            "group": "Participants",
+            "pages": [
+              "network/wallets",
+              "network/apps/overview",
+              {
+                "group": "Custodians and Institutions",
+                "pages": [
+                  "network/wallets/custodians/overview",
+                  "network/wallets/custodians/app-access-control",
+                  "network/wallets/custodians/contract-access-control",
+                  "network/wallets/custodians/extended-sessions"
+                ]
+              },
+              "network/service-nodes"
+            ]
+          },
+          {
+            "group": "WCT Token",
+            "pages": [
+              "network/WCT-token/overview",
+              "network/WCT-token/rewards",
+              "network/WCT-token/service-node-rewards",
+              "network/WCT-token/staking",
+              "network/WCT-token/faq",
+              "network/WCT-token/governance",
+              "network/WCT-token/contracts"
+            ]
+          }
+        ]
+      },
       {
         "tab": "Payments",
         "icon": "credit-card",
