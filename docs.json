@@ -455,69 +455,25 @@
         "icon": "credit-card",
         "groups": [
           {
-            "group": "WalletConnect Pay",
+            "group": "Get Started",
             "pages": [
               "payments/overview",
               "payments/for-users",
-              "payments/token-and-chain-coverage",
-              "payments/fiat-coverage",
-              "payments/wallet-coverage",
-              "payments/cex-coverage",
+              {
+                "group": "Coverage & Reference",
+                "pages": [
+                  "payments/token-and-chain-coverage",
+                  "payments/fiat-coverage",
+                  "payments/wallet-coverage",
+                  "payments/cex-coverage"
+                ]
+              },
               "payments/test-mode",
               "payments/webhooks"
             ]
           },
           {
-            "group": "WalletConnect Pay for Merchants",
-            "pages": [
-              "payments/merchant/quickstart"
-            ]
-          },
-          {
-            "group": "Merchant API",
-            "pages": [
-              "payments/merchant-api/logo-specification"
-            ]
-          },
-          {
-            "group": "WalletConnect Pay for Wallets",
-            "pages": [
-              "payments/wallets/overview",
-              {
-                "group": "Standalone integration",
-                "pages": [
-                  "payments/wallets/standalone/kotlin",
-                  "payments/wallets/standalone/swift",
-                  "payments/wallets/standalone/react-native",
-                  "payments/wallets/standalone/flutter",
-                  "payments/wallets/standalone/web"
-                ]
-              },
-              {
-                "group": "Integrate using the Wallet SDK",
-                "pages": [
-                  "payments/wallets/walletkit/kotlin",
-                  "payments/wallets/walletkit/swift",
-                  "payments/wallets/walletkit/react-native",
-                  "payments/wallets/walletkit/flutter",
-                  "payments/wallets/walletkit/web"
-                ]
-              },
-              "payments/wallets/api-first",
-              "payments/wallets/webview",
-              {
-                "group": "Token & Chain Support",
-                "pages": [
-                  "payments/wallets/token-chain-support",
-                  "payments/wallets/token-chain-support/usdt-support",
-                  "payments/wallets/token-chain-support/solana-support"
-                ]
-              },
-              "payments/wallets/tap-to-pay"
-            ]
-          },
-          {
-            "group": "WalletConnect Pay for PSPs",
+            "group": "For PSPs",
             "pages": [
               "payments/psps/overview",
               {
@@ -532,7 +488,51 @@
             ]
           },
           {
-            "group": "Ecommerce and Online Checkout",
+            "group": "For Merchants",
+            "pages": [
+              "payments/merchant/quickstart",
+              "payments/merchant-api/logo-specification"
+            ]
+          },
+          {
+            "group": "For Wallets",
+            "pages": [
+              "payments/wallets/overview",
+              {
+                "group": "Standalone integration",
+                "pages": [
+                  "payments/wallets/standalone/kotlin",
+                  "payments/wallets/standalone/swift",
+                  "payments/wallets/standalone/react-native",
+                  "payments/wallets/standalone/flutter",
+                  "payments/wallets/standalone/web"
+                ]
+              },
+              {
+                "group": "Integrate Wallet SDK",
+                "pages": [
+                  "payments/wallets/walletkit/kotlin",
+                  "payments/wallets/walletkit/swift",
+                  "payments/wallets/walletkit/react-native",
+                  "payments/wallets/walletkit/flutter",
+                  "payments/wallets/walletkit/web"
+                ]
+              },
+              "payments/wallets/api-first",
+              "payments/wallets/tap-to-pay",
+              "payments/wallets/webview",
+              {
+                "group": "Token & Chain Support",
+                "pages": [
+                  "payments/wallets/token-chain-support",
+                  "payments/wallets/token-chain-support/usdt-support",
+                  "payments/wallets/token-chain-support/solana-support"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "For Checkout",
             "pages": [
               "payments/ecommerce/overview",
               "payments/ecommerce/integration",
@@ -540,7 +540,7 @@
             ]
           },
           {
-            "group": "WalletConnect AI Agent SDK",
+            "group": "AI Agents",
             "pages": [
               "agents/overview"
             ]
