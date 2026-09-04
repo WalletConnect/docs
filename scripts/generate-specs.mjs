@@ -143,25 +143,12 @@ async function generateSpec(version) {
   return { version, spec: merged };
 }
 
-function findPaymentsTab(navigation) {
-  if (navigation.versions) {
-    const tabs = navigation.versions[0]?.tabs || [];
-    return tabs.find((t) => t.tab === "Payments");
-  }
-  if (navigation.tabs) {
-    return navigation.tabs.find((t) => t.tab === "Payments");
-  }
-  return null;
-}
-
 async function buildNavigation(
   currentConfig,
   stableVersions,
   previewVersions,
   versionSpecs
 ) {
-  const paymentsTab = findPaymentsTab(currentConfig.navigation);
-
   const makeVersionEntry = async (version, { tag, isDefault } = {}) => {
     const spec = versionSpecs.get(version);
     const groups = await generatePages(version, spec);
@@ -171,16 +158,9 @@ async function buildNavigation(
 
     const entry = {
       version,
-      tabs: [
-        paymentsTab,
-        {
-          tab: "API Reference",
-          icon: "code",
-          groups: [
-            { group: "Overview", pages: ["payments/api-reference/index", "payments/api-reference/versioning"] },
-            ...groups,
-          ],
-        },
+      groups: [
+        { group: "Overview", pages: ["payments/api-reference/index", "payments/api-reference/versioning"] },
+        ...groups,
       ],
     };
     if (tag) entry.tag = tag;
@@ -198,8 +178,14 @@ async function buildNavigation(
     ...previewVersions.map((v) => makeVersionEntry(v, { tag: "Preview" })),
   ]);
 
+  const apiReferenceTab = { tab: "API Reference", icon: "code", versions };
+
+  const tabs = currentConfig.navigation.tabs.map((t) =>
+    t.tab === "API Reference" ? apiReferenceTab : t
+  );
+
   return {
-    versions,
+    tabs,
     global: currentConfig.navigation.global,
   };
 }
