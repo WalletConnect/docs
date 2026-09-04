@@ -25,8 +25,40 @@
       "destination": "/network/wallets/chains/:slug*"
     },
     {
-      "source": "/wallet-sdk/upgrade/:slug*",
-      "destination": "/network/wallets/more/:slug*"
+      "source": "/wallet-sdk/best-practices",
+      "destination": "/network/wallets/more/best-practices"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/staying-up-to-date",
+      "destination": "/network/wallets/more/updating-wallet-sdk"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-to-reown",
+      "destination": "/network/wallets/more/web3wallet-migration/quickstart"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-web",
+      "destination": "/network/wallets/more/web3wallet-migration/web"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-react-native",
+      "destination": "/network/wallets/more/web3wallet-migration/react-native"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-flutter",
+      "destination": "/network/wallets/more/web3wallet-migration/flutter"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-android",
+      "destination": "/network/wallets/more/web3wallet-migration/android"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-ios",
+      "destination": "/network/wallets/more/web3wallet-migration/ios"
+    },
+    {
+      "source": "/wallet-sdk/upgrade/from-web3wallet-unity",
+      "destination": "/network/wallets/more/web3wallet-migration/unity"
     },
     {
       "source": "/wallet-sdk/:slug*",
@@ -43,6 +75,26 @@
     {
       "source": "/custodians/:slug*",
       "destination": "/network/wallets/custodians/:slug*"
+    },
+    {
+      "source": "/walletguide/explorer-submission",
+      "destination": "/network/wallets/walletguide/submit-wallet"
+    },
+    {
+      "source": "/walletguide/explorer",
+      "destination": "/network/wallets/walletguide/explorer-api"
+    },
+    {
+      "source": "/walletguide/chains/overview",
+      "destination": "/network/wallets/walletguide/submit-chain"
+    },
+    {
+      "source": "/walletguide/chains/chain-list",
+      "destination": "/network/wallets/walletguide/chain-list"
+    },
+    {
+      "source": "/walletguide/wallets/wallet-list",
+      "destination": "/network/wallets/walletguide/wallet-list"
     },
     {
       "source": "/walletguide/:slug*",
@@ -147,43 +199,28 @@
               {
                 "group": "WalletGuide",
                 "pages": [
-                  "network/wallets/walletguide/explorer-submission",
-                  {
-                    "group": "WalletGuide Chains",
-                    "pages": [
-                      "network/wallets/walletguide/overview",
-                      "network/wallets/walletguide/chain-list"
-                    ]
-                  },
-                  {
-                    "group": "WalletGuide Wallets",
-                    "pages": [
-                      "network/wallets/walletguide/wallet-list"
-                    ]
-                  },
-                  "network/wallets/walletguide/explorer"
+                  "network/wallets/walletguide/submit-wallet",
+                  "network/wallets/walletguide/explorer-api",
+                  "network/wallets/walletguide/submit-chain",
+                  "network/wallets/walletguide/chain-list",
+                  "network/wallets/walletguide/wallet-list"
                 ]
               },
               {
-                "group": "Production",
+                "group": "More",
                 "pages": [
-                  "network/wallets/best-practices"
-                ]
-              },
-              {
-                "group": "Upgrade",
-                "pages": [
-                  "network/wallets/more/staying-up-to-date",
+                  "network/wallets/more/best-practices",
+                  "network/wallets/more/updating-wallet-sdk",
                   {
                     "group": "Web3Wallet to Wallet SDK",
                     "pages": [
-                      "network/wallets/more/from-web3wallet-to-reown",
-                      "network/wallets/more/from-web3wallet-web",
-                      "network/wallets/more/from-web3wallet-react-native",
-                      "network/wallets/more/from-web3wallet-flutter",
-                      "network/wallets/more/from-web3wallet-android",
-                      "network/wallets/more/from-web3wallet-ios",
-                      "network/wallets/more/from-web3wallet-unity"
+                      "network/wallets/more/web3wallet-migration/quickstart",
+                      "network/wallets/more/web3wallet-migration/web",
+                      "network/wallets/more/web3wallet-migration/react-native",
+                      "network/wallets/more/web3wallet-migration/flutter",
+                      "network/wallets/more/web3wallet-migration/android",
+                      "network/wallets/more/web3wallet-migration/ios",
+                      "network/wallets/more/web3wallet-migration/unity"
                     ]
                   }
                 ]
