@@ -659,7 +659,36 @@
           }
         ]
       }
-    ]
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "WalletConnect",
+          "href": "https://walletconnect.com",
+          "icon": "globe"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://walletconnect.com/blog",
+          "icon": "newspaper"
+        },
+        {
+          "anchor": "Whitepaper",
+          "href": "https://whitepaper.walletconnect.network/",
+          "icon": "book"
+        },
+        {
+          "anchor": "WalletConnect Specs",
+          "href": "https://specs.walletconnect.com/",
+          "icon": "code"
+        },
+        {
+          "anchor": "Report an Issue",
+          "href": "/report-an-issue",
+          "icon": "bug"
+        }
+      ]
+    }
   },
   "logo": {
     "light": "/logo/light.svg",
