@@ -1,0 +1,56 @@
+---
+title: Verify API
+sidebarTitle: Verify
+---
+
+App Verification is a first-of-its-kind layered security solution that enables wallets to help users protect themselves from phishing attacks, with robust architecture enabling wallets to support users in better identifying the veracity of a domain they are attempting to connect to.
+
+<Frame caption="Verify API Userflow" height="400" width="600">
+  <img src="https://mintlify.s3.us-west-1.amazonaws.com/reown-5552f0bb/images/verify-banner.png" />
+</Frame>
+
+## Security providers
+
+Verify API combines WalletConnect's domain registry with threat intelligence from leading web3 security providers. If any of them flags the domain behind a session proposal or session request as malicious, the `verifyContext` of that request is returned with `isScam` set to `true`.
+
+<CardGroup cols={3}>
+  <Card title="Hexagate" href="https://www.hexagate.com/">
+    Real-time detection of malicious contracts, transactions and web3 threats.
+  </Card>
+
+  <Card title="ChainPatrol" href="https://chainpatrol.io/">
+    Crypto-native anti-phishing intelligence, including scam domain detection and takedowns.
+  </Card>
+
+  <Card title="Hypernative" href="https://www.hypernative.io/">
+    Real-time monitoring of malicious dapps, wallet drainers and phishing domains.
+  </Card>
+</CardGroup>
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Android" icon="android" href="/network/wallets/android/verify">
+    Get started with WalletKit in Android.
+  </Card>
+
+  <Card title="iOS" icon="apple" href="/network/wallets/ios/verify">
+    Get started with WalletKit in iOS.
+  </Card>
+
+  <Card title="Flutter" icon="flutter" href="/network/wallets/flutter/verify">
+    Get started with WalletKit in Flutter.
+  </Card>
+
+  <Card title="React Native" icon="react" href="/network/wallets/react-native/verify">
+    Get started with WalletKit in React Native.
+  </Card>
+
+  <Card title="Web" icon="browser" href="/network/wallets/web/verify">
+    Get started with WalletKit in Web.
+  </Card>
+
+  <Card title=".NET" icon="c" href="/network/wallets/c-sharp/verify">
+    Get started with WalletKit in .NET.
+  </Card>
+</CardGroup>
