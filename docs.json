@@ -159,13 +159,6 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Home",
-        "icon": "house",
-        "pages": [
-          "index"
-        ]
-      },
-      {
         "tab": "Wallets",
         "icon": "wallet",
         "dropdowns": [
