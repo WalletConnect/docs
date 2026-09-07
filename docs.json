@@ -147,22 +147,6 @@
     {
       "source": "/overview",
       "destination": "/network"
-    },
-    {
-      "source": "/wallets/android/notifications/push",
-      "destination": "/wallets/android/usage#register-device-token"
-    },
-    {
-      "source": "/wallets/ios/notifications/push",
-      "destination": "/wallets/ios/usage#register-device-token"
-    },
-    {
-      "source": "/wallets/react-native/notifications/push",
-      "destination": "/wallets/react-native/usage"
-    },
-    {
-      "source": "/wallets/ios/notifications/notify/usage",
-      "destination": "/wallets/ios/notifications/notify/overview"
     }
   ],
   "integrations": {
