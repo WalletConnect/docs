@@ -156,6 +156,11 @@
     }
   },
   "favicon": "/favicon.ico",
+  "errors": {
+    "404": {
+      "redirect": true
+    }
+  },
   "navigation": {
     "tabs": [
       {
@@ -166,6 +171,7 @@
             "dropdown": "Wallet SDK - Overview",
             "icon": "wallet",
             "pages": [
+              "index",
               {
                 "group": "Getting Started",
                 "pages": [
