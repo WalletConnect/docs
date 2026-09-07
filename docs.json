@@ -159,6 +159,10 @@
     {
       "source": "/wallets/react-native/notifications/push",
       "destination": "/wallets/react-native/usage"
+    },
+    {
+      "source": "/wallets/ios/notifications/notify/usage",
+      "destination": "/wallets/ios/notifications/notify/overview"
     }
   ],
   "integrations": {
