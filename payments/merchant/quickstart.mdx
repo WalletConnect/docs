@@ -50,7 +50,7 @@ curl "$WCP_BASE/v1/merchants" \
 A `200 OK` with a (possibly empty) `data` array confirms the key works. A `401` means the key is wrong; a `403` means the key is valid but lacks permission for this account.
 
 <Tip>
-Pin requests to a specific API version with the `WCP-Version` header (for example, `WCP-Version: 2026-02-18`). Without it, your account's default version is used. See [Versioning](/api-reference/versioning) for the full policy.
+Pin requests to a specific API version with the `WCP-Version` header (for example, `WCP-Version: 2026-02-18`). Without it, your account's default version is used. See [Versioning](/payments/api-reference/versioning) for the full policy.
 </Tip>
 
 </Step>
@@ -92,7 +92,7 @@ export WCP_MERCHANT_ID="mrch_7kBz2qR9xPvLmN4Yw"
 `Idempotency-Key` is required on this endpoint. Use a fresh UUID per merchant — replays with the same key return the original result instead of creating a duplicate.
 </Note>
 
-See the full schema and field reference in [Create a merchant](/api-reference/latest/post-v1-merchants).
+See the full schema and field reference in [Create a merchant](/payments/api-reference/latest/post-v1-merchants).
 
 </Step>
 
@@ -118,10 +118,10 @@ curl -X POST "$WCP_BASE/v1/merchants/$WCP_MERCHANT_ID/settlements/crypto" \
 The example above registers USDC on Base. For the full list of supported `asset` values and the chains we settle to, see [Token & Chain Coverage](/payments/token-and-chain-coverage).
 
 <Note>
-Each `(merchant, asset)` pair must be unique — registering the same asset twice returns `settlement_asset_conflict`. To change a destination, use [Update a crypto settlement](/api-reference/latest/put-v1-merchants-merchantid-settlements-crypto-id) instead.
+Each `(merchant, asset)` pair must be unique — registering the same asset twice returns `settlement_asset_conflict`. To change a destination, use [Update a crypto settlement](/payments/api-reference/latest/put-v1-merchants-merchantid-settlements-crypto-id) instead.
 </Note>
 
-See the full schema in [Create crypto settlements](/api-reference/latest/post-v1-merchants-merchantid-settlements-crypto).
+See the full schema in [Create crypto settlements](/payments/api-reference/latest/post-v1-merchants-merchantid-settlements-crypto).
 
 </Step>
 
@@ -182,7 +182,7 @@ Use `isFinal` to decide when to stop polling. While the payment is still in flig
 In test mode the `txId` is synthetic (`test:{paymentId}`) — no transaction is executed on-chain. Live payments return a real transaction hash.
 </Note>
 
-See the full response schema in [Get the payment status](/api-reference/latest/get-v1-payments-id-status).
+See the full response schema in [Get the payment status](/payments/api-reference/latest/get-v1-payments-id-status).
 
 </Step>
 

@@ -8,7 +8,7 @@ Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they
 
 ## Webhooks vs. polling
 
-Polling [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) is the primary way to validate payment status during the purchase cycle: create the payment, then poll until the status is final. Webhooks come on top as an enhancement. They usually tell you first, and with far fewer requests, so you can update the order status in your UI, notify a customer, or kick off downstream processing the moment something happens.
+Polling [`GET /v1/payments/{id}/status`](/payments/api-reference/latest/get-v1-payments-id-status) is the primary way to validate payment status during the purchase cycle: create the payment, then poll until the status is final. Webhooks come on top as an enhancement. They usually tell you first, and with far fewer requests, so you can update the order status in your UI, notify a customer, or kick off downstream processing the moment something happens.
 
 When a webhook event arrives, its payload already contains everything you need. Every event is a full signed snapshot of the payment and carries a monotonic `payment_state_version`, so verifying the signature, deduplicating by `id`, and applying the version guard is enough; there is no need to call the API from inside your handler.
 
@@ -173,7 +173,7 @@ That's roughly **28 hours** of automatic retries. After the final attempt the de
 
 Replay operations reach back 14 days at most. And if every delivery to an endpoint keeps failing for **5 days**, the endpoint is **disabled** and stops receiving events.
 
-Because a misconfigured URL or a disabled endpoint drops deliveries silently, don't rely on noticing an outage. Run a **periodic reconciliation job**: poll [`GET /v1/payments/{id}/status`](/api-reference/latest/get-v1-payments-id-status) for any payment your records still show in a non-final state after its `expires_at` has passed, and [`GET /v1/payments`](/api-reference/latest/get-v1-payments), which returns `settled`, for succeeded payments still awaiting settlement. Use the endpoint's delivery history in the dashboard to debug what went wrong.
+Because a misconfigured URL or a disabled endpoint drops deliveries silently, don't rely on noticing an outage. Run a **periodic reconciliation job**: poll [`GET /v1/payments/{id}/status`](/payments/api-reference/latest/get-v1-payments-id-status) for any payment your records still show in a non-final state after its `expires_at` has passed, and [`GET /v1/payments`](/payments/api-reference/latest/get-v1-payments), which returns `settled`, for succeeded payments still awaiting settlement. Use the endpoint's delivery history in the dashboard to debug what went wrong.
 
 To stop deliveries entirely (for example, when decommissioning an integration), delete the endpoint from the dashboard's **Webhooks** page. Deletion takes effect immediately and cannot be undone.
 
@@ -549,7 +549,7 @@ Webhook configuration does **not** carry over from test to live; they are separa
   <Card title="Test mode" icon="flask" href="/payments/test-mode">
     Simulate every payment status transition and watch the webhooks arrive.
   </Card>
-  <Card title="Get the payment status" icon="magnifying-glass" href="/api-reference/latest/get-v1-payments-id-status">
+  <Card title="Get the payment status" icon="magnifying-glass" href="/payments/api-reference/latest/get-v1-payments-id-status">
     The polling endpoint to confirm state on the critical path.
   </Card>
 </CardGroup>
