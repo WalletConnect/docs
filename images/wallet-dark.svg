@@ -1,0 +1,28 @@
+<svg width="280" height="146" viewBox="0 0 280 146" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2364_2900)">
+<mask id="mask0_2364_2900" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="280" height="146">
+<path d="M0 16C0 7.16344 7.16344 0 16 0H264C272.837 0 280 7.16344 280 16V130C280 138.837 272.837 146 264 146H16C7.16344 146 0 138.837 0 130V16Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_2364_2900)">
+<path d="M0 16C0 7.16344 7.16344 0 16 0H264C272.837 0 280 7.16344 280 16V130C280 138.837 272.837 146 264 146H16C7.16344 146 0 138.837 0 130V16Z" fill="#181817"/>
+<path d="M-26.354 18.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 45.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 72.5H140H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 99.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 126.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M26.5 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M83 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M139.5 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M196 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M252.5 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+</g>
+<g transform="translate(117.5 50.5) scale(0.17578)">
+<path d="M216,64H56a8,8,0,0,1,0-16H184a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm-36,80a12,12,0,1,1,12-12A12,12,0,0,1,180,144Z" fill="#202020"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_2364_2900">
+<rect width="280" height="146" fill="white"/>
+</clipPath>
+</defs>
+</svg>
