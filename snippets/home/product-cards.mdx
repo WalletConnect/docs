@@ -1,11 +1,18 @@
-export const ProductCard = ({ img, href, title, description, model, type }) => {
+export const ProductCard = ({ img, imgDark, href, title, description, model, type }) => {
   return (
     <a href={href} rel="noopener noreferrer" className="group mb-5">
       <div className="flex flex-col rounded-xl md:p-1">
-        <div className="w-full h-32 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
+        <div className="w-full h-32 overflow-hidden rounded-xl bg-gray-100 dark:bg-[#181817]">
           <img
             src={img}
-            className="w-full h-[calc(100%+4px)] object-cover transition-transform duration-300 group-hover:scale-105 align-center -mt-1"
+            className="block w-full h-full m-0 object-cover object-center transition-transform duration-300 group-hover:scale-105 dark:hidden"
+            alt={title}
+            loading="lazy"
+            noZoom
+          />
+          <img
+            src={imgDark || img}
+            className="hidden w-full h-full m-0 object-cover object-center transition-transform duration-300 group-hover:scale-105 dark:block"
             alt={title}
             loading="lazy"
             noZoom
