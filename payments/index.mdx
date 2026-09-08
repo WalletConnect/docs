@@ -16,46 +16,34 @@ import { ProductCard } from '/snippets/home/product-cards.mdx';
           WalletConnect Pay
         </div>
         <p className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4">
-          <strong>WalletConnect Pay</strong> is a complete, end-to-end stablecoin and crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration.
+          <strong>WalletConnect Pay</strong> is a complete, end-to-end stablecoin and crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration. Choose your integration method below to quickstart.
         </p>
       </div>
     </div>
-  </Container>
-
-  <Container>
-    <div className="flex flex-col w-full mb-5">
-      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
-        WalletConnect Pay serves Merchants, PSPs, Wallets and eCommerce. Choose your integration method below to quickstart.
-      </p>
-    </div>
     <CardGroup cols={4}>
-      <ProductCard
-        title="Wallet Integration"
-        description="Integrate WalletConnect Pay as a wallet provider."
-        href="/payments/wallets/overview"
-        img="/images/wallet.png"
-        type="Get started"
-      />
       <ProductCard
         title="Payment Service Providers (PSPs)"
         description="Enable stablecoin payments in your payments product."
         href="/payments/psps/overview"
-        img="/images/merchant.png"
-        type="Get started"
-      />
-      <ProductCard
-        title="Ecommerce (Checkout)"
-        description="Add stablecoin and crypto payments to your online checkout."
-        href="/payments/ecommerce/overview"
-        img="/images/ecommerce.png"
-        type="Get started"
+        img="/images/psp.png"
       />
       <ProductCard
         title="Merchant Dashboard"
         description="Integrate WalletConnect Pay in your business as a Merchant."
         href="/payments/merchant/quickstart"
         img="/images/merchant.png"
-        type="Get started"
+      />
+      <ProductCard
+        title="Wallet Integration"
+        description="Integrate WalletConnect Pay as a wallet provider."
+        href="/payments/wallets/overview"
+        img="/images/wallet.png"
+      />
+      <ProductCard
+        title="Ecommerce (Checkout)"
+        description="Add stablecoin and crypto payments to your online checkout."
+        href="/payments/ecommerce/overview"
+        img="/images/ecommerce.png"
       />
     </CardGroup>
     <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
