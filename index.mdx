@@ -10,19 +10,6 @@ import { ProductCard } from '/snippets/home/product-cards.mdx';
 
 <div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
   <Container>
-    <div className="w-full flex flex-col">
-      <div className="flex flex-col items-start justify-center w-full max-w-4xl text-left">
-        <div className="text-gray-900 dark:text-gray-200 text-4xl tracking-tight">
-          WalletConnect
-        </div>
-        <p className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4">
-          The Connectivity Layer for the Financial Internet
-        </p>
-      </div>
-    </div>
-  </Container>
-
-  <Container>
     <div className="flex flex-col w-full mb-8">
       <Title>
         WalletConnect Ecosystem Quickstart
@@ -39,29 +26,25 @@ import { ProductCard } from '/snippets/home/product-cards.mdx';
         title="Wallets"
         description="Reach users on the network by joining our ecosystem of wallets."
         href="/wallets/overview"
-        img="/images/wallet.png"
-        type="Wallet SDK"
+        img="/images/wallet.svg"
       />
       <ProductCard
         title="Apps"
         description="Provide wallet connections and user authentication for your app."
         href="/apps/overview"
         img="/images/app.svg"
-        type="App SDK"
       />
       <ProductCard
         title="Payments"
         description="Enable stablecoin and crypto payments as a wallet, app, PSP or merchant."
         href="/payments"
         img="/images/credit-card.svg"
-        type="Payments"
       />
       <ProductCard
         title="WalletConnect Network"
         description="Discover the network powering 700+ wallets and 80,000+ apps."
         href="/network"
         img="/images/network.svg"
-        type="Network"
       />
     </CardGroup>
     <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
