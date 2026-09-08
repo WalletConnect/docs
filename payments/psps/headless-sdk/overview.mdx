@@ -51,6 +51,43 @@ If you just want to accept payments with the least effort, use the [hosted gatew
 
 The Headless SDK supports the full WalletConnect Pay token and network coverage — USDC, USDT, EURC, PYUSD and more across Ethereum, Polygon, Base, Optimism, Arbitrum (and Solana, rolling out). See [Token & chain coverage](/payments/token-and-chain-coverage) for the live list.
 
+## Request access and collect the Keys
+
+The Headless SDK is gated. Access is granted per account from the WalletConnect Pay dashboard.
+
+<Steps>
+
+<Step title="Open Developers → API Keys" stepNumber="1">
+
+Go to **Developers → API Keys** in the dashboard and sign in if prompted.
+
+</Step>
+
+<Step title="Request access on the Headless checkout card" stepNumber="2">
+
+Find the **Headless checkout** card and click **Request access**. The WalletConnect Pay team reviews the request and gets back to you.
+
+</Step>
+
+<Step title="Collect your credentials" stepNumber="3">
+
+Once access is granted, the **Headless checkout** card exposes the credentials for embedding the SDK:
+
+- A **Reown project ID** — used to configure the Headless feature in Reown AppKit. It is public.
+- A **Gateway wallet key** button — each key (prefix `wcw_`) authenticates your server against the WalletConnect Pay API.
+
+</Step>
+
+<Step title="Grab your WalletConnect Pay key" stepNumber="4">
+
+In the same **API Keys** section, copy your **WalletConnect Pay key** (prefix `wcp_` for live, `wcp_test_` for test) — the Merchant API key used to create payments. See [Test mode](/payments/test-mode) for the difference between the two.
+
+</Step>
+
+</Steps>
+
+With the Reown project ID, a Gateway wallet key, and a WalletConnect Pay key, you have everything needed to run the Headless SDK end to end. Map them to environment variables as shown in [Implementation](/payments/psps/headless-sdk/implementation#environment-variables).
+
 ## Full example
 
 The fastest way to learn the SDK is to read the reference checkout it's extracted from. Every snippet in these docs comes from it.
