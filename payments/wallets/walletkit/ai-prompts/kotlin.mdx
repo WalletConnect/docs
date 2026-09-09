@@ -165,7 +165,7 @@ data class PaymentOption(
 // Data collection action (for KYC/compliance via WebView)
 data class CollectDataAction(
     val url: String,           // WebView URL for data collection
-    val schema: String?        // JSON schema describing required fields
+    val schema: String?        // JSON Schema — source of truth for native-UI forms (parse required + anyOf); never use the deprecated `fields` property
 )
 
 // Transaction result details (present when payment already completed)

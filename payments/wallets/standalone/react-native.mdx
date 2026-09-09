@@ -297,7 +297,7 @@ const result = await client.confirmPayment({
   paymentId: options.paymentId,
   optionId: options.options[0].id,
   signatures,
-  collectedData, // Include if collectData was present
+  collectedData, // Native UI only — omit when using the WebView flow; build from collectData.schema
 });
 
 if (result.status === "succeeded") {
@@ -734,12 +734,16 @@ interface BuyerInfo {
 
 ```typescript
 interface CollectDataAction {
-  /** URL for data collection (displayed in WebView) */
+  /** URL for data collection (displayed in WebView) — recommended */
   url: string;
-  /** JSON schema describing required fields */
+  /** JSON Schema — source of truth for native-UI forms (parse required + anyOf) */
   schema?: string;
 }
 ```
+
+<Warning>
+`collectData` in the API response also contains a deprecated `fields` array. Do not use it to build native UI — it does not include all required fields. Use `url` for the WebView flow (recommended) or parse `schema` for native forms.
+</Warning>
 
 ## Error Handling
 

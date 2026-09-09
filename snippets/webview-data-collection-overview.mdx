@@ -54,3 +54,19 @@ The top-level `collectData` on the payment options response is still available f
 <Warning>
 Do **not** pass `collectedData` to `confirmPayment()` when using the embedded form. The form handles data submission directly.
 </Warning>
+
+<Accordion title="Building native UI instead">
+  WalletConnect Pay strongly recommends the embedded form: data collection requirements are driven by regulation and can change, and the hosted form is updated centrally. Wallets that build native UI instead must use `collectData.schema` as the single source of truth for which fields to render:
+
+  <Warning>
+  Do **not** build native forms from the deprecated `fields` array on `collectData`. It is retained for backward compatibility only and does not include all required fields (for example, country of residence or birth). Forms built from `fields` will collect incomplete compliance data.
+  </Warning>
+
+  1. Parse `schema` — a [JSON Schema](https://json-schema.org/) (draft 2020-12) string
+  2. Render an input for each entry in `properties` (each has a `title`, `description`, `type`, and format constraints)
+  3. Treat every field in the top-level `required` array as mandatory
+  4. Honor conditional requirements in `anyOf` — for example, the schema may require **either** place-of-birth (`pobCountry` + `pobAddress`) **or** place-of-residence (`porCountry` + `porAddress`)
+  5. Validate values against the schema constraints (`pattern`, `format`, `minLength`, `maxLength`)
+  6. Ensure the user accepts the [WalletConnect Terms and Conditions](https://walletconnect.com/terms) and [Privacy Policy](https://walletconnect.com/privacy) (`tosConfirmed`)
+  7. Pass the collected values as `collectedData` to `confirmPayment()` — required when using native UI
+</Accordion>

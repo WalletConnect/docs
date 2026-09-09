@@ -639,7 +639,7 @@ struct WalletRpcAction {
 
 struct CollectDataAction {
     let url: String                    // WebView URL for data collection
-    let schema: String?                // JSON schema describing required fields
+    let schema: String?                // JSON Schema — source of truth for native-UI forms (parse required + anyOf); never use the deprecated `fields` property
 }
 
 struct ConfirmPaymentResultResponse {

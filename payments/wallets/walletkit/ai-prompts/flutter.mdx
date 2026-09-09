@@ -207,7 +207,7 @@ class PaymentResultInfo {
 
 class CollectDataAction {
   final String url;                // WebView URL for data collection
-  final String? schema;            // JSON schema describing required fields
+  final String? schema;            // JSON Schema — source of truth for native-UI forms (parse required + anyOf); never use the deprecated `fields` property
 }
 
 class PaymentInfo {
