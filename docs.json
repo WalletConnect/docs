@@ -490,7 +490,7 @@
                     "pages": [
                       "payments/webhooks",
                       {
-                        "group": "Webhook Reference",
+                        "group": "Reference",
                         "pages": [
                           "payments/webhook-event-reference",
                           "payments/webhook-events/payment-created",
