@@ -481,19 +481,29 @@
                   "payments/cex-coverage"
                 ]
               },
-              "payments/test-mode",
-              "payments/webhooks",
               {
-                "group": "Webhook Reference",
+                "group": "Integration Essentials",
                 "pages": [
-                  "payments/webhook-event-reference",
-                  "payments/webhook-events/payment-created",
-                  "payments/webhook-events/payment-processing",
-                  "payments/webhook-events/payment-succeeded",
-                  "payments/webhook-events/payment-failed",
-                  "payments/webhook-events/payment-expired",
-                  "payments/webhook-events/payment-cancelled",
-                  "payments/webhook-events/payment-settled"
+                  "payments/test-mode",
+                  {
+                    "group": "Webhooks",
+                    "pages": [
+                      "payments/webhooks",
+                      {
+                        "group": "Webhook Reference",
+                        "pages": [
+                          "payments/webhook-event-reference",
+                          "payments/webhook-events/payment-created",
+                          "payments/webhook-events/payment-processing",
+                          "payments/webhook-events/payment-succeeded",
+                          "payments/webhook-events/payment-failed",
+                          "payments/webhook-events/payment-expired",
+                          "payments/webhook-events/payment-cancelled",
+                          "payments/webhook-events/payment-settled"
+                        ]
+                      }
+                    ]
+                  }
                 ]
               }
             ]
