@@ -37,9 +37,32 @@ function mergeSpecs(specs, version) {
 
   const seenTags = new Set();
 
-  for (const spec of specs) {
+  const HTTP_METHODS = new Set([
+    "get",
+    "put",
+    "post",
+    "delete",
+    "options",
+    "head",
+    "patch",
+    "trace",
+  ]);
+
+  for (let i = 0; i < specs.length; i++) {
+    const spec = specs[i];
+    const serviceUrl = SERVICES[i]?.baseUrl;
     for (const [path, methods] of Object.entries(spec.paths || {})) {
-      merged.paths[path] = { ...(merged.paths[path] || {}), ...methods };
+      // Stamp each operation with the server of the service it came from, so
+      // merged endpoints render their real host (Core vs MX) instead of
+      // inheriting the document-level Core server.
+      const stamped = {};
+      for (const [key, value] of Object.entries(methods)) {
+        stamped[key] =
+          serviceUrl && HTTP_METHODS.has(key.toLowerCase()) && !value.servers
+            ? { ...value, servers: [{ url: serviceUrl }] }
+            : value;
+      }
+      merged.paths[path] = { ...(merged.paths[path] || {}), ...stamped };
       for (const op of Object.values(methods)) {
         for (const tagName of op.tags || []) {
           if (!seenTags.has(tagName)) {
