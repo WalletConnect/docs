@@ -24,7 +24,7 @@ Maintain consistent architecture and naming conventions with your existing codeb
 
 Before starting, ensure your wallet app has:
 
-1. **WalletKit SDK integrated** (`reown_walletkit: ^1.4.0` package or newer)
+1. **WalletKit SDK integrated** (`reown_walletkit: ^1.5.1` package or newer, which bundles `walletconnect_pay` 1.1.0)
 2. **EVM signing capability** supporting:
    - `eth_signTypedData_v4` (EIP-712 typed data signing)
    - `personal_sign` (message signing)
@@ -47,7 +47,7 @@ Payment Link → Detect → Get Options → [WebView Data Collection] → Get Ac
 3. **WebView Data Collection** (optional): Display WebView form for KYC/compliance data if required by the payment. The WebView submits data directly to the backend, so this must happen BEFORE fetching actions.
 4. **Get Actions**: Fetch the required signing actions via `getRequiredPaymentActions` (only needed when the selected option's `actions` are empty)
 5. **Sign Actions**: Execute wallet signing operations (typically `eth_signTypedData_v4`)
-6. **Confirm Payment**: Submit signatures to complete the transaction
+6. **Confirm Payment**: Submit the wallet RPC results (`data`) to complete the transaction
 7. **Handle Result**: Display success/failure and handle polling if needed
 
 ### Key Data Models
@@ -59,7 +59,7 @@ Payment Link → Detect → Get Options → [WebView Data Collection] → Get Ac
 | `PaymentOption` | Individual payment option with amount, account, and actions |
 | `Action` / `WalletRpcAction` | Signing request with chain ID, method, and parameters |
 | `CollectDataAction` | Optional data collection with WebView URL |
-| `ConfirmPaymentRequest` | Request to confirm payment with signatures |
+| `ConfirmPaymentRequest` | Request to confirm payment with the wallet RPC results (`data`) |
 | `ConfirmPaymentResponse` | Payment status and polling information |
 | `PaymentStatus` | Enum: `requires_action`, `processing`, `succeeded`, `failed`, `expired` |
 
@@ -74,7 +74,7 @@ The `walletconnect_pay` package is already a dependency of `reown_walletkit` and
 ```yaml
 # pubspec.yaml
 dependencies:
-  reown_walletkit: ^1.4.0  # Check for latest version
+  reown_walletkit: ^1.5.1  # Check for latest version
 ```
 
 All Pay-related types are exported from `reown_walletkit`:
@@ -409,16 +409,16 @@ class WalletRpcAction {
 **CRITICAL**: The `params` field contains a JSON string. Handle it appropriately for your signing library.
 
 ```dart
-/// Sign all actions and return signatures
-Future<List<String>> signActions(List<Action> actions) async {
-  final List<String> signatures = [];
+/// Sign all actions and return the wallet RPC results, in action order
+Future<List<Object>> signActions(List<Action> actions) async {
+  final List<Object> data = [];
 
   for (final action in actions) {
     final signature = await signAction(action);
-    signatures.add(signature);
+    data.add(signature);
   }
 
-  return signatures;
+  return data;
 }
 
 /// Sign a single action
@@ -521,19 +521,19 @@ String personalSign(String chainId, String params) {
 
 ### Step 8: Confirm Payment
 
-Submit signatures to complete the payment.
+Submit the wallet RPC results (`data`) to complete the payment. Each element of `data` is either a plain `String` (a signature or transaction hash) or, for chains like Tron, a `Map<String, dynamic>` JSON object; the SDK forwards each element verbatim. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
 
 ```dart
-/// Confirm the payment with signatures
+/// Confirm the payment with the wallet RPC results
 Future<ConfirmPaymentResponse> confirmPayment({
   required String paymentId,
   required String optionId,
-  required List<String> signatures,
+  required List<Object> data,
 }) async {
   final request = ConfirmPaymentRequest(
     paymentId: paymentId,
     optionId: optionId,
-    signatures: signatures,
+    data: data,
     maxPollMs: 60000, // Poll for up to 60 seconds
   );
 
@@ -548,7 +548,11 @@ Future<ConfirmPaymentResponse> confirmPayment({
 }
 ```
 
-**CRITICAL**: Signatures array must match actions array order exactly. Misalignment causes payment failures.
+**CRITICAL**: The `data` list must match the actions array order exactly. Misalignment causes payment failures.
+
+<Warning>
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is null.
+</Warning>
 
 ### Step 9: Handle Payment Result
 
@@ -633,14 +637,14 @@ Future<void> processPayment(String paymentLink) async {
     }
 
     // Step 5: Sign all actions
-    final signatures = await signActions(actions);
+    final data = await signActions(actions);
 
     // Step 6: Confirm payment
     final result = await walletKit.confirmPayment(
       request: ConfirmPaymentRequest(
         paymentId: options.paymentId,
         optionId: selectedOption.id,
-        signatures: signatures,
+        data: data,
         maxPollMs: 60000,
       ),
     );
@@ -847,18 +851,18 @@ try {
 **Wrong**: `0x1234...`
 **Correct**: `eip155:1:0x1234...` (CAIP-10 format)
 
-### 2. Signature Order
-**CRITICAL**: Signatures must be in the same order as actions.
+### 2. Result Order
+**CRITICAL**: `data` must be in the same order as actions.
 
 ```dart
 // CORRECT
-final signatures = <String>[];
+final data = <Object>[];
 for (final action in actions) {
-  signatures.add(await signAction(action));
+  data.add(await signAction(action));
 }
 
 // WRONG - parallel execution may change order
-final signatures = await Future.wait(
+final data = await Future.wait(
   actions.map((a) => signAction(a)),
 );
 ```
@@ -959,7 +963,7 @@ walletKit.pay
 - [ ] Accounts formatted in CAIP-10 format
 - [ ] `eth_signTypedData_v4` signing implemented
 - [ ] Hex value normalization for typed data signing
-- [ ] Signature order matches action order
+- [ ] `data` order matches action order
 - [ ] WebView data collection for compliance (using webview_flutter)
 - [ ] Error handling for all error types
 - [ ] Loading states during API calls

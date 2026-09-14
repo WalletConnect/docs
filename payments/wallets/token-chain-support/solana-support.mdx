@@ -13,7 +13,7 @@ This guide applies whether you integrate with the **Wallet Pay SDK** or directly
 |-----|-------------|
 | `getPaymentOptions({ accounts })` | `POST /v1/gateway/payment/{id}/options` with `accounts[]` |
 | `option.actions` / `getRequiredPaymentActions` | the option's `actions[]`, resolved via `POST /v1/gateway/payment/{id}/fetch` when an action is type `build` |
-| `confirmPayment(signatures)` | `POST /v1/gateway/payment/{id}/confirm` with `results[]` |
+| `confirmPayment(data)` | `POST /v1/gateway/payment/{id}/confirm` with `results[]` |
 
 Everything else in this guide — advertising Solana accounts, routing by namespace, the `solana_signTransaction` payload, and returning the signed transaction blob — is the same in both integrations.
 </Info>
@@ -54,7 +54,7 @@ sequenceDiagram
 ```
 
 <Warning>
-The `results[]` (or `signatures[]`) you submit on confirm must match the option's `actions[]` in **order and length** — including any EVM actions that precede a Solana action in a mixed-chain option.
+The `data[]` (or `results[]` API-first) you submit on confirm must match the option's `actions[]` in **order and length** — including any EVM actions that precede a Solana action in a mixed-chain option. The former `signatures` parameter is deprecated but still accepted.
 </Warning>
 
 ## Key capabilities
@@ -203,7 +203,7 @@ for action in actions {
 
 ### Implement Solana signing
 
-For Solana actions, implement the `solana_signTransaction` method. Sign the transaction and append the **signed transaction blob, base64-encoded** to the signatures array.
+For Solana actions, implement the `solana_signTransaction` method. Sign the transaction and append the **signed transaction blob, base64-encoded** to the `data` array.
 
 <Tabs>
 <Tab title="TypeScript">
@@ -311,7 +311,7 @@ if (namespace === 'solana' && !solanaWallet) {
 
 ### Reject unknown methods
 
-Reject unknown wallet-RPC methods instead of silently omitting them from result arrays. The signatures array must match the actions array in order and length.
+Reject unknown wallet-RPC methods instead of silently omitting them from result arrays. The `data` array must match the actions array in order and length.
 
 ```typescript
 default:
@@ -327,7 +327,7 @@ Here's a complete example showing how to handle both EVM and Solana actions in a
 <Tab title="TypeScript">
 ```typescript
 async function approvePayment(actions: Action[]): Promise<string[]> {
-  const signatures: string[] = [];
+  const data: string[] = [];
   
   for (const action of actions) {
     const { chainId, method, params } = action.walletRpc;
@@ -346,10 +346,10 @@ async function approvePayment(actions: Action[]): Promise<string[]> {
         throw new Error(`Unsupported namespace: ${namespace}`);
     }
     
-    signatures.push(signature);
+    data.push(signature);
   }
   
-  return signatures;
+  return data;
 }
 
 async function handleEvmAction(

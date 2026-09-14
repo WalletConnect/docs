@@ -60,20 +60,20 @@ This prevents accumulating errors that become harder to debug later.
 
 The wallet must already have:
 
-- `@reown/walletkit` integrated and working
-- `@walletconnect/react-native-compat` installed
+- `@reown/walletkit` 1.6.0 or later integrated and working (bundles `@walletconnect/pay` 1.1.0)
+- `@walletconnect/react-native-compat` 2.25.0 or later installed (ships the native Yttrium module: yttrium-wcpay 0.10.60 on Android, YttriumWrapper 0.10.59 on iOS)
 - WalletKit initialization in place
 
 ### Required Package Versions
 
 ```json
 {
-  "@reown/walletkit": "1.5.4",
-  "@walletconnect/react-native-compat": "2.23.8"
+  "@reown/walletkit": "1.6.0",
+  "@walletconnect/react-native-compat": "2.25.0"
 }
 ```
 
-These stable versions include Pay support via `walletKit.pay`.
+These are the minimum versions that include Pay support via `walletKit.pay` with the `data` parameter on `confirmPayment`.
 
 ---
 
@@ -269,10 +269,12 @@ const fetchPaymentActions = async (option: PaymentOption) => {
 
 **IMPORTANT**: Always try passing the raw JSON string first. This is the safest approach.
 
+Collect each wallet RPC result into `data`, in the same order as the actions. Each element is a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object that the SDK forwards verbatim — see [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
 ```typescript
 const confirmPayment = async () => {
   const payClient = walletKit?.pay;
-  const signatures: string[] = [];
+  const data: (string | object)[] = [];
 
   for (const action of paymentActions) {
     if (!action.walletRpc) continue;
@@ -294,13 +296,13 @@ const confirmPayment = async () => {
         SignTypedDataVersion.V4
       );
 
-      signatures.push(signature);
+      data.push(signature);
     } else if (method === 'eth_sendTransaction') {
       const txHash = await wallet.sendTransaction(parsedParams[0]);
-      signatures.push(txHash);
+      data.push(txHash);
     } else if (method === 'personal_sign') {
       const sig = await wallet.personalSign(parsedParams);
-      signatures.push(sig);
+      data.push(sig);
     }
   }
 
@@ -308,12 +310,16 @@ const confirmPayment = async () => {
   const result = await payClient.confirmPayment({
     paymentId: paymentData.paymentId,
     optionId: selectedOption.id,
-    signatures,
+    data,
   });
 
   return result;
 };
 ```
+
+<Warning>
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Warning>
 
 ### 3.5 Signing API Variations
 
@@ -501,9 +507,12 @@ await walletKit.pay.getRequiredPaymentActions({
 await walletKit.pay.confirmPayment({
   paymentId: string,
   optionId: string,
-  signatures: string[],            // Array of 0x-prefixed signatures
+  data: (string | object)[],       // Wallet RPC results in action order: strings or JSON objects (e.g. Tron)
+  // signatures: string[]          // Deprecated alias for `data`, still accepted
 });
 ```
+
+The SDK types `data` as `(string | Record<string, unknown> | unknown[])[]`. A value typed with a TypeScript `interface` does not satisfy `Record<string, unknown>`; declare it as a `type` alias or spread it into an object literal.
 
 ### Account Format (CAIP-10)
 

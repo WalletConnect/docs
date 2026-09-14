@@ -25,7 +25,8 @@ For a complete working example, check out our sample wallet implementation:
 ## Requirements
 
 - **Min SDK**: 23 (Android 6.0)
-- **WalletKit**: 1.6.0+
+- **WalletKit**: 1.9.0+ (`com.reown:walletkit`)
+- **WalletConnect Pay**: 1.3.0+ (`com.walletconnect:pay`, bundled with WalletKit; ships yttrium-wcpay 0.10.60). Required for the `data` parameter in `confirmPayment`.
 
 <AppIdSnippet />
 
@@ -280,7 +281,7 @@ actionsResult.onSuccess { actions ->
 Sign each required action using your wallet's signing implementation:
 
 ```kotlin
-val signatures = actions.map { action ->
+val data = actions.map { action ->
     when (action) {
         is Wallet.Model.RequiredAction.WalletRpc -> {
             val rpc = action.action
@@ -330,21 +331,21 @@ Payment options may include multiple actions with different RPC methods. For exa
 </Note>
 
 <Warning>
-Signatures must be in the same order as the actions array.
+Keep `data` in the same order as the actions array.
 </Warning>
 
 </Step>
 
 <Step title="Confirm Payment" titleSize="h3">
 
-Submit signatures and finalize the payment:
+Submit the wallet RPC results (`data`) and finalize the payment. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object encoded as a string; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
 
 ```kotlin
 val confirmResult = WalletKit.Pay.confirmPayment(
     Wallet.Params.ConfirmPayment(
         paymentId = paymentId,
         optionId = selectedOption.id,
-        signatures = signatures
+        data = data
     )
 )
 
@@ -373,6 +374,10 @@ confirmResult.onSuccess { response ->
     handleError(error)
 }
 ```
+
+<Warning>
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Warning>
 
 </Step>
 
@@ -500,14 +505,14 @@ class PaymentViewModel : ViewModel() {
 
                 actionsResult.onSuccess { actions ->
                     // Step 4: Sign actions
-                    val signatures = signActions(actions)
+                    val data = signActions(actions)
 
                     // Step 5: Confirm payment
                     val confirmResult = WalletKit.Pay.confirmPayment(
                         Wallet.Params.ConfirmPayment(
                             paymentId = paymentId,
                             optionId = selectedOption.id,
-                            signatures = signatures
+                            data = data
                         )
                     )
 
@@ -582,7 +587,10 @@ data class RequiredPaymentActions(
 data class ConfirmPayment(
     val paymentId: String,
     val optionId: String,
-    val signatures: List<String>
+    @Deprecated("Use data instead")
+    val signatures: List<String> = emptyList(),   // Deprecated alias for data, still accepted
+    val collectedData: List<Wallet.Model.CollectDataFieldResult>? = null,
+    val data: List<String>? = null                 // Wallet RPC results in action order: plain strings or JSON-encoded objects (e.g. Tron); falls back to signatures when null
 )
 ```
 
@@ -703,7 +711,7 @@ data class ConfirmPaymentResponse(
 
 4. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
 
-5. **Signature Order**: Maintain the same order of signatures as the actions array
+5. **Result Order**: Keep `data` in the same order as the actions array
 
 6. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
 
