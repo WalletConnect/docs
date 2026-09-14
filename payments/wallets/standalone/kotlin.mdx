@@ -23,6 +23,7 @@ For a complete working example, check out our sample wallet implementation:
 - **Min SDK**: 23 (Android 6.0)
 - **Target SDK**: 36
 - **JVM Target**: 11
+- **WalletConnect Pay SDK**: 1.3.0+ (`com.walletconnect:pay`, ships yttrium-wcpay 0.10.60). Required for the `data` parameter in `confirmPayment`.
 
 ## Installation
 
@@ -30,7 +31,7 @@ Add the WalletConnect Pay SDK to your project's `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("com.walletconnect:pay:1.0.0")
+    implementation("com.walletconnect:pay:1.3.0")
 }
 ```
 
@@ -43,7 +44,7 @@ The version shown above may not be the latest. Check the [GitHub releases](https
 If you encounter JNA-related errors (e.g., `UnsatisfiedLinkError` or class loading issues), explicitly configure the JNA dependency:
 
 ```kotlin
-implementation("com.walletconnect:pay:1.0.0") {
+implementation("com.walletconnect:pay:1.3.0") {
     exclude(group = "net.java.dev.jna", module = "jna")
 }
 implementation("net.java.dev.jna:jna:5.17.0@aar")
@@ -154,7 +155,7 @@ sequenceDiagram
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
 
-    Wallet->>PaySDK: confirmPayment(signatures)
+    Wallet->>PaySDK: confirmPayment(data)
     PaySDK->>Backend: Submit payment
     Backend-->>PaySDK: Payment status
     PaySDK-->>Wallet: ConfirmPaymentResponse
@@ -294,7 +295,7 @@ actionsResult.onSuccess { actions ->
 Sign each action using your wallet's signing implementation:
 
 ```kotlin
-val signatures = actions.map { action ->
+val data = actions.map { action ->
     when (action) {
         is Pay.RequiredAction.WalletRpc -> {
             val rpc = action.action
@@ -314,20 +315,20 @@ Payment options may include multiple actions with different RPC methods. For exa
 </Note>
 
 <Warning>
-Signatures must be in the same order as the actions array.
+Keep `data` in the same order as the actions array.
 </Warning>
 
 </Step>
 
 <Step title="Confirm Payment" titleSize="h3">
 
-Submit the signatures to complete the payment:
+Submit the wallet RPC results (`data`) and finalize the payment. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object encoded as a string; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
 
 ```kotlin
 val confirmResult = WalletConnectPay.confirmPayment(
     paymentId = paymentId,
     optionId = selectedOption.id,
-    signatures = signatures
+    data = data
 )
 
 confirmResult.onSuccess { response ->
@@ -356,6 +357,10 @@ confirmResult.onSuccess { response ->
     handleError(error)
 }
 ```
+
+<Warning>
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Warning>
 
 </Step>
 
@@ -500,13 +505,13 @@ class PaymentViewModel : ViewModel() {
 
                 actionsResult.onSuccess { actions ->
                     // Step 4: Sign actions
-                    val signatures = signActions(actions)
+                    val data = signActions(actions)
 
                     // Step 5: Confirm payment
                     val confirmResult = WalletConnectPay.confirmPayment(
                         paymentId = paymentId,
                         optionId = selectedOption.id,
-                        signatures = signatures
+                        data = data
                     )
 
                     confirmResult.onSuccess { confirmation ->
@@ -566,7 +571,8 @@ Main entry point for the Pay SDK (singleton object).
 | `initialize(config: Pay.SdkConfig)` | Initialize the SDK |
 | `getPaymentOptions(paymentLink, accounts)` | Get available payment options |
 | `getRequiredPaymentActions(paymentId, optionId)` | Get actions requiring signatures |
-| `confirmPayment(paymentId, optionId, signatures)` | Confirm and finalize payment |
+| `confirmPayment(paymentId, optionId, data, collectedData)` | Confirm and finalize payment. `data: List<String>` holds the wallet RPC results in action order (plain strings or JSON-encoded objects) |
+| `confirmPayment(paymentId, optionId, signatures)` | Deprecated alias for `data`; still accepted |
 
 ## Data Models
 
@@ -760,7 +766,7 @@ result.onFailure { error ->
 
 3. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
 
-4. **Signature Order**: Maintain the same order of signatures as the actions array
+4. **Result Order**: Keep `data` in the same order as the actions array
 
 5. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
 

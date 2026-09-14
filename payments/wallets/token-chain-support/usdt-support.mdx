@@ -34,12 +34,12 @@ sequenceDiagram
     Wallet->>User: Sign Permit2 typed data
     User-->>Wallet: signature
 
-    Wallet->>PaySDK: confirmPayment(signatures: [txHash, signature])
+    Wallet->>PaySDK: confirmPayment(data: [txHash, signature])
     PaySDK-->>Wallet: status
 ```
 
 <Warning>
-`signatures[]` passed to `confirmPayment` must match `actions[]` in **order and length** — the approve tx hash first, then the Permit2 signature.
+`data[]` passed to `confirmPayment` must match `actions[]` in **order and length** — the approve tx hash first, then the Permit2 signature. Both results are plain strings; `data` also accepts JSON objects for chains such as [Tron](/payments/wallets/token-chain-support/tron-support). The former `signatures` parameter is deprecated but still accepted.
 </Warning>
 
 ## Detecting an approval-required option
@@ -157,16 +157,16 @@ Because the Permit2 typed data signs against the token allowance the approve tx 
 
 1. Submit `eth_sendTransaction` (action 1) and wait for the receipt.
 2. Parse the typed data from `eth_signTypedData_v4` (action 2) and sign it.
-3. Push both results into `signatures[]` in the order the actions were returned.
-4. Call `confirmPayment(signatures)`.
+3. Push both results into `data[]` in the order the actions were returned.
+4. Call `confirmPayment(data)`.
 
 <Tabs>
 <Tab title="Kotlin">
 ```kotlin
-val signatures = mutableListOf<String>()
+val data = mutableListOf<String>()
 
 for (action in actions.filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()) {
-    signatures += when (action.action.method) {
+    data += when (action.action.method) {
         "eth_sendTransaction" -> {
             val txHash = wallet.sendTransaction(action.action.chainId, action.action.params)
             wallet.awaitReceipt(action.action.chainId, txHash)
@@ -181,7 +181,7 @@ for (action in actions.filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()
 </Tab>
 <Tab title="Swift">
 ```swift
-var signatures: [String] = []
+var data: [String] = []
 
 for action in actions {
     let rpc = action.walletRpc
@@ -196,13 +196,13 @@ for action in actions {
     default:
         throw PaymentError.unsupportedMethod(rpc.method)
     }
-    signatures.append(result)
+    data.append(result)
 }
 ```
 </Tab>
 <Tab title="TypeScript">
 ```typescript
-const signatures: string[] = [];
+const data: string[] = [];
 
 for (const action of actions) {
   const { chainId, method, params } = action.walletRpc;
@@ -211,11 +211,11 @@ for (const action of actions) {
     case "eth_sendTransaction": {
       const tx = await wallet.sendTransaction(chainId, parsed[0]);
       await tx.wait();
-      signatures.push(tx.hash);
+      data.push(tx.hash);
       break;
     }
     case "eth_signTypedData_v4":
-      signatures.push(await wallet.signTypedData(chainId, parsed));
+      data.push(await wallet.signTypedData(chainId, parsed));
       break;
     default:
       throw new Error(`Unsupported method: ${method}`);
@@ -225,7 +225,7 @@ for (const action of actions) {
 </Tab>
 <Tab title="Dart">
 ```dart
-final signatures = <String>[];
+final data = <Object>[];
 
 for (final action in actions) {
   final rpc = action.walletRpc;
@@ -233,12 +233,12 @@ for (final action in actions) {
     case 'eth_sendTransaction':
       // sendPayTransaction broadcasts and waits for the receipt
       final params = (jsonDecode(rpc.params) as List).first as Map;
-      signatures.add(await service.sendPayTransaction(
+      data.add(await service.sendPayTransaction(
         Map<String, dynamic>.from(params),
       ));
       break;
     case 'eth_signTypedData_v4':
-      signatures.add(service.ethSignTypedDataV4(rpc.params));
+      data.add(service.ethSignTypedDataV4(rpc.params));
       break;
     default:
       throw UnimplementedError('Unsupported method: ${rpc.method}');
@@ -311,7 +311,7 @@ Test a payment with a token requiring Permit2 approval for the first time. The f
 - Present the approval transaction first
 - Wait for on-chain confirmation
 - Then prompt for the Permit2 signature
-- Complete successfully with both results in `signatures[]`
+- Complete successfully with both results in `data[]`
 </Step>
 
 <Step title="Repeat ERC-20 payment">
@@ -323,7 +323,7 @@ After completing the first-time flow, make another payment with the same token. 
 
 <Step title="Native token payment">
 Test a payment using the chain's native token (e.g., ETH on Base). Verify that:
-- The transaction hash is correctly included in `signatures[]`
+- The transaction hash is correctly included in `data[]`
 - The payment completes successfully
 </Step>
 
@@ -336,7 +336,7 @@ Quickly switch between payment options and verify:
 
 <Step title="Expired payment handling">
 Test behavior when a payment session expires:
-- Before any signatures are submitted
+- Before any results are submitted
 - The wallet should handle expiration gracefully
 - Users should receive clear feedback about the expiration
 </Step>

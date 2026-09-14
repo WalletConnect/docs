@@ -278,13 +278,18 @@ sequenceDiagram
     val actions = WalletKit.Pay.getRequiredPaymentActions(paymentId, optionId).getOrThrow()
 
     // 4. Sign each action
-    val signatures = actions
+    val data = actions
         .filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()
         .map { rpc -> yourSigner.sign(rpc.action.method, rpc.action.params) }
 
     // 5. Confirm payment
     WalletKit.Pay.confirmPayment(
-        Wallet.Params.ConfirmPayment(paymentId, optionId, signatures, collectedData)
+        Wallet.Params.ConfirmPayment(
+            paymentId = paymentId,
+            optionId = optionId,
+            data = data,
+            collectedData = collectedData
+        )
     )
     ```
   </Step>
@@ -585,7 +590,7 @@ sequenceDiagram
     )
 
     // 4. Sign each action (typically eth_signTypedData_v4)
-    let signatures = try actions.map { action in
+    let data = try actions.map { action in
         try yourSigner.sign(method: action.method, params: action.params)
     }
 
@@ -593,7 +598,7 @@ sequenceDiagram
     let result = try await WalletKit.instance.Pay.confirmPayment(
         paymentId: options.paymentId,
         optionId: selectedOption.id,
-        signatures: signatures
+        data: data
     )
     ```
   </Step>

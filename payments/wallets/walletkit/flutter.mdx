@@ -28,7 +28,7 @@ For a complete working example, check out our sample wallet implementation:
 - Flutter 3.0+
 - iOS 13.0+
 - Android API 23+
-- ReownWalletKit
+- ReownWalletKit (`reown_walletkit`) 1.5.1 or later (bundles `walletconnect_pay` 1.1.0)
 
 <AppIdSnippet />
 
@@ -38,7 +38,7 @@ Add `reown_walletkit` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  reown_walletkit: ^1.4.0
+  reown_walletkit: ^1.5.1
 ```
 
 Then run:
@@ -237,18 +237,18 @@ Sign each action using your wallet's signing implementation, dispatching on the 
 
 ```dart
 // Sign each action based on its RPC method
-final signatures = <String>[];
+final data = <Object>[];
 for (final action in actions) {
   final rpc = action.walletRpc;
   switch (rpc.method) {
     case 'eth_signTypedData_v4':
-      signatures.add(await signTypedData(rpc.chainId, rpc.params));
+      data.add(await signTypedData(rpc.chainId, rpc.params));
       break;
     case 'eth_sendTransaction':
-      signatures.add(await sendTransaction(rpc.chainId, rpc.params));
+      data.add(await sendTransaction(rpc.chainId, rpc.params));
       break;
     case 'personal_sign':
-      signatures.add(await personalSign(rpc.chainId, rpc.params));
+      data.add(await personalSign(rpc.chainId, rpc.params));
       break;
     default:
       throw UnimplementedError('Unsupported RPC method: ${rpc.method}');
@@ -261,21 +261,21 @@ Payment options may include multiple actions with different RPC methods. For exa
 </Note>
 
 <Warning>
-Signatures must be in the same order as the actions array.
+Keep `data` in the same order as the actions array.
 </Warning>
 
 </Step>
 
 <Step title="Confirm Payment" titleSize="h3">
 
-Confirm the payment with the collected signatures:
+Confirm the payment with the wallet RPC results (`data`) collected in the previous step. Each element of `data` is either a plain `String` (a signature or transaction hash) or, for chains like Tron, a `Map<String, dynamic>` JSON object; the SDK forwards each element verbatim. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
 
 ```dart
 final confirmResponse = await walletKit.confirmPayment(
   request: ConfirmPaymentRequest(
     paymentId: 'payment-id',
     optionId: 'option-id',
-    signatures: ['0x...', '0x...'], // Signatures from wallet actions
+    data: data, // Wallet RPC results from the Sign Actions step
     maxPollMs: 60000, // Maximum polling time in milliseconds
   ),
 );
@@ -283,6 +283,10 @@ final confirmResponse = await walletKit.confirmPayment(
 print('Payment Status: ${confirmResponse.status}');
 print('Is Final: ${confirmResponse.isFinal}');
 ```
+
+<Warning>
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is null.
+</Warning>
 
 <Note>
 When using the WebView data-collection approach, you do **not** pass `collectedData` to `confirmPayment`. The WebView submits the collected data directly to the backend during the earlier Collect User Data step.
@@ -434,14 +438,14 @@ class PaymentService {
         );
       }
 
-      // Step 5: Execute wallet actions and collect signatures
-      final signatures = <String>[];
+      // Step 5: Execute wallet actions and collect the results
+      final data = <Object>[];
       for (final action in actions) {
         // Dispatch based on action.walletRpc.method:
         // 'eth_signTypedData_v4' -> sign EIP-712 typed data
         // 'eth_sendTransaction'  -> send transaction (e.g., token approval)
         // 'personal_sign'        -> personal message signing
-        signatures.add(await signAction(action.walletRpc));
+        data.add(await signAction(action.walletRpc));
       }
 
       // Step 6: Confirm payment
@@ -449,7 +453,7 @@ class PaymentService {
         request: ConfirmPaymentRequest(
           paymentId: paymentId,
           optionId: optionId,
-          signatures: signatures,
+          data: data,
           maxPollMs: 60000, // Maximum polling time in milliseconds
         ),
       );
@@ -461,7 +465,7 @@ class PaymentService {
           request: ConfirmPaymentRequest(
             paymentId: paymentId,
             optionId: optionId,
-            signatures: signatures,
+            data: data,
             maxPollMs: 60000,
           ),
         );
@@ -574,7 +578,8 @@ PaymentOption({
 ConfirmPaymentRequest({
   required String paymentId,
   required String optionId,
-  required List<String> signatures,
+  List<Object>? data,                   // Wallet RPC results in action order: Strings or Map<String, dynamic> JSON objects
+  @Default([]) List<String> signatures, // Deprecated alias for `data`, still accepted as fallback when data is null
   int? maxPollMs,
 })
 ```
@@ -666,7 +671,7 @@ try {
 
 4. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
 
-5. **Signature Order**: Maintain the same order of signatures as the actions array
+5. **Result Order**: Keep `data` in the same order as the actions array
 
 6. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
 

@@ -23,6 +23,7 @@ For a complete working example, check out our sample wallet implementation:
 - iOS 13.0+
 - Swift 5.7+
 - Xcode 14.0+
+- WalletConnectPay 2.4.0 or later (ships YttriumWrapper 0.10.59). Required for the `data` parameter in `confirmPayment`.
 
 ## Installation
 
@@ -32,7 +33,7 @@ Add WalletConnectPay to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/reown-com/reown-swift", from: "1.0.0")
+    .package(url: "https://github.com/reown-com/reown-swift", from: "2.4.0")
 ]
 ```
 
@@ -188,7 +189,7 @@ sequenceDiagram
     Wallet->>User: Request signature(s)
     User->>Wallet: Approve & sign
 
-    Wallet->>PaySDK: confirmPayment(signatures)
+    Wallet->>PaySDK: confirmPayment(data)
     PaySDK->>Backend: Submit payment
     Backend-->>PaySDK: Payment status
     PaySDK-->>Wallet: ConfirmPaymentResponse
@@ -302,7 +303,7 @@ let actions = try await WalletConnectPay.instance.getRequiredPaymentActions(
 Each action contains a `walletRpc` describing the RPC call to execute. Your wallet must check the `method` field and dispatch accordingly — for example, a payment option may require an `eth_sendTransaction` to approve a token allowance followed by an `eth_signTypedData_v4` to sign Permit2 typed data.
 
 ```swift
-var signatures: [String] = []
+var data: [String] = []
 
 for action in actions {
     let rpc = action.walletRpc
@@ -336,7 +337,7 @@ for action in actions {
         throw PaymentError.unsupportedMethod(rpc.method)
     }
 
-    signatures.append(result)
+    data.append(result)
 }
 ```
 
@@ -345,14 +346,14 @@ Payment options may include multiple actions with different RPC methods. For exa
 </Note>
 
 <Warning>
-Signatures must be in the same order as the actions array.
+Keep `data` in the same order as the actions array.
 </Warning>
 
 </Step>
 
 <Step title="Confirm Payment" titleSize="h3">
 
-Submit the signatures to complete the payment:
+Submit the wallet RPC results (`data`) and finalize the payment. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON-encoded object; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
 
 <Note>
 When using the WebView approach for data collection, the WebView submits the captured data directly to the backend, so you do **not** pass `collectedData` to `confirmPayment`.
@@ -362,7 +363,7 @@ When using the WebView approach for data collection, the WebView submits the cap
 let result = try await WalletConnectPay.instance.confirmPayment(
     paymentId: response.paymentId,
     optionId: selectedOption.id,
-    signatures: signatures,
+    data: data,
     maxPollMs: 60000  // Wait up to 60 seconds for confirmation
 )
 
@@ -381,6 +382,10 @@ case .cancelled:
     print("Payment cancelled")
 }
 ```
+
+<Warning>
+The `signatures:` overload of `confirmPayment` is deprecated in favor of `data:` and will be removed in a future major version. Existing integrations that pass `signatures:` keep working; the overload forwards its value to `data`.
+</Warning>
 
 </Step>
 
@@ -546,21 +551,21 @@ class PaymentManager {
         )
         
         // 5. Sign all actions
-        var signatures: [String] = []
+        var data: [String] = []
         for action in actions {
             let signature = try await signAction(
                 action: action,
                 walletAddress: walletAddress,
                 signer: signer
             )
-            signatures.append(signature)
+            data.append(signature)
         }
 
         // 6. Confirm payment
         let result = try await WalletConnectPay.instance.confirmPayment(
             paymentId: optionsResponse.paymentId,
             optionId: selectedOption.id,
-            signatures: signatures
+            data: data
         )
         
         switch result.status {
@@ -628,7 +633,8 @@ Main client for payment operations.
 |--------|-------------|
 | `getPaymentOptions(paymentLink:accounts:includePaymentInfo:)` | Fetch available payment options |
 | `getRequiredPaymentActions(paymentId:optionId:)` | Get signing actions for a payment option |
-| `confirmPayment(paymentId:optionId:signatures:maxPollMs:)` | Confirm and execute the payment |
+| `confirmPayment(paymentId:optionId:data:collectedData:maxPollMs:)` | Confirm and execute the payment. `data: [String]` holds the wallet RPC results in action order (plain strings or JSON-encoded objects) |
+| `confirmPayment(paymentId:optionId:signatures:collectedData:maxPollMs:)` | Deprecated alias for the `data:` overload; still compiles and forwards to `data` |
 
 **Data Types**
 
@@ -776,7 +782,7 @@ The SDK throws specific error types for different failure scenarios:
 
 2. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
 
-3. **Signature Order**: Maintain the same order of signatures as the actions array
+3. **Result Order**: Keep `data` in the same order as the actions array
 
 4. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
 

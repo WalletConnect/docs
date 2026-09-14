@@ -20,7 +20,7 @@ This document is a reference guide, not boilerplate code to copy-paste. Before i
 
 ### Prerequisites
 
-- WalletKit SDK integrated and initialized (`com.reown:walletkit`)
+- WalletKit SDK 1.9.0+ integrated and initialized (`com.reown:walletkit`; bundles `com.walletconnect:pay` 1.3.0+, required for the `data` parameter in `confirmPayment`)
 - Ethereum signing capability (EIP-712 typed data, personal_sign)
 - Kotlin Coroutines for async operations
 - Understanding of your app's navigation and state management
@@ -429,19 +429,19 @@ fun String.hexToByteArray(): ByteArray = chunked(2).map { it.toInt(16).toByte() 
 
 #### 2.5 Confirm Payment
 
-Submit the signatures to confirm the payment (data collection, if any, was already submitted by the WebView):
+Submit the wallet RPC results (`data`) to confirm the payment (data collection, if any, was already submitted by the WebView). Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object encoded as a string; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
 
 ```kotlin
 suspend fun confirmPayment(
     paymentId: String,
     optionId: String,
-    signatures: List<String>
+    data: List<String>
 ): Result<Wallet.Model.ConfirmPaymentResponse> {
     return WalletKit.Pay.confirmPayment(
         Wallet.Params.ConfirmPayment(
             paymentId = paymentId,
             optionId = optionId,
-            signatures = signatures
+            data = data
         )
     )
 }
@@ -470,6 +470,23 @@ fun handleConfirmationResult(response: Wallet.Model.ConfirmPaymentResponse) {
     }
 }
 ```
+
+`Wallet.Params.ConfirmPayment` fields:
+
+```kotlin
+data class ConfirmPayment(
+    val paymentId: String,
+    val optionId: String,
+    @Deprecated("Use data instead")
+    val signatures: List<String> = emptyList(),   // Deprecated alias for data, still accepted
+    val collectedData: List<Wallet.Model.CollectDataFieldResult>? = null,
+    val data: List<String>? = null                 // Wallet RPC results in action order: plain strings or JSON-encoded objects (e.g. Tron); falls back to signatures when null
+)
+```
+
+<Warning>
+The `signatures` field is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Warning>
 
 ## Step 3: State Management
 
@@ -598,7 +615,7 @@ class PaymentViewModel(
 
         try {
             // Sign all pending actions
-            val signatures = pendingActions.map { action ->
+            val data = pendingActions.map { action ->
                 walletRepository.signWalletRpcAction(action.action)
             }
 
@@ -607,7 +624,7 @@ class PaymentViewModel(
                 Wallet.Params.ConfirmPayment(
                     paymentId = paymentId,
                     optionId = optionId,
-                    signatures = signatures
+                    data = data
                 )
             )
                 .onSuccess { response ->
@@ -888,7 +905,7 @@ class PaymentFlowExample(
         ).getOrThrow()
 
         // 6. Sign all actions
-        val signatures = actions
+        val data = actions
             .filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()
             .map { walletRepository.signWalletRpcAction(it.action) }
 
@@ -897,7 +914,7 @@ class PaymentFlowExample(
             Wallet.Params.ConfirmPayment(
                 paymentId = paymentId,
                 optionId = selectedOption.id,
-                signatures = signatures
+                data = data
             )
         ).getOrThrow()
 

@@ -24,7 +24,7 @@ Integration guide for iOS/Swift wallets that already have WalletKit integrated.
 
 3. **CAIP-10 Format Required** - All accounts must be in `eip155:{chainId}:{address}` format.
 
-4. **Signature Order Critical** - Signatures array must match actions array order exactly.
+4. **Result Order Critical** - The `data` array passed to `confirmPayment` must match the actions array order exactly.
 
 5. **Travel Rule Conditional** - Only collect user data when `selectedOption.collectData` is non-nil. IC is per-option, not global.
 
@@ -66,13 +66,13 @@ func getCAIP10Accounts(address: String) -> [String] {
 
 - iOS 13.0+
 - Swift 5.7+
-- WalletKit already integrated
+- WalletKit (reown-swift 2.4.0 or later) already integrated (ships YttriumWrapper 0.10.59; required for the `data` parameter in `confirmPayment`)
 - WalletConnect Cloud `PROJECT_ID` ([Get one](https://cloud.walletconnect.com))
 
 ```swift
 // Package.swift
 dependencies: [
-    .package(url: "https://github.com/reown-com/reown-swift", from: "1.0.0")
+    .package(url: "https://github.com/reown-com/reown-swift", from: "2.4.0")
 ]
 ```
 
@@ -111,7 +111,7 @@ dependencies: [
        │                                                               │
        │  6. Sign typed data (wallet's EIP-712 signer)                 │
        │                                                               │
-       │  7. confirmPayment(signatures)                                │
+       │  7. confirmPayment(data)                                      │
        │──────────────────────▶┌─────────────┐     ┌────────────┐      │
        │                       │  Pay API    │────▶│ Blockchain │      │
        │◀──────────────────────└─────────────┘     └────────────┘      │
@@ -365,7 +365,7 @@ func confirmPayment(
     )
 
     // 3. Sign each action using YOUR wallet's signer
-    var signatures: [String] = []
+    var data: [String] = []
     for action in actions {
         let rpc = action.walletRpc
 
@@ -385,14 +385,14 @@ func confirmPayment(
                 throw PaymentError.invalidParams
             }
             let signature = try await yourWallet.signTypedData(typedDataJson)
-            signatures.append(signature)
+            data.append(signature)
 
         case "eth_sendTransaction":
             guard let txParams = params[0] as? [String: Any] else {
                 throw PaymentError.invalidParams
             }
             let txHash = try await yourWallet.sendTransaction(txParams)
-            signatures.append(txHash)
+            data.append(txHash)
 
         case "personal_sign":
             guard params.count >= 2,
@@ -400,7 +400,7 @@ func confirmPayment(
                 throw PaymentError.invalidParams
             }
             let signature = try await yourWallet.personalSign(message)
-            signatures.append(signature)
+            data.append(signature)
 
         default:
             throw PaymentError.unsupportedMethod(rpc.method)
@@ -411,7 +411,7 @@ func confirmPayment(
     let result = try await WalletKit.instance.Pay.confirmPayment(
         paymentId: paymentId,
         optionId: selectedOption.id,
-        signatures: signatures,
+        data: data,
         maxPollMs: 60000
     )
 
@@ -430,7 +430,11 @@ func confirmPayment(
 }
 ```
 
-**CRITICAL**: Signatures must be in the same order as the actions array.
+**CRITICAL**: Keep `data` in the same order as the actions array. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON-encoded object; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
+<Warning>
+The `signatures:` overload of `confirmPayment` is deprecated in favor of `data:` and will be removed in a future major version. Existing integrations that pass `signatures:` keep working; the overload forwards its value to `data`.
+</Warning>
 
 ---
 
@@ -574,11 +578,21 @@ WalletKit.instance.Pay.getRequiredPaymentActions(
     optionId: String
 ) async throws -> [Action]
 
-// Confirm payment with signatures
+// Confirm payment with the wallet RPC results (plain strings or JSON-encoded objects, in action order)
+WalletKit.instance.Pay.confirmPayment(
+    paymentId: String,
+    optionId: String,
+    data: [String],
+    collectedData: [CollectDataFieldResult]? = nil,
+    maxPollMs: Int64? = nil
+) async throws -> ConfirmPaymentResultResponse
+
+// Deprecated: `signatures:` is an alias for `data:`; still compiles and forwards to `data`
 WalletKit.instance.Pay.confirmPayment(
     paymentId: String,
     optionId: String,
     signatures: [String],
+    collectedData: [CollectDataFieldResult]? = nil,
     maxPollMs: Int64? = nil
 ) async throws -> ConfirmPaymentResultResponse
 ```
@@ -681,7 +695,7 @@ enum PaymentStatus {
 |-------|---------|----------|
 | `paymentExpired` | Link expired | Merchant generates new link |
 | `routeExpired` | Route expired | Retry `getPaymentOptions` |
-| `invalidSignature` | Signature mismatch | Check signature order matches actions |
+| `invalidSignature` | Signature mismatch | Check `data` order matches actions |
 | `optionNotFound` | Stale option | Refresh options and reselect |
 
 ### Signing Issues
@@ -708,7 +722,7 @@ enum PaymentStatus {
 
 1. **Forgetting CAIP-10 format** - Accounts must be `eip155:{chainId}:{address}`, not just addresses.
 
-2. **Wrong signature order** - Signatures array must match actions array order exactly.
+2. **Wrong result order** - The `data` array must match the actions array order exactly.
 
 3. **Skipping WebView data collection** - Always check `selectedOption.collectData?.url` after the user selects an option and show the WebView before calling `getRequiredPaymentActions`.
 
