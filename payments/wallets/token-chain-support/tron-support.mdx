@@ -134,6 +134,19 @@ let options = try await WalletKit.instance.Pay.getPaymentOptions(
 )
 ```
 </Tab>
+<Tab title="Dart">
+```dart accounts.dart
+final evmAccounts = evmChains.map((chain) => 'eip155:${chain.id}:$evmAddress');
+final tronAccounts = tronAddress != null ? ['tron:0x2b6653dc:$tronAddress'] : <String>[];
+
+final options = await walletKit.getPaymentOptions(
+  request: GetPaymentOptionsRequest(
+    paymentLink: paymentLink,
+    accounts: [...evmAccounts, ...tronAccounts],
+  ),
+);
+```
+</Tab>
 </Tabs>
 
 <Note>
@@ -168,8 +181,8 @@ for (const action of actions) {
 </Tab>
 <Tab title="Kotlin">
 ```kotlin RouteActions.kt
-for (action in actions) {
-    val namespace = action.walletRpc.chainId.split(':')[0]
+for (action in actions.filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()) {
+    val namespace = action.action.chainId.split(':')[0]
 
     data += when (namespace) {
         "eip155" -> handleEvmAction(action)
@@ -195,6 +208,27 @@ for action in actions {
     default:
         throw PaymentError.unsupportedNamespace(namespace)
     }
+}
+```
+</Tab>
+<Tab title="Dart">
+```dart route_actions.dart
+for (final action in actions) {
+  final namespace = action.walletRpc.chainId.split(':').first;
+
+  switch (namespace) {
+    case 'eip155':
+      data.add(await handleEvmAction(action));
+      break;
+    case 'solana':
+      data.add(await handleSolanaAction(action));
+      break;
+    case 'tron':
+      data.add(handleTronAction(action)); // returns a Map, see below
+      break;
+    default:
+      throw UnimplementedError('Unsupported namespace: $namespace');
+  }
 }
 ```
 </Tab>
@@ -333,24 +367,49 @@ data.append(String(decoding: tronResult, as: UTF8.self))
 </Tab>
 <Tab title="Dart">
 ```dart handle_tron_action.dart
-// Verify txID == sha256(raw_data_hex) and the owner before signing (see above),
-// then sign the digest and return the result as a JSON object.
-final tronResult = <String, dynamic>{
-  'raw_data_hex': rawDataHex,
-  'signature': [signatureHex], // 130 hex chars, r ‖ s ‖ v
-};
+import 'package:blockchain_utils/blockchain_utils.dart';
+import 'package:on_chain/on_chain.dart';
 
-final request = ConfirmPaymentRequest(
-  paymentId: paymentId,
-  optionId: optionId,
-  data: [tronResult], // List<Object>: Strings or Map<String, dynamic>
-);
+Map<String, dynamic> signTronPayment(
+  Map<String, dynamic> tx,
+  String privateKeyHex,
+  String walletAddress,
+) {
+  final rawDataHex = tx['raw_data_hex'] as String;
+  final rawDataBytes = BytesUtils.fromHexString(rawDataHex);
+
+  // 1. txID must be sha256(raw_data_hex)
+  final computedTxId = BytesUtils.toHexString(QuickCrypto.sha256Hash(rawDataBytes));
+  final txId = (tx['txID'] as String).replaceFirst(RegExp(r'^0x'), '').toLowerCase();
+  if (computedTxId != txId) {
+    throw StateError('Tron txID mismatch: expected $computedTxId, got $txId');
+  }
+
+  // 2. The transaction must spend from the quoted buyer
+  final contract = (tx['raw_data']?['contract'] as List?)?.firstOrNull as Map?;
+  final owner = contract?['parameter']?['value']?['owner_address'] as String?;
+  if (owner != null && TronAddress(owner) != TronAddress(walletAddress)) {
+    throw StateError('Tron transaction owner does not match the wallet account');
+  }
+
+  // 3. Sign the digest — TronPrivateKey.sign hashes the raw bytes with sha256 and
+  //    returns the 65-byte recoverable signature (r ‖ s ‖ v). Do not rebuild the
+  //    transaction with Transaction.fromJson(...).rawData.toBuffer() — that
+  //    re-serializes raw_data and can change the hash.
+  final signature = TronPrivateKey(privateKeyHex).sign(rawDataBytes);
+
+  // `data` elements are Objects on Flutter — return the Map itself.
+  return {
+    'raw_data_hex': rawDataHex,
+    'signature': [BytesUtils.toHexString(signature)], // 130 hex chars
+  };
+}
 ```
 </Tab>
 </Tabs>
 
 <Warning>
-**Return the object, not a bare signature.** The gateway needs both `raw_data_hex` and `signature` to broadcast. On React Native and Web pass the object directly; on Kotlin and Swift pass it JSON-encoded as a string — the SDK detects JSON objects in `data` and forwards them as objects.
+**Return the object, not a bare signature.** The gateway needs both `raw_data_hex` and `signature` to broadcast. On React Native, Web and Flutter pass the object directly; on Kotlin and Swift pass it JSON-encoded as a string — the SDK detects JSON objects in `data` and forwards them as objects.
 </Warning>
 
 ### Do not broadcast
@@ -398,6 +457,110 @@ async function approvePayment(actions: Action[]): Promise<NonNullable<ConfirmPay
 }
 
 const result = await pay.confirmPayment({ paymentId, optionId, data });
+```
+</Tab>
+<Tab title="Kotlin">
+```kotlin ApprovePayment.kt
+// Plain strings for EVM/Solana results, a JSON-encoded object for Tron — in action order
+val data = mutableListOf<String>()
+
+for (action in actions.filterIsInstance<Wallet.Model.RequiredAction.WalletRpc>()) {
+    val rpc = action.action
+    val namespace = rpc.chainId.split(':')[0]
+
+    data += when (namespace) {
+        "eip155" -> handleEvmAction(rpc.method, rpc.chainId, rpc.params)
+        "solana" -> handleSolanaAction(rpc.method, rpc.params)
+        "tron" -> {
+            require(rpc.method == "tron_signTransaction") { "Unsupported Tron method: ${rpc.method}" }
+            val parsed = JSONTokener(rpc.params).nextValue()
+            val request = if (parsed is JSONArray) parsed.getJSONObject(0) else parsed as JSONObject
+            val transaction = request.getJSONObject("transaction")
+                .let { it.optJSONObject("transaction") ?: it }
+            // Verify txID and owner, sign the digest, JSON-encode { raw_data_hex, signature } (see above)
+            signTronPayment(transaction, tronWallet)
+        }
+        else -> error("Unsupported namespace: $namespace")
+    }
+}
+
+val result = WalletKit.Pay.confirmPayment(
+    Wallet.Params.ConfirmPayment(paymentId = paymentId, optionId = optionId, data = data)
+)
+```
+</Tab>
+<Tab title="Swift">
+```swift ApprovePayment.swift
+// Plain strings for EVM/Solana results, a JSON-encoded object for Tron — in action order
+var data: [String] = []
+
+for action in actions {
+    let rpc = action.walletRpc
+    let namespace = rpc.chainId.split(separator: ":").first.map(String.init) ?? ""
+
+    switch namespace {
+    case "eip155":
+        data.append(try await handleEvmAction(rpc))
+    case "solana":
+        data.append(try await handleSolanaAction(rpc))
+    case "tron":
+        guard rpc.method == "tron_signTransaction" else {
+            throw PaymentError.unsupportedMethod(rpc.method)
+        }
+        let parsed = try JSONSerialization.jsonObject(with: Data(rpc.params.utf8))
+        let request = ((parsed as? [Any])?.first ?? parsed) as? [String: Any]
+        let wrapper = request?["transaction"] as? [String: Any]
+        guard let transaction = (wrapper?["transaction"] as? [String: Any]) ?? wrapper else {
+            throw PaymentError.malformedTronAction
+        }
+        // Verify txID and owner, sign the digest, JSON-encode { raw_data_hex, signature } (see above)
+        data.append(try signTronPayment(transaction, wallet: tronWallet))
+    default:
+        throw PaymentError.unsupportedNamespace(namespace)
+    }
+}
+
+let result = try await WalletKit.instance.Pay.confirmPayment(
+    paymentId: paymentId,
+    optionId: optionId,
+    data: data
+)
+```
+</Tab>
+<Tab title="Dart">
+```dart approve_payment.dart
+// Plain Strings for EVM/Solana results, a Map for Tron — in action order
+final data = <Object>[];
+
+for (final action in actions) {
+  final rpc = action.walletRpc;
+  final namespace = rpc.chainId.split(':').first;
+
+  switch (namespace) {
+    case 'eip155':
+      data.add(await handleEvmAction(rpc.method, rpc.chainId, rpc.params));
+      break;
+    case 'solana':
+      data.add(await handleSolanaAction(rpc.method, rpc.params));
+      break;
+    case 'tron':
+      if (rpc.method != 'tron_signTransaction') {
+        throw UnimplementedError('Unsupported Tron method: ${rpc.method}');
+      }
+      final parsed = jsonDecode(rpc.params);
+      final request = (parsed is List ? parsed.first : parsed) as Map<String, dynamic>;
+      final wrapper = request['transaction'] as Map<String, dynamic>;
+      final transaction = (wrapper['transaction'] as Map<String, dynamic>?) ?? wrapper;
+      data.add(signTronPayment(transaction, tronPrivateKeyHex, tronAddress));
+      break;
+    default:
+      throw UnimplementedError('Unsupported namespace: $namespace');
+  }
+}
+
+final result = await walletKit.confirmPayment(
+  request: ConfirmPaymentRequest(paymentId: paymentId, optionId: optionId, data: data),
+);
 ```
 </Tab>
 </Tabs>
