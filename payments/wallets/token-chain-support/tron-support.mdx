@@ -62,10 +62,10 @@ sequenceDiagram
 
     Wallet->>Gateway: Confirm payment (data: [{ raw_data_hex, signature }])
     Gateway->>Chain: Broadcast signed transaction
-    Gateway-->>Wallet: status: processing (accepted into the mempool)
+    Note over Wallet,Gateway: SDK polls the payment status<br/>until it is final (keep your loader)
     Chain-->>Gateway: Inclusion
-    Gateway-->>Wallet: status: succeeded / failed (via polling)
-    Wallet->>User: Show result / status
+    Gateway-->>Wallet: status: succeeded / failed
+    Wallet->>User: Show result
 ```
 
 <Warning>
@@ -78,7 +78,7 @@ The `data[]` you submit on confirm must match the option's `actions[]` in **orde
 2. **Object result** — the confirm result is `{ raw_data_hex, signature }`, not a bare signature string. This is why `confirmPayment` takes `data` rather than `signatures`.
 3. **The buyer pays energy** — there is no fee payer and no fee bump on Tron. WalletConnect Pay offers a Tron option only to accounts holding USDT **and** enough TRX for energy (currently 14 TRX). An unfunded account is not offered Tron at all.
 4. **Mainnet only** — WalletConnect Pay settles Tron on mainnet (`tron:0x2b6653dc`).
-5. **Asynchronous settlement** — Tron accepts a transaction into the mempool before inclusion. A `processing` confirm result is the happy path, not an error.
+5. **Settlement takes a few seconds** — the gateway broadcasts the transaction and waits for inclusion. `confirmPayment` keeps polling and resolves with `succeeded` or `failed`, exactly as on other chains; nothing extra to handle.
 
 ## Implementation requirements
 
@@ -357,10 +357,6 @@ final request = ConfirmPaymentRequest(
 
 Do not implement `tron_sendTransaction` for Pay flows and do not call `sendRawTransaction`. WalletConnect Pay broadcasts the signed transaction; a wallet that also broadcasts causes a duplicate submission.
 
-### Treat `processing` as in flight
-
-Tron accepts the transaction into the mempool before it is included in a block. The confirm response reports `processing` while WalletConnect Pay polls for inclusion; the SDK keeps polling until the status is final (`succeeded` or `failed`). Present `processing` as an in-flight payment, not as a failure.
-
 ## Complete action handler
 
 <Tabs>
@@ -414,11 +410,7 @@ Import a mainnet account holding USDT and at least 14 TRX. Open a payment link w
 - The Tron option is presented
 - The wallet verifies `txID` and the owner, then signs
 - The confirm request carries `{ raw_data_hex, signature }` as an object in `data`
-- The result shows `processing`, then the payment settles (check the payment in the explorer)
-</Step>
-
-<Step title="Unfunded Tron account">
-Advertise a Tron account with no TRX or USDT. Verify that no Tron option is offered and that the other options still load normally.
+- `confirmPayment` resolves with `succeeded` and the transaction appears in a Tron explorer
 </Step>
 
 <Step title="Tampered payload">

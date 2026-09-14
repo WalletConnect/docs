@@ -571,8 +571,8 @@ Main entry point for the Pay SDK (singleton object).
 | `initialize(config: Pay.SdkConfig)` | Initialize the SDK |
 | `getPaymentOptions(paymentLink, accounts)` | Get available payment options |
 | `getRequiredPaymentActions(paymentId, optionId)` | Get actions requiring signatures |
-| `confirmPayment(paymentId, optionId, data, collectedData)` | Confirm and finalize payment. `data: List<String>` holds the wallet RPC results in action order (plain strings or JSON-encoded objects) |
-| `confirmPayment(paymentId, optionId, signatures)` | Deprecated alias for `data`; still accepted |
+| `confirmPayment(paymentId, optionId, data = ..., collectedData = null)` | Confirm and finalize payment. `data: List<String>` holds the wallet RPC results in action order (plain strings or JSON-encoded objects). `collectedData` is the existing optional parameter for collected data fields — unchanged |
+| `confirmPayment(paymentId, optionId, signatures = ...)` | Deprecated alias for `data`; still accepted |
 
 ## Data Models
 
