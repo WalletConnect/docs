@@ -126,6 +126,10 @@ For best user experience, follow the recommended implementation below.
 
 Test your WalletConnect Pay integration with the Point-of-Sale app in the WalletConnect Dashboard. To enable the app, configure a mock-merchant recipient address. Payments will arrive to this address and you won't lose any testing funds.
 
+<Note>
+On Solana, payment options for non-native tokens only appear once this address has an associated token account (ATA) for that token. The easiest way to create one is to send a small amount of the token to this address — the transfer covers the SOL needed to create the account. Alternatively, send a create-account transaction and pay for it with SOL.
+</Note>
+
 <video
   controls
   className="w-full"
