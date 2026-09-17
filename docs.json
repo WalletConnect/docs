@@ -468,7 +468,6 @@
         "groups": [
           {
             "group": "Get Started",
-            "root": "payments/index",
             "pages": [
               "payments/overview",
               "payments/for-users",
