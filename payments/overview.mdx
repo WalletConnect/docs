@@ -1,109 +1,119 @@
 ---
-title: "WalletConnect Pay"
-metatags:
-    description: "Overview of WalletConnect Pay, a universal protocol that enables wallets and payment applications to exchange blockchain-based payment requests in a consistent, secure, and chain-agnostic way."
+mode: "frame"
+title: "WalletConnect Pay Documentation"
 sidebarTitle: "Introduction"
+description: "Documentation for WalletConnect Pay. Integrate secure crypto payments into your app with step-by-step guides, APIs, and best practices."
 ---
 
-Digital payments across blockchains remain inconsistent. Payments are fragmented by geography and <Tooltip headline="Rail" tip="The term for the payment network that is used to process payments.">Rail</Tooltip>. For example, a few countries in Latin America run on PIX and Mercado Pago, Europe on SEPA and cards, Southeast Asia on QR wallets like GrabPay and GCash, China on Alipay and WeChat Pay, India on UPI. 
+import { Container, Title } from '/snippets/home/utility.mdx';
+import { ProductCard } from '/snippets/home/product-cards.mdx';
 
-Each region invented its own system, none of them interoperate, and merchants and PSPs are forced to support whatever their local stack dictates. Users adapt to the rail in front of them rather than the method they prefer.
+<div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
+  <Container>
+    <div className="w-full flex flex-col">
+      <div className="flex flex-col items-start justify-center w-full max-w-4xl text-left">
+        <div className="text-gray-900 dark:text-gray-200 text-4xl tracking-tight">
+          WalletConnect Pay
+        </div>
+        <p className="text-md text-gray-600 dark:text-gray-400 text-left mt-3 mb-4">
+          <strong>WalletConnect Pay</strong> is a complete, end-to-end stablecoin and crypto payment solution that allows PSPs and merchants to enable crypto payments from any wallet and any asset through a single, familiar integration. Choose your integration method below to quickstart.
+        </p>
+      </div>
+    </div>
+    <CardGroup cols={4}>
+      <ProductCard
+        title="Payment Service Providers (PSPs)"
+        description="Enable stablecoin payments in your payments product."
+        href="/payments/psps/overview"
+        img="/images/psp.png"
+      />
+      <ProductCard
+        title="Merchant Dashboard"
+        description="Integrate WalletConnect Pay in your business as a Merchant."
+        href="/payments/merchant/quickstart"
+        img="/images/merchant.png"
+      />
+      <ProductCard
+        title="Wallet Integration"
+        description="Integrate WalletConnect Pay as a wallet provider."
+        href="/payments/wallets/overview"
+        img="/images/wallet.png"
+      />
+      <ProductCard
+        title="Ecommerce (Checkout)"
+        description="Add stablecoin and crypto payments to your online checkout."
+        href="/payments/ecommerce/overview"
+        img="/images/ecommerce.png"
+      />
+    </CardGroup>
+    <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
+  </Container>
 
-In the world of Crypto payments, each wallet, merchant, and provider implements its own integration model. This fragmentation slows innovation and limits interoperability. 
-
-To address this, WalletConnect introduces the **WalletConnect Pay**. 
-
-**WalletConnect Pay** provides a complete end-to-end crypto payment solution that fits directly into an existing Payment Service Provider (PSP) stack, allowing crypto payments to be offered without changing how payments operate today. 
-
-It also aligns with common **payment compliance requirements**, such as required customer and transaction information capture and screening steps, so providers can keep the same operational and compliance controls they rely on today.
-
-## Who is WalletConnect Pay for?
-
-There are a couple of primary actors that can benefit from WalletConnect Pay:
-
-- **Payment Service Providers (PSPs) and Acquirers** - PSPs and Acquirers can integrate WalletConnect Pay into their existing payment stack, allowing them to offer their merchants and customers an option to accept crypto payments without changing how payments operate today.
-- **Merchants** - PSPs and Acquirers can offer their merchants an option to accept crypto payments without changing how payments operate today.
-- **Wallets** - Wallets can work closely with WalletConnect to provide a seamless payment experience for their users by integrating the WalletConnect Pay SDK into their wallet.
-
-<Columns cols={2}>
-  <Card title="PSPs and Acquirers" href="https://share.hsforms.com/1XsMCkUxFT2Cte8SCeAh89wnxw6s" icon="credit-card">
-    Are you a PSP or Acquirer? Fill out this form to learn how you can integrate WalletConnect Pay.
-  </Card>
-  <Card title="Wallets and Pay Providers" href="https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s" icon="wallet">
-    Are you a Wallet or Pay Provider? Fill out this form to learn how you can integrate WalletConnect Pay.
-  </Card>
-</Columns>
-
-## What would WalletConnect Pay look like in action?
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        How does WalletConnect Pay work?
+      </Title>
+    </div>
 
 <video
-  controls
   className="w-full"
+  src="/images/videos/wc-pay.mp4"
+  poster="/images/videos/wc-pay-poster.png"
+  aria-label="Animated walkthrough of a WalletConnect Pay payment, from merchant QR code to settlement."
+  controls
   autoPlay
   muted
-  src="/images/videos/wc-pay.mp4"
- ></video>
+  loop
+  playsInline
+/>
 
-1. The merchant presents a WalletConnect QR code with the payment intent.
-2. The customer scans the QR with their wallet:
-   - The wallet displays the payment intent.
-   - The customer picks the token and network of their choice (e.g., USDC on Ethereum) and approves the payment.
-   - The wallet builds the transaction and sends it to the network.
-3. Or alternatively, the customer scans the QR code with their QR scanner:
-    - This takes the customer to a payment gateway URL that is pre-filled with the payment intent.
-    - The customer can connect their wallet (using WalletConnect).
-    - The wallet displays the payment intent.
-    - The customer picks the token and network of their choice (e.g., USDC on Ethereum) and approves the payment.
-    - The wallet builds the transaction and sends it to the network.
-4. The merchant receives the transaction result and the customer is notified.
-5. The merchant then receives fiat or crypto settlement from the PSP.
-
-## What does WalletConnect Pay offer? 
-
-<Steps> 
-  <Step title="Any wallet can be used across checkout types" icon="wallet">
-    Buyers can pay from any wallet at online checkout and in-person.
+<Steps>
+  <Step title="The merchant presents a WalletConnect QR code with the payment intent.">
   </Step>
-  <Step title="Payments are only confirmed when they can be completed" icon="check">
-    Balance checks, routing, and compliance (screening, KYC/KYT) are completed before a payment is confirmed.
+  <Step title="The customer scans the QR code, either with their wallet or with a standard QR scanner">
+    Scanning with a wallet opens the wallet directly on the payment intent.
+    Scanning with a QR scanner opens a payment gateway URL pre-filled with the payment intent, where the customer connects their wallet using WalletConnect.
   </Step>
-  <Step title="Funds move and settle predictably" icon="money-bill">
-    Fixed, transparent fees, consistent settlement paths (crypto or fiat), in-flow swaps and bridges, and more.
+  <Step title="The wallet displays the payment intent.">
   </Step>
-  <Step title="Everything is logged and observable" icon="eye">
-    Full audit trails and data visibility for operations, support, and reporting.
+  <Step title="The customer picks the token and network of their choice and approves the payment.">
+    (e.g. The customer may pick USDC on Ethereum or USDT on Arbitrum)
   </Step>
-  <Step title="Merchants get clear onboarding materials and familiar tools" icon="book">
-    Clear documentation, reference implementations, and operational dashboards aligned with traditional payment workflows.
+  <Step title="The wallet builds the transaction and sends it to the network.">
+  </Step>
+  <Step title="The merchant receives the transaction result and the customer is notified.">
+  </Step>
+  <Step title="The merchant then receives stablecoin or fiat settlement from the PSP.">
   </Step>
 </Steps>
-## What else does WalletConnect Pay offer?
 
-WalletConnect Pay is designed to fit into existing checkout workflows so crypto payments can feel like a natural extension of how payments already run today. WalletConnect Pay is also available as a compliant e-commerce (checkout) solution.
+  </Container>
 
-To learn more about what’s available and what’s coming next, contact us by filling out the form below:
-
-<Columns cols={2}>
-  <Card title="Ecommerce" href="https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s" icon="wallet">
-    Are you a Payment Method Aggregators or an ecommerce platform? Contact us to learn more.
-  </Card>
-</Columns>
-
-## Get Started
-
-Every integration can be built and verified end to end in [test mode](/payments/test-mode) — same API, no real funds — before going live.
-
-<CardGroup cols={2}>
-  <Card title="Wallet Integration" icon="wallet" href="/payments/wallets/overview">
-    Integrate WalletConnect Pay into your wallet.
-  </Card>
-  <Card title="Ecommerce" icon="cart-shopping" href="/payments/ecommerce/overview">
-    Add crypto payments to your online checkout.
-  </Card>
-  <Card title="Merchant Quickstart" icon="rocket" href="/payments/merchant/quickstart">
-    Create your first test payment via the Merchant API in six steps.
-  </Card>
-  <Card title="Test Mode" icon="flask" href="/payments/test-mode">
-    Build and verify your integration without moving real funds.
-  </Card>
-</CardGroup>
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        Resources
+      </Title>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
+        Learn more about WalletConnect Pay and the wider WalletConnect brand.
+      </p>
+    </div>
+    <Columns cols={3}>
+      <Card
+        title="API Reference"
+        icon="code"
+        href="/payments/api-reference"
+      >
+        Dive into the API reference to explore more
+      </Card>
+      <Card
+        title="WalletConnect Blog"
+        icon="newspaper"
+        href="https://walletconnect.com/blog"
+      >
+        Read the latest news and updates from the WalletConnect team
+      </Card>
+    </Columns>
+  </Container>
+</div>
