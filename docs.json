@@ -209,7 +209,8 @@
                   "wallets/walletguide/wallet-list",
                   "wallets/walletguide/submit-chain",
                   "wallets/walletguide/chain-list",
-                  "wallets/walletguide/explorer-api"
+                  "wallets/walletguide/explorer-api",
+                  "wallets/walletguide/certified"
                 ]
               },
               {
