@@ -6,7 +6,7 @@ description: The WalletConnect Certified program, its requirements by season, an
 
 WalletConnect Certified is a program to improve onchain connectivity together with the wallet ecosystem. It recognizes wallets that meet the highest standards for reliability, usability, security, and interoperability on the WalletConnect Network.
 
-To date, 32 wallets have been certified. Find them all on [WalletGuide](https://walletguide.walletconnect.network/).
+To date, 32 wallets have been certified. Find them all on [WalletGuide](https://walletguide.walletconnect.network/?badge_type=certified).
 
 ## Why get certified
 
@@ -27,15 +27,15 @@ The program runs in seasons, each with its own theme and progressively higher re
 | Season 2 (2025) | UX excellence | Complete |
 | Season 3 (2026) | Payments | Open (Jan 21, 2026 – end of 2026) |
 
-Requirements are set by WalletConnect in collaboration with the WalletConnect Council, which represents leading projects across the ecosystem. The Season 2 requirements, for example, came out of a workshop with wallets at WalletCon II in Bangkok.
+Requirements are set by WalletConnect in collaboration with the [WalletConnect Council](https://walletconnect.com/blog/the-walletconnect-council), which represents leading projects across the ecosystem. The Season 2 requirements, for example, came out of a workshop with wallets at WalletCon II in Bangkok.
 
 ## Eligibility
 
 Certification is high-touch and collaborative, so only a limited number of wallets are certified per season. To be eligible, a wallet must meet at least one of the following:
 
-- Top 40 wallet by number of WalletConnect connections.
-- Demonstrated growth potential — a credible path to becoming top 40.
-- High transaction volume — for example, institutional-grade wallets.
+1. **Top 40 wallet** by number of WalletConnect connections.
+2. **Demonstrated growth potential** — a credible path to becoming top 40.
+3. **High transaction volume** — for example, institutional-grade wallets.
 
 <Note>
 
@@ -45,47 +45,19 @@ Not sure a wallet qualifies? Reach out to evaluate eligibility.
 
 ## Criteria by season
 
-Each season below follows the same shape: what the season is about, then the requirements a wallet must meet.
-
 ### Season 1 — "It just works"
 
-The foundational season, focused on reliable connections across dapps.
-
-**Requirements**
-
-- Integrate the WalletKit SDK.
-- Pass every test case in the "It Just Works" QA sheet.
+The foundation: connecting a wallet to apps through WalletConnect works reliably, every time. Wallets integrate the WalletKit SDK and prove that connecting, switching chains and accounts, disconnecting, and handling errors all work smoothly and fast — even on poor networks.
 
 ### Season 2 — UX excellence
 
-Focused on fewer clicks and a cleaner connection experience.
-
-**Requirements**
-
-- Upgrade to the latest SDK version.
-- Implement a simple "Connect" screen:
-  - Abstract the network — hide it entirely, or keep it out of the user's way.
-  - Let users change the account during connection, and expose multiple accounts.
-  - Let users reject the connection.
-  - Show proper error messages (chain names, not identifiers like `eip155:1`).
-- Transaction approval screen improvements.
-- Ecosystem-specific RPC support, where applicable to the wallet:
-  - Solana: all methods in the Solana RPC reference, plus `signAndSendAllTransactions`.
-  - Ethereum: `wallet_sendCalls` per the Ethereum RPC reference.
-  - Bitcoin: all methods in the Bitcoin RPC reference.
+Fewer clicks, better experience. Wallets make connecting and approving as simple as possible — Link Mode, One-Click Auth, a clean connect screen — and support the key RPC methods of every chain they offer (EVM, Solana, Bitcoin), so users can do everything an app asks of them.
 
 ### Season 3 — Payments
 
-Focused on stablecoin and crypto payments through WalletConnect Pay: in-store QR payments and 1-click checkout online, with interchange-like revenue on every transaction. Season 3 also requires meeting the WCT staking requirements for the Wallet Rewards program — Certified wallets need a minimum `stakeWeight` of 12,500 (e.g. 50,000 WCT staked for 52 weeks).
+Wallets become a way to pay. Through WalletConnect Pay, users scan a merchant QR code in-store or check out online and approve the payment in one click, and the wallet earns interchange-like revenue on every transaction. Wallets integrate native WalletConnect Pay and confirm the fallback payment flow works for users who haven't updated yet.
 
-**Requirements**
-
-- **Native WalletConnect Pay integration (primary criterion).** The native integration delivers the best user experience and unlocks interchange-like revenue. It's an SDK upgrade plus enablement, roughly two weeks of effort. Get started with the [WalletConnect Pay integration docs](/payments/wallets/overview).
-- **Fallback flow.** This already works for any wallet that supports WalletConnect sessions — no SDK changes needed. The user lands on the payment gateway, connects their wallet via WalletConnect, and completes the payment. Certification confirms this path functions correctly and covers users during staged rollouts of native Pay.
-  - Before native Pay integration: fallback is tested via both the wallet QR scanner and the device camera.
-  - After native Pay integration: the wallet QR scanner triggers native Pay, so fallback is only tested via the device camera (lower priority).
-
-WalletConnect Pay supports mobile wallets, hardware wallets, browser extensions, and wallet-as-a-service providers. Both in-store (POS) and e-commerce flows are part of certification; testing is adapted to each wallet's capabilities.
+Certification requires meeting the criteria of all seasons. Every test case, with steps and expected results, is in the detailed QA sheet: [WalletConnect Certified QA Template](https://docs.google.com/spreadsheets/d/1sGZnBilocXfSQKSFlDSkB_G3OUMNr0x_41JD-Qc-UuY/copy).
 
 ## How to apply
 
@@ -96,15 +68,15 @@ WalletConnect Pay supports mobile wallets, hardware wallets, browser extensions,
 </Step>
 
 <Step title="Meet the requirements">
-  Complete the SDK integration and the QA checklist for the active season. Run QA independently first by making a copy of the self-serve QA checklist to validate the integration before submitting.
+  Complete the SDK integration and work through the [WalletConnect Certified QA Template](https://docs.google.com/spreadsheets/d/1sGZnBilocXfSQKSFlDSkB_G3OUMNr0x_41JD-Qc-UuY/copy) to validate the integration before submitting.
 </Step>
 
 <Step title="Submit for review">
-  Apply via the form, or reach out on existing channels, email [wallets@walletconnect.com](mailto:wallets@walletconnect.com), or book an intro call.
+  [Apply via the form](https://share.hsforms.com/1Q12irNdNRo2HJe3Jl1OJiAnxw6s), reach out on existing channels, or email [wallets@walletconnect.com](mailto:wallets@walletconnect.com).
 </Step>
 
 <Step title="Get listed and rewarded">
-  Once approved, the wallet appears on WalletGuide and becomes eligible for all Certified benefits.
+  Once approved, the wallet appears on [WalletGuide](https://walletguide.walletconnect.network/) and becomes eligible for all Certified benefits.
 </Step>
 
 </Steps>
