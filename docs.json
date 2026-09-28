@@ -466,9 +466,9 @@
       {
         "tab": "Payments",
         "icon": "credit-card",
-        "dropdowns": [
+        "groups": [
           {
-            "dropdown": "Get Started",
+            "group": "Get Started",
             "pages": [
               "payments/overview",
               "payments/for-users",
@@ -505,92 +505,10 @@
                     ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "dropdown": "For PSPs",
-            "pages": [
-              "payments/psps/overview",
-              {
-                "group": "Headless SDK",
-                "pages": [
-                  "payments/psps/headless-sdk/overview",
-                  "payments/psps/headless-sdk/how-it-works",
-                  "payments/psps/headless-sdk/implementation",
-                  "payments/psps/headless-sdk/packages-reference"
-                ]
-              }
-            ]
-          },
-          {
-            "dropdown": "For Merchants",
-            "pages": [
-              "payments/merchant/quickstart",
-              "payments/merchant-api/logo-specification"
-            ]
-          },
-          {
-            "dropdown": "For Wallets",
-            "pages": [
-              "payments/wallets/overview",
-              {
-                "group": "Standalone integration",
-                "pages": [
-                  "payments/wallets/standalone/kotlin",
-                  "payments/wallets/standalone/swift",
-                  "payments/wallets/standalone/react-native",
-                  "payments/wallets/standalone/flutter",
-                  "payments/wallets/standalone/web"
-                ]
               },
               {
-                "group": "Integrate Wallet SDK",
+                "group": "API Reference",
                 "pages": [
-                  "payments/wallets/walletkit/kotlin",
-                  "payments/wallets/walletkit/swift",
-                  "payments/wallets/walletkit/react-native",
-                  "payments/wallets/walletkit/flutter",
-                  "payments/wallets/walletkit/web"
-                ]
-              },
-              "payments/wallets/api-first",
-              "payments/wallets/tap-to-pay",
-              "payments/wallets/webview",
-              {
-                "group": "Token & Chain Support",
-                "pages": [
-                  "payments/wallets/token-chain-support",
-                  "payments/wallets/token-chain-support/usdt-support",
-                  "payments/wallets/token-chain-support/solana-support",
-                  "payments/wallets/token-chain-support/tron-support"
-                ]
-              }
-            ]
-          },
-          {
-            "dropdown": "For Checkout",
-            "pages": [
-              "payments/ecommerce/overview",
-              "payments/ecommerce/integration",
-              "payments/ecommerce/api-reference"
-            ]
-          },
-          {
-            "dropdown": "AI Agents",
-            "pages": [
-              "agents/overview"
-            ]
-          },
-          {
-            "dropdown": "API Reference",
-            "icon": "code",
-            "versions": [
-              {
-                "version": "2026-02-18",
-                "tag": "Latest",
-                "default": true,
-                "groups": [
                   {
                     "group": "Overview",
                     "pages": [
@@ -643,63 +561,81 @@
                     ]
                   }
                 ]
-              },
+              }
+            ]
+          },
+          {
+            "group": "For PSPs",
+            "pages": [
+              "payments/psps/overview",
               {
-                "version": "2026-02-19.preview",
-                "groups": [
-                  {
-                    "group": "Overview",
-                    "pages": [
-                      "payments/api-reference/index",
-                      "payments/api-reference/authentication",
-                      "payments/api-reference/versioning"
-                    ]
-                  },
-                  {
-                    "group": "Gateway",
-                    "pages": [
-                      "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id",
-                      "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-cancel",
-                      "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
-                      "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
-                      "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
-                      "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
-                    ]
-                  },
-                  {
-                    "group": "Payments",
-                    "pages": [
-                      "payments/api-reference/2026-02-19.preview/post-v1-payments",
-                      "payments/api-reference/2026-02-19.preview/get-v1-payments",
-                      "payments/api-reference/2026-02-19.preview/get-v1-payments-id",
-                      "payments/api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
-                      "payments/api-reference/2026-02-19.preview/get-v1-payments-id-status"
-                    ]
-                  },
-                  {
-                    "group": "Refunds",
-                    "pages": [
-                      "payments/api-reference/2026-02-19.preview/post-v1-refunds"
-                    ]
-                  },
-                  {
-                    "group": "Merchants",
-                    "pages": [
-                      "payments/api-reference/2026-02-19.preview/get-v1-merchants-payments",
-                      "payments/api-reference/2026-02-19.preview/post-v1-merchants",
-                      "payments/api-reference/2026-02-19.preview/get-v1-merchants",
-                      "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
-                      "payments/api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
-                      "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
-                      "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid-settlements",
-                      "payments/api-reference/2026-02-19.preview/post-v1-merchants-merchantid-settlements-crypto",
-                      "payments/api-reference/2026-02-19.preview/put-v1-merchants-merchantid-settlements-crypto-id",
-                      "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid-settlements-crypto-id",
-                      "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
-                    ]
-                  }
+                "group": "Headless SDK",
+                "pages": [
+                  "payments/psps/headless-sdk/overview",
+                  "payments/psps/headless-sdk/how-it-works",
+                  "payments/psps/headless-sdk/implementation",
+                  "payments/psps/headless-sdk/packages-reference"
                 ]
               }
+            ]
+          },
+          {
+            "group": "For Merchants",
+            "pages": [
+              "payments/merchant/quickstart",
+              "payments/merchant-api/logo-specification"
+            ]
+          },
+          {
+            "group": "For Wallets",
+            "pages": [
+              "payments/wallets/overview",
+              {
+                "group": "Standalone integration",
+                "pages": [
+                  "payments/wallets/standalone/kotlin",
+                  "payments/wallets/standalone/swift",
+                  "payments/wallets/standalone/react-native",
+                  "payments/wallets/standalone/flutter",
+                  "payments/wallets/standalone/web"
+                ]
+              },
+              {
+                "group": "Integrate Wallet SDK",
+                "pages": [
+                  "payments/wallets/walletkit/kotlin",
+                  "payments/wallets/walletkit/swift",
+                  "payments/wallets/walletkit/react-native",
+                  "payments/wallets/walletkit/flutter",
+                  "payments/wallets/walletkit/web"
+                ]
+              },
+              "payments/wallets/api-first",
+              "payments/wallets/tap-to-pay",
+              "payments/wallets/webview",
+              {
+                "group": "Token & Chain Support",
+                "pages": [
+                  "payments/wallets/token-chain-support",
+                  "payments/wallets/token-chain-support/usdt-support",
+                  "payments/wallets/token-chain-support/solana-support",
+                  "payments/wallets/token-chain-support/tron-support"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "For Checkout",
+            "pages": [
+              "payments/ecommerce/overview",
+              "payments/ecommerce/integration",
+              "payments/ecommerce/api-reference"
+            ]
+          },
+          {
+            "group": "AI Agents",
+            "pages": [
+              "agents/overview"
             ]
           }
         ]
