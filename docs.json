@@ -701,7 +701,7 @@
         },
         {
           "anchor": "Whitepaper",
-          "href": "https://whitepaper.walletconnect.network/",
+          "href": "https://whitepaper.walletconnect.com/",
           "icon": "book"
         },
         {
@@ -720,7 +720,7 @@
     "links": [
       {
         "label": "WalletGuide",
-        "href": "https://walletguide.walletconnect.network/"
+        "href": "https://walletguide.walletconnect.com/"
       }
     ],
     "primary": {
@@ -745,7 +745,7 @@
     "socials": {
       "website": "https://walletconnect.com",
       "x": "https://x.com/walletconnect",
-      "discord": "https://discord.walletconnect.network",
+      "discord": "https://discord.walletconnect.com",
       "github": "https://github.com/WalletConnect",
       "linkedin": "https://www.linkedin.com/company/walletconnectnetwork/"
     }
