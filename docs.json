@@ -577,6 +577,16 @@
             ]
           },
           {
+            "group": "Wallet Verification",
+            "pages": [
+              "payments/wallet-verification/overview",
+              "payments/wallet-verification/quickstart",
+              "payments/wallet-verification/hosted-page",
+              "payments/wallet-verification/attestations",
+              "payments/wallet-verification/dashboard"
+            ]
+          },
+          {
             "group": "AI Agents",
             "pages": [
               "agents/overview"
