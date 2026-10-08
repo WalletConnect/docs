@@ -64,9 +64,9 @@ The page uses the business name, page title, and logo you set in [Customization]
 
 ## Return to your app
 
-Set `return_url` when you create a verification to send the user back to your app. The **Return** and **Cancel** buttons navigate to `return_url` exactly as you gave it. Nothing is appended, so look up the result by polling.
+Set `return_url` when you create a verification to send the user back to your app. The **Return to {your business name}** button on the success and error screens, and the **Cancel** button, navigate to `return_url` exactly as you gave it. Nothing is appended, so look up the result by polling.
 
-Without a `return_url`, the buttons close the tab.
+Without a `return_url`, the success screen tells the user they can close the page, and the other buttons close the tab.
 
 The `return_url` must be HTTPS, and its origin must be on your account's allowed list (exact `https://host[:port]`, up to 20 origins). Otherwise create returns `400 invalid_return_url`.
 
@@ -82,8 +82,9 @@ Embedding origins are `https://host` or `https://*.host`, up to 20. Each host mu
 
 When embedded:
 
+- **When the user verifies**, the page posts a `verified` message to the parent window right away, without waiting for a click.
 - **With a `return_url`**, the Return and Cancel buttons navigate the top window. If your iframe is sandboxed, add `allow-top-navigation-by-user-activation`. Otherwise only the iframe navigates.
-- **Without a `return_url`**, the page posts a message to the parent window instead:
+- **Without a `return_url`**, the Return and Cancel buttons post a message to the parent window instead of navigating:
 
 ```json postMessage payload
 { "type": "wallet_verification:return", "state": "verified" }
