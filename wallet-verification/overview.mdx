@@ -39,8 +39,8 @@ sequenceDiagram
 
 1. Your backend creates a verification with your own `reference_id` and a `purpose`. The response includes a one-time `url`.
 2. You send the user that `url` as a link, a redirect, or an embedded iframe.
-3. The user opens the [hosted page](/payments/wallet-verification/hosted-page), connects a wallet, and signs a message that names your business and the purpose.
-4. Wallet Verification checks the signature and stores an [attestation](/payments/wallet-verification/attestations).
+3. The user opens the [hosted page](/wallet-verification/hosted-page), connects a wallet, and signs a message that names your business and the purpose.
+4. Wallet Verification checks the signature and stores an [attestation](/wallet-verification/attestations).
 5. Your backend polls the verification until it reaches a terminal state, then reads the attestation.
 
 <Note>
@@ -50,16 +50,16 @@ Wallet Verification does not send webhooks. Poll `GET /verifications/{id}` to ge
 ## Get Started
 
 <CardGroup cols={2}>
-  <Card title="Quickstart" icon="rocket" href="/payments/wallet-verification/quickstart">
+  <Card title="Quickstart" icon="rocket" href="/wallet-verification/quickstart">
     Create your first verification and read the result.
   </Card>
-  <Card title="Hosted page" icon="window" href="/payments/wallet-verification/hosted-page">
+  <Card title="Hosted page" icon="window" href="/wallet-verification/hosted-page">
     What your users see, supported wallets, return URLs, and embedding.
   </Card>
-  <Card title="Attestations" icon="file-signature" href="/payments/wallet-verification/attestations">
+  <Card title="Attestations" icon="file-signature" href="/wallet-verification/attestations">
     States, fields, the signed message, and how to re-check a signature.
   </Card>
-  <Card title="Dashboard" icon="gauge" href="/payments/wallet-verification/dashboard">
+  <Card title="Dashboard" icon="gauge" href="/wallet-verification/dashboard">
     Request access, manage API keys, review activity, and customize the page.
   </Card>
 </CardGroup>

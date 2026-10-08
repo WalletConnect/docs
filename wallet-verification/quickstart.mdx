@@ -19,7 +19,7 @@ Use staging for integration testing only; attestations created there are not evi
 
 <Step title="Get access and an API key" stepNumber="1">
 
-In the WalletConnect Pay merchant dashboard, open the **Wallet Verification** tab on the [API keys](https://merchant.pay.walletconnect.com/en/api-keys) page and request access. Once access is enabled, create an API key. The full key is shown only once, so store it in a secret manager. See [Dashboard](/payments/wallet-verification/dashboard) for details.
+In the WalletConnect Pay merchant dashboard, open the **Wallet Verification** tab on the [API keys](https://merchant.pay.walletconnect.com/en/api-keys) page and request access. Once access is enabled, create an API key. The full key is shown only once, so store it in a secret manager. See [Dashboard](/wallet-verification/dashboard) for details.
 
 Send the key as a bearer token on every request:
 
@@ -55,11 +55,11 @@ curl -X POST "$WV_BASE/verifications" \
 | `expected_address` | No | Pins the wallet. The page and the API refuse any other address. Returns `400 invalid_address` if it does not fit the pinned chain. |
 | `validity_seconds` | No | How long the link stays valid. 60 to 2,592,000 (30 days). Defaults to 604,800 (7 days). |
 | `metadata` | No | Object up to 4 KiB, echoed back on the verification. Never signed. Do not put personal data here. |
-| `return_url` | No | HTTPS URL the page sends the user back to. Up to 2,048 characters, no credentials, and its origin must be registered for your account. See [Return to your app](/payments/wallet-verification/hosted-page#return-to-your-app). |
+| `return_url` | No | HTTPS URL the page sends the user back to. Up to 2,048 characters, no credentials, and its origin must be registered for your account. See [Return to your app](/wallet-verification/hosted-page#return-to-your-app). |
 
 The request body can be up to 16 KiB. Larger bodies return `413 request_error`.
 
-A successful request returns `201` with the [verification object](/payments/wallet-verification/attestations#verification-object) plus a `url`:
+A successful request returns `201` with the [verification object](/wallet-verification/attestations#verification-object) plus a `url`:
 
 ```json 201 Created
 {
@@ -87,7 +87,7 @@ The `url` is returned only in this response. Store it with the verification `id`
 
 <Step title="Send the user the link" stepNumber="3">
 
-Give the user the `url` however fits your product: send it as a link, redirect the browser to it, or embed it in an iframe. The [hosted page](/payments/wallet-verification/hosted-page) walks the user through connecting and signing.
+Give the user the `url` however fits your product: send it as a link, redirect the browser to it, or embed it in an iframe. The [hosted page](/wallet-verification/hosted-page) walks the user through connecting and signing.
 
 </Step>
 
@@ -110,7 +110,7 @@ To find verifications later, list them with `GET /verifications`. Results are ne
 
 <Step title="Read the attestation" stepNumber="5">
 
-When `state` is `verified`, the `attestation` field holds the address, the exact signed message, the signature, and how it was checked. See [Attestations](/payments/wallet-verification/attestations) for every field and how to re-check the signature yourself.
+When `state` is `verified`, the `attestation` field holds the address, the exact signed message, the signature, and how it was checked. See [Attestations](/wallet-verification/attestations) for every field and how to re-check the signature yourself.
 
 </Step>
 

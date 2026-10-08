@@ -4,7 +4,7 @@ description: "What your users see when they verify a wallet, which wallets are s
 sidebarTitle: "Hosted page"
 ---
 
-The hosted page is where your user connects a wallet and signs the verification message. You get its link as the `url` when you [create a verification](/payments/wallet-verification/quickstart).
+The hosted page is where your user connects a wallet and signs the verification message. You get its link as the `url` when you [create a verification](/wallet-verification/quickstart).
 
 | Environment | Hosted page origin |
 |-------------|--------------------|
@@ -13,9 +13,13 @@ The hosted page is where your user connects a wallet and signs the verification 
 
 ## What your user sees
 
+<Frame caption="The first screen: your business name at the top, the wallet list, and a QR code for mobile wallets.">
+  <img src="/images/wallet-verification/connect-wallet.png" alt="Wallet Verification hosted page asking the user to connect a wallet, with a searchable wallet list and a QR code to connect on mobile" />
+</Frame>
+
 <Steps>
   <Step title="Open the link">
-    The page shows your business name, page title, and logo from [Customization](/payments/wallet-verification/dashboard#customization).
+    The page shows your business name, page title, and logo from [Customization](/wallet-verification/dashboard#customization).
   </Step>
   <Step title="Connect a wallet">
     On desktop the user scans a QR code. On mobile they pick from a wallet list. More than 700 wallets connect through WalletConnect.
@@ -60,7 +64,7 @@ Multi-signature wallets that need more than one approver, such as a Safe with a 
 
 ## Branding
 
-The page uses the business name, page title, and logo you set in [Customization](/payments/wallet-verification/dashboard#customization). Your business name also appears in the [signed message](/payments/wallet-verification/attestations#signed-message).
+The page uses the business name, page title, and logo you set in [Customization](/wallet-verification/dashboard#customization). Your business name also appears in the [signed message](/wallet-verification/attestations#signed-message).
 
 ## Return to your app
 

@@ -79,7 +79,7 @@ Request ID: {verification id, ver_…}
 | `onboarding` | complete onboarding |
 | `re_verification` | re-confirm ownership of this wallet |
 
-The requester name is the business name from [Customization](/payments/wallet-verification/dashboard#customization), with accents stripped to fit the format. Without one, it reads "The requester". Your `reference_id` and `metadata` are not part of the message.
+The requester name is the business name from [Customization](/wallet-verification/dashboard#customization), with accents stripped to fit the format. Without one, it reads "The requester". Your `reference_id` and `metadata` are not part of the message.
 
 To fetch only the signed text, call `GET /verifications/{id}/message`. It returns `text/plain`, or `409 not_verified` if the verification is not `verified`.
 
