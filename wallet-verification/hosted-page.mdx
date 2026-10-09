@@ -1,0 +1,131 @@
+---
+title: "Wallet Verification Hosted Page"
+description: "What your users see when they verify a wallet, which wallets are supported, and how to return users to your app or embed the page."
+sidebarTitle: "Hosted page"
+---
+
+The hosted page is where your user connects a wallet and signs the verification message. You get its link as the `url` when you [create a verification](/wallet-verification/quickstart).
+
+| Environment | Hosted page origin |
+|-------------|--------------------|
+| Production | `https://wallet-verification.walletconnect.com` |
+| Staging | `https://staging.wallet-verification.walletconnect.com` |
+
+## What your user sees
+
+<Frame caption="The first screen: your business name at the top, the wallet list, and a QR code for mobile wallets.">
+  <img src="/images/wallet-verification/connect-wallet.png" alt="Wallet Verification hosted page asking the user to connect a wallet, with a searchable wallet list and a QR code to connect on mobile" />
+</Frame>
+
+<Steps>
+  <Step title="Open the link">
+    The page shows your business name, page title, and logo from [Customization](/wallet-verification/dashboard#customization).
+  </Step>
+  <Step title="Connect a wallet">
+    The user picks a wallet from the list, or on desktop scans the QR code with a mobile wallet. More than 700 wallets connect through WalletConnect.
+  </Step>
+  <Step title="Review">
+    The user reviews the address and taps **Verify address**. The page names the wallet that will ask for approval and states that no funds move.
+
+    <Frame>
+      <img src="/images/wallet-verification/review.png" alt="Review screen showing the Solana network and shortened address, the wallet that will ask for approval, and a Verify address button" />
+    </Frame>
+  </Step>
+  <Step title="Add personal details">
+    Only shown if your account collects user information. After tapping **Verify address**, the user enters their full name, date of birth, and city and country of birth, then accepts the terms.
+
+    <Frame>
+      <img src="/images/wallet-verification/personal-details.png" alt="Personal details form asking for full name, date of birth, city of birth and country of birth, with an I agree checkbox and a Confirm button" />
+    </Frame>
+  </Step>
+  <Step title="Sign">
+    The user signs the message in their wallet.
+  </Step>
+  <Step title="Done">
+    The page shows **Wallet verified** if you set `expected_address`, or **Wallet added** if you didn't. With a `return_url`, it sends the user back to your app after 5 seconds, or right away when they tap **Return to** your business name.
+
+    <Frame>
+      <img src="/images/wallet-verification/verified.png" alt="Success screen titled Wallet verified, counting down 5 seconds before returning the user to Acme Inc, with a Return to Acme Inc button" />
+    </Frame>
+  </Step>
+</Steps>
+
+### Errors the user can see
+
+| Error | What it means |
+|-------|---------------|
+| Wrong wallet | The connected address does not match `expected_address`. |
+| Wrong network | The wallet is on a different network than `chain_id`. |
+| Invalid signature | The signature did not verify. This is terminal: the verification ends as `failed`, and the user needs a fresh link from you. |
+| Unsupported wallet type | The wallet type is not supported. See below. |
+| Unsupported network | The network is not supported. |
+| Chain temporarily unavailable | The page could not reach the chain. The user can retry. |
+
+## Supported wallets and networks
+
+| Network | Supported | Not supported |
+|---------|-----------|---------------|
+| EVM | Regular accounts (EOA), EIP-7702 accounts, smart contract wallets (ERC-1271), smart wallets that are not deployed yet (ERC-6492) | Multi-signature wallets that need several approvers |
+| Solana | Regular accounts (ed25519) | Program-derived addresses |
+
+An EVM address is the same on every EVM chain. A verification proves control of the address.
+
+<Warning>
+Multi-signature wallets that need more than one approver, such as a Safe with a threshold above 1, are not supported yet. Today such a verification ends as `failed`. Multisig support is planned.
+</Warning>
+
+## Branding
+
+The page uses the business name, page title, and logo you set in [Customization](/wallet-verification/dashboard#customization). Your business name also appears in the [signed message](/wallet-verification/attestations#signed-message).
+
+## Return to your app
+
+Set `return_url` when you create a verification to send the user back to your app. After a successful verification the page returns the user automatically after 5 seconds, unless it is [in an iframe](#embed-in-an-iframe). The **Return to** button (it shows your business name) on the success and error screens, and the **Cancel** button, navigate to `return_url` exactly as you gave it. Nothing is appended, so look up the result by polling.
+
+Without a `return_url`, the success screen tells the user they can close the page, and the other buttons close the tab.
+
+The `return_url` must be HTTPS, and its origin must be on your account's allowed list (exact `https://host[:port]`, up to 20 origins). Otherwise create returns `400 invalid_return_url`.
+
+<Info>
+Allowed return-URL origins are configured by the WalletConnect team. Contact your WalletConnect contact to register them.
+</Info>
+
+## Embed in an iframe
+
+You can show the hosted page inside your app in an iframe. The page can only be framed by origins on your account's embedding list. Without one, the page refuses to be framed (`frame-ancestors 'none'`).
+
+Embedding origins are `https://host` or `https://*.host`, up to 20. Each host must be a registrable domain. IP addresses, `localhost`, and bare platform suffixes such as `*.vercel.app` are not allowed. Contact your WalletConnect contact to register them.
+
+When embedded:
+
+- **When the user verifies**, the page posts a `verified` message to the parent window right away, without waiting for a click.
+- **No automatic return** when framed. The 5-second return only runs when the page is not in an iframe. Close the frame or move on when you get `verified`.
+- **With a `return_url`**, the Return and Cancel buttons navigate the top window. If your iframe is sandboxed, add `allow-top-navigation-by-user-activation`. Otherwise only the iframe navigates.
+- **Without a `return_url`**, the Return and Cancel buttons post a message to the parent window instead of navigating:
+
+```json postMessage payload
+{ "type": "wallet_verification:return", "state": "verified" }
+```
+
+`state` is one of `verified`, `cancelled`, `failed`, `expired`, `not_found`, `pending`, or `unknown`. The message is only sent to an origin on your embedding list, never to `*`.
+
+```javascript Listen for the return message
+window.addEventListener("message", (event) => {
+  if (event.origin !== "https://wallet-verification.walletconnect.com") return;
+  if (event.data?.type !== "wallet_verification:return") return;
+
+  // Treat this as a hint. Confirm the result on your backend.
+  closeVerificationFrame();
+  refreshVerificationStatus();
+});
+```
+
+<Warning>
+Browsers that do not expose the parent origin, such as Firefox without a referrer, receive no message. Always confirm the result server-side by polling `GET /verifications/{id}`.
+</Warning>
+
+## Limitations
+
+- Multi-signature wallets that need several approvers are not supported yet.
+- Solana program-derived addresses are not supported.
+- Allowed return-URL and embedding origins are not self-serve yet.

@@ -1,0 +1,208 @@
+---
+title: "Wallet Verification Quickstart"
+description: "Create a wallet verification, send the link to your user, and read the signed attestation."
+sidebarTitle: "Quickstart"
+---
+
+This guide takes you from an API key to a verified wallet in five steps.
+
+| Environment | API base URL |
+|-------------|--------------|
+| Production | `https://api.wallet-verification.walletconnect.com` |
+| Staging | `https://staging.api.wallet-verification.walletconnect.com` |
+
+<Warning>
+Use staging for integration testing only; attestations created there are not evidence for compliance. There is no test mode in production.
+</Warning>
+
+<Steps>
+
+<Step title="Get access and an API key" stepNumber="1">
+
+In the WalletConnect Pay merchant dashboard, open the **Wallet Verification** tab on the [API keys](https://merchant.pay.walletconnect.com/en/api-keys) page and request access. Once access is enabled, create an API key. The full key is shown only once, so store it in a secret manager. See [Dashboard](/wallet-verification/dashboard) for details.
+
+Send the key as a bearer token on every request:
+
+```bash Environment
+export WV_API_KEY="wv_your-api-key"
+export WV_BASE="https://api.wallet-verification.walletconnect.com"
+```
+
+A missing, unknown, or revoked key, or an account without access, returns `401 unauthorized`.
+
+</Step>
+
+<Step title="Create a verification" stepNumber="2">
+
+```bash Create a verification
+curl -X POST "$WV_BASE/verifications" \
+  -H "Authorization: Bearer $WV_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reference_id": "customer-4821-payout-wallet",
+    "purpose": "payout",
+    "chain_id": "eip155:1",
+    "return_url": "https://app.example.com/wallets"
+  }'
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `reference_id` | Yes | Your own identifier, 1–200 printable ASCII characters with no spaces. Not included in the signed message. |
+| `purpose` | Yes | `withdrawal`, `payout`, `onboarding`, or `re_verification`. Sets the wording of the signed message. |
+| `chain_id` | No | CAIP-2 chain ID in the `eip155` or `solana` namespace. If omitted, the user chooses Ethereum-compatible or Solana when connecting. |
+| `expected_address` | No | Pins the wallet. The page and the API refuse any other address. Returns `400 invalid_address` if it does not fit the pinned chain. |
+| `validity_seconds` | No | How long the link stays valid. 60 to 2,592,000 (30 days). Defaults to 604,800 (7 days). |
+| `metadata` | No | Object up to 4 KiB, echoed back on the verification. Never signed. Do not put personal data here. |
+| `return_url` | No | HTTPS URL the page sends the user back to. Up to 2,048 characters, no credentials, and its origin must be registered for your account. See [Return to your app](/wallet-verification/hosted-page#return-to-your-app). |
+
+The request body can be up to 16 KiB. Larger bodies return `413 request_error`.
+
+A successful request returns `201` with the [verification object](/wallet-verification/attestations#verification-object) plus a `url`:
+
+```json 201 Created
+{
+  "id": "ver_3f9a1c2b7d8e4f6a9b0c1d2e3f4a5b6c",
+  "state": "pending",
+  "reference_id": "customer-4821-payout-wallet",
+  "purpose": "payout",
+  "chain_id": "eip155:1",
+  "expected_address": null,
+  "expires_at": "2026-10-15T10:00:00Z",
+  "return_url": "https://app.example.com/wallets",
+  "created_at": "2026-10-08T10:00:00Z",
+  "metadata": {},
+  "failure_reason": null,
+  "attestation": null,
+  "url": "https://wallet-verification.walletconnect.com/s/your-session-token"
+}
+```
+
+<Warning>
+The `url` is returned only in this response. Store it with the verification `id`.
+</Warning>
+
+</Step>
+
+<Step title="Send the user the link" stepNumber="3">
+
+Give the user the `url` however fits your product: send it as a link, redirect the browser to it, or embed it in an iframe. The [hosted page](/wallet-verification/hosted-page) walks the user through connecting and signing.
+
+</Step>
+
+<Step title="Poll for the result" stepNumber="4">
+
+Poll the verification until its `state` is terminal: `verified`, `failed`, `expired`, or `cancelled`.
+
+```bash Read a verification
+curl "$WV_BASE/verifications/ver_3f9a1c2b7d8e4f6a9b0c1d2e3f4a5b6c" \
+  -H "Authorization: Bearer $WV_API_KEY"
+```
+
+<Tip>
+Poll every few seconds while the user is on the page, then back off. If the user returns through your `return_url` or the page posts a message to your parent window, poll once more to confirm the result server-side.
+</Tip>
+
+To find verifications later, list them with `GET /verifications`. Results are newest first and support `limit` (1–100, default 20), an opaque `cursor`, and the filters `state`, `reference_id`, `from` (inclusive), and `to` (exclusive). The response is `{ "data": [...], "next_cursor": "..." }`, and `next_cursor` is `null` on the last page.
+
+</Step>
+
+<Step title="Read the attestation" stepNumber="5">
+
+When `state` is `verified`, the `attestation` field holds the address, the exact signed message, the signature, and how it was checked. See [Attestations](/wallet-verification/attestations) for every field and how to re-check the signature yourself.
+
+</Step>
+
+</Steps>
+
+## Idempotency
+
+Send an `Idempotency-Key` header (1–255 characters) on create so you can retry safely. Keys are scoped to your account and kept for 24 hours.
+
+- Retrying with the same key and the same body returns `200` with the same verification and **no `url`**. Keep the `url` from the first `201`.
+- Reusing a key with a different body returns `409 idempotency_key_mismatch`.
+
+## One live session per reference
+
+Each `reference_id` can have only one `pending` verification at a time. Creating another while one is pending returns `409 reference_in_progress`, and the link is not re-issued:
+
+```json 409 Conflict
+{
+  "status": "error",
+  "error": {
+    "code": "reference_in_progress",
+    "message": "A verification for this reference is already in progress.",
+    "details": {
+      "verification_id": "ver_3f9a1c2b7d8e4f6a9b0c1d2e3f4a5b6c",
+      "state": "pending",
+      "expires_at": "2026-10-15T10:00:00Z"
+    }
+  }
+}
+```
+
+Once the earlier verification reaches a terminal state, you can create a new one with the same `reference_id`.
+
+## Cancel a verification
+
+Cancel a pending verification to stop its link from working:
+
+```bash Cancel a verification
+curl -X POST "$WV_BASE/verifications/ver_3f9a1c2b7d8e4f6a9b0c1d2e3f4a5b6c/cancel" \
+  -H "Authorization: Bearer $WV_API_KEY"
+```
+
+The state moves to `cancelled`. Cancelling a verification in any other state returns `409 not_cancellable`.
+
+## Error handling
+
+Errors use one envelope. Switch on `code`. The `message` text may change.
+
+```json Error envelope
+{
+  "status": "error",
+  "error": {
+    "code": "invalid_body",
+    "message": "Human-readable description.",
+    "details": {}
+  }
+}
+```
+
+| Code | HTTP | Meaning |
+|------|------|---------|
+| `invalid_body` | 400 | The request body failed validation. |
+| `invalid_address` | 400 | `expected_address` is not valid for the pinned chain. |
+| `invalid_return_url` | 400 | `return_url` is malformed or its origin is not registered for your account. |
+| `invalid_cursor` | 400 | The cursor is invalid or was reused with different filters. |
+| `request_error` | 400, 413 | The request is malformed, or the body is larger than 16 KiB. |
+| `unauthorized` | 401 | The API key is missing, unknown, or revoked, or the account has no access. |
+| `not_found` | 404 | No verification with this ID exists for your account. |
+| `not_cancellable` | 409 | Only `pending` verifications can be cancelled. |
+| `not_verified` | 409 | The signed message is only available once the verification is `verified`. |
+| `reference_in_progress` | 409 | A `pending` verification already exists for this `reference_id`. |
+| `idempotency_key_mismatch` | 409 | The idempotency key was used with a different body. |
+| `internal_error` | 500 | Something went wrong on the server. Retry with the same idempotency key. |
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+  <Accordion title="Can I re-verify the same wallet?">
+    Yes. After a verification for a `reference_id` reaches a terminal state, create a new one with the same `reference_id`. Use the `re_verification` purpose so the signed message says why.
+  </Accordion>
+  <Accordion title="What happens if the link expires?">
+    The verification moves to `expired` once `expires_at` passes without a signature, and the link stops working. Create a new verification to get a new link.
+  </Accordion>
+  <Accordion title="Can I pin the address or the chain?">
+    Yes. Set `chain_id` to pin the network and `expected_address` to pin the wallet. The hosted page refuses any other network or address.
+  </Accordion>
+  <Accordion title="Can I get the link again?">
+    No. The `url` is returned only in the first `201` response. If you lose it, cancel the verification and create a new one.
+  </Accordion>
+  <Accordion title="Are there webhooks?">
+    No. Poll `GET /verifications/{id}` until the state is terminal.
+  </Accordion>
+</AccordionGroup>
+
+The API reference is coming soon.

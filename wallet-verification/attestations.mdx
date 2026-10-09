@@ -1,0 +1,145 @@
+---
+title: "Wallet Verification Attestations"
+description: "Verification states, the verification and attestation objects, the signed message format, and how to re-check a signature yourself."
+sidebarTitle: "Attestations"
+---
+
+When a user signs, Wallet Verification checks the signature and stores an attestation on the verification. The attestation holds everything you need to re-check the proof independently.
+
+## Verification states
+
+| State | Terminal | Meaning |
+|-------|----------|---------|
+| `pending` | No | Created. Waiting for the user to sign. |
+| `verified` | Yes | The signature checked out. `attestation` is set. |
+| `failed` | Yes | The signature did not verify. `failure_reason` is set. |
+| `expired` | Yes | `expires_at` passed without a signature. |
+| `cancelled` | Yes | You cancelled the verification. The link no longer works. |
+
+`failure_reason` is currently always `invalid_signature`.
+
+## Verification object
+
+| Field | Description |
+|-------|-------------|
+| `id` | Verification ID, `ver_` followed by 32 hex characters. |
+| `state` | One of the [states](#verification-states) above. |
+| `reference_id` | Your identifier from create. |
+| `purpose` | `withdrawal`, `payout`, `onboarding`, or `re_verification`. |
+| `chain_id` | CAIP-2 chain ID you pinned, or `null`. |
+| `expected_address` | Address you pinned, or `null`. |
+| `expires_at` | When the link stops working. |
+| `return_url` | Return URL you set, or `null`. |
+| `created_at` | When the verification was created. |
+| `metadata` | Your metadata object, echoed back. Never signed. |
+| `failure_reason` | Set when `state` is `failed`. |
+| `attestation` | Set when `state` is `verified`. See below. |
+
+The create response also includes `url`. No other response returns it.
+
+## Attestation object
+
+| Field | Description |
+|-------|-------------|
+| `address` | Verified address. EIP-55 checksummed for EVM, base58 for Solana. |
+| `chain_id` | CAIP-2 chain ID the user signed on. |
+| `message` | The exact text the user signed. |
+| `signature` | `0x` hex for EVM, base58 for Solana. |
+| `wallet_type` | `eoa`, `eoa_7702`, `contract`, or `counterfactual`. |
+| `verification_method` | `ecrecover`, `erc1271`, `erc6492`, or `ed25519`. |
+| `block_number` | Block the contract check ran at, as a decimal string. `null` for stateless methods. |
+| `block_hash` | Hash of that block. `null` for stateless methods. |
+| `verified_at` | When the signature was verified. |
+
+`ecrecover` and `ed25519` are stateless. `erc1271` and `erc6492` call the wallet contract, so they record the block.
+
+## Signed message
+
+EVM wallets sign an [EIP-4361](https://eips.ethereum.org/EIPS/eip-4361) (Sign-In with Ethereum) message. Solana wallets sign the equivalent [CAIP-122](https://chainagnostic.org/CAIPs/caip-122) message.
+
+```text Signed message format
+{page host} wants you to sign in with your {Ethereum|Solana} account:
+{address}
+
+{Requester name} asks you to verify wallet ownership to {purpose text}.
+
+URI: {page origin}/s
+Version: 1
+Chain ID: {EVM: chain number, e.g. 1 | Solana: full CAIP-2 id}
+Nonce: {nonce}
+Issued At: {created_at}
+Expiration Time: {expires_at}
+Request ID: {verification id, ver_…}
+```
+
+| Purpose | Purpose text |
+|---------|--------------|
+| `withdrawal` | authorise a withdrawal to this wallet |
+| `payout` | receive payouts at this wallet |
+| `onboarding` | complete onboarding |
+| `re_verification` | re-confirm ownership of this wallet |
+
+The requester name is the business name from [Customization](/wallet-verification/dashboard#customization), with accents stripped to fit the format. Without one, it reads "The requester". Your `reference_id` and `metadata` are not part of the message.
+
+To fetch only the signed text, call `GET /verifications/{id}/message`. It returns `text/plain`, or `409 not_verified` if the verification is not `verified`.
+
+## Verify an attestation yourself
+
+You can re-check any attestation without trusting Wallet Verification. Pick the check that matches `verification_method`.
+
+<Note>
+These examples are illustrative. Use them as a starting point and adapt chain selection, RPC endpoints, and error handling to your stack.
+</Note>
+
+<Tabs>
+  <Tab title="ecrecover">
+    Recover the EIP-191 `personal_sign` signer over `message` and compare it to `address`.
+
+    ```typescript verify-ecrecover.ts
+    import { verifyMessage } from "viem";
+
+    const valid = await verifyMessage({
+      address: attestation.address,
+      message: attestation.message,
+      signature: attestation.signature,
+    });
+    ```
+  </Tab>
+  <Tab title="erc1271 / erc6492">
+    Call the ERC-6492 universal signature validator on the attestation's chain at `block_number`. viem's `publicClient.verifyMessage` handles both ERC-1271 and ERC-6492.
+
+    ```typescript verify-contract.ts
+    import { createPublicClient, http } from "viem";
+    import { mainnet } from "viem/chains"; // match attestation.chain_id
+
+    const client = createPublicClient({ chain: mainnet, transport: http() });
+
+    const valid = await client.verifyMessage({
+      address: attestation.address,
+      message: attestation.message,
+      signature: attestation.signature,
+      blockNumber: BigInt(attestation.block_number),
+    });
+    ```
+
+    Checking at a past block needs an RPC endpoint that serves historical state.
+  </Tab>
+  <Tab title="ed25519">
+    Verify the signature over the UTF-8 bytes of `message` with the address as the public key.
+
+    ```typescript verify-ed25519.ts
+    import { verifyAsync } from "@noble/ed25519";
+    import bs58 from "bs58";
+
+    const valid = await verifyAsync(
+      bs58.decode(attestation.signature),
+      new TextEncoder().encode(attestation.message),
+      bs58.decode(attestation.address),
+    );
+    ```
+  </Tab>
+</Tabs>
+
+## Retention
+
+Attestations are kept for 5 years.
