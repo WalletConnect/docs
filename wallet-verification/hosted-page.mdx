@@ -22,13 +22,14 @@ The hosted page is where your user connects a wallet and signs the verification 
     The page shows your business name, page title, and logo from [Customization](/wallet-verification/dashboard#customization).
   </Step>
   <Step title="Connect a wallet">
-    On desktop the user scans a QR code. On mobile they pick from a wallet list. More than 700 wallets connect through WalletConnect.
-  </Step>
-  <Step title="Choose a network">
-    Only shown if you did not set `chain_id`. "Ethereum" covers Base, Arbitrum, Polygon, and other EVM chains. The other option is "Solana".
-  </Step>
-  <Step title="Pick an account">
-    Only shown if the wallet connected on more than one network, so the user picks which address to verify.
+    The user picks a wallet from the list, or on desktop scans the QR code with a mobile wallet. More than 700 wallets connect through WalletConnect.
+
+    <Note>
+    Two extra choices can appear, both rare:
+
+    - **Ecosystem:** a browser extension that supports more than one ecosystem asks the user to pick one, such as "Ethereum Networks" or "Solana". More ecosystems will follow.
+    - **Account:** a WalletConnect connection that holds addresses from more than one ecosystem (for example, Trust Wallet) asks the user which address to verify.
+    </Note>
   </Step>
   <Step title="Review">
     The user reviews the address and taps **Verify address**. The page names the wallet that will ask for approval and states that no funds move.
