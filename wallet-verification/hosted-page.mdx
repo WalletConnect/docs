@@ -86,7 +86,7 @@ The page uses the business name, page title, and logo you set in [Customization]
 
 ## Return to your app
 
-Set `return_url` when you create a verification to send the user back to your app. After a successful verification the page returns the user automatically after 5 seconds. The **Return to** button (it shows your business name) on the success and error screens, and the **Cancel** button, navigate to `return_url` exactly as you gave it. Nothing is appended, so look up the result by polling.
+Set `return_url` when you create a verification to send the user back to your app. After a successful verification the page returns the user automatically after 5 seconds, unless it is [in an iframe](#embed-in-an-iframe). The **Return to** button (it shows your business name) on the success and error screens, and the **Cancel** button, navigate to `return_url` exactly as you gave it. Nothing is appended, so look up the result by polling.
 
 Without a `return_url`, the success screen tells the user they can close the page, and the other buttons close the tab.
 
@@ -105,6 +105,7 @@ Embedding origins are `https://host` or `https://*.host`, up to 20. Each host mu
 When embedded:
 
 - **When the user verifies**, the page posts a `verified` message to the parent window right away, without waiting for a click.
+- **No automatic return** when framed. The 5-second return only runs when the page is not in an iframe. Close the frame or move on when you get `verified`.
 - **With a `return_url`**, the Return and Cancel buttons navigate the top window. If your iframe is sandboxed, add `allow-top-navigation-by-user-activation`. Otherwise only the iframe navigates.
 - **Without a `return_url`**, the Return and Cancel buttons post a message to the parent window instead of navigating:
 
