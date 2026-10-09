@@ -49,7 +49,7 @@ The hosted page is where your user connects a wallet and signs the verification 
     The user signs the message in their wallet.
   </Step>
   <Step title="Done">
-    The page shows **Wallet verified**. With a `return_url`, it sends the user back to your app after 5 seconds, or right away when they tap **Return to** your business name. Without one, it shows **Wallet added** with the verified address and time.
+    The page shows **Wallet verified** if you set `expected_address`, or **Wallet added** if you didn't, with the verified address and time. With a `return_url`, it sends the user back to your app after 5 seconds, or right away when they tap **Return to** your business name.
 
     <Frame>
       <img src="/images/wallet-verification/verified.png" alt="Success screen titled Wallet verified, counting down 5 seconds before returning the user to Acme Inc, with a Return to Acme Inc button" />
