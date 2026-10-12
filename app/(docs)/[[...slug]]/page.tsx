@@ -1,0 +1,83 @@
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { getMDXComponents } from '@/components/mdx';
+import { appName, getPageImageUrl, siteUrl } from '@/lib/shared';
+import { source } from '@/lib/source';
+
+export default async function Page(props: PageProps<'/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  // Unknown URLs land on the home page instead of a 404
+  if (!page) redirect('/');
+
+  const MDX = page.data.body;
+  const components = getMDXComponents({
+    // this allows you to link to other pages with relative file paths
+    a: createRelativeLink(source, page),
+  });
+
+  // Mintlify `mode: frame` → landing pages with no title, TOC or page actions
+  if (page.data.mode === 'frame' || page.data.mode === 'custom') {
+    // The start page is the only one rendered without a sidebar — see app/global.css.
+    // `mode: frame` alone won't do: the Payments landing pages are `frame` and keep theirs.
+    const isHome = page.slugs.length === 0;
+    return (
+      <DocsPage
+        data-home={isHome || undefined}
+        // these pages open with a <Container> of their own (py-14), so the article's top
+        // padding would double the gap under the navbar
+        className="pt-0 md:pt-0 xl:pt-0"
+        full
+        toc={[]}
+        footer={{ enabled: false }}
+        tableOfContent={{ enabled: false }}
+      >
+        <DocsBody>
+          <MDX components={components} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  return (
+    <DocsPage
+      toc={page.data.toc}
+      full={page.data.full ?? page.data.mode === 'wide'}
+      // Fumadocs styles the prev/next links like <Card>, so a page ending in a "Next steps"
+      // card grid runs straight into look-alike boxes. Set the pager apart as plain navigation:
+      // a divider above, borderless items, and the "Previous/Next Page" hint as a small label.
+      footer={{
+        className:
+          'mt-8 border-t pt-6 [&>a]:flex-col-reverse [&>a]:gap-1 [&>a]:border-transparent [&>a>p]:text-xs',
+      }}
+    >
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <MDX components={components} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function generateStaticParams() {
+  return source.generateParams();
+}
+
+export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promise<Metadata> {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) redirect('/');
+
+  const { metatags } = page.data;
+  return {
+    metadataBase: new URL(siteUrl),
+    title: page.slugs.length === 0 ? appName : `${page.data.title} | ${appName}`,
+    description: metatags?.description ?? page.data.description,
+    openGraph: {
+      images: getPageImageUrl(page).url,
+    },
+  };
+}

@@ -1,0 +1,154 @@
+[
+  {
+    "source": "/payments/merchant/onboarding",
+    "destination": "/payments/merchant/quickstart"
+  },
+  {
+    "source": "/api-reference/:slug*",
+    "destination": "/payments/api-reference/:slug*"
+  },
+  {
+    "source": "/payments/api-reference/latest/:slug*",
+    "destination": "/payments/api-reference/2026-02-18/:slug*"
+  },
+  {
+    "source": "/wallet-sdk/chain-support/:slug*",
+    "destination": "/wallets/chains/:slug*"
+  },
+  {
+    "source": "/wallet-sdk/best-practices",
+    "destination": "/wallets/more/best-practices"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/staying-up-to-date",
+    "destination": "/wallets/more/updating-wallet-sdk"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-to-reown",
+    "destination": "/wallets/more/web3wallet-migration/quickstart"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-web",
+    "destination": "/wallets/more/web3wallet-migration/web"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-react-native",
+    "destination": "/wallets/more/web3wallet-migration/react-native"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-flutter",
+    "destination": "/wallets/more/web3wallet-migration/flutter"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-android",
+    "destination": "/wallets/more/web3wallet-migration/android"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-ios",
+    "destination": "/wallets/more/web3wallet-migration/ios"
+  },
+  {
+    "source": "/wallet-sdk/upgrade/from-web3wallet-unity",
+    "destination": "/wallets/more/web3wallet-migration/unity"
+  },
+  {
+    "source": "/wallet-sdk/:slug*",
+    "destination": "/wallets/:slug*"
+  },
+  {
+    "source": "/app-sdk/:slug*",
+    "destination": "/apps/:slug*"
+  },
+  {
+    "source": "/guides/:slug*",
+    "destination": "/wallets/guides/:slug*"
+  },
+  {
+    "source": "/custodians/:slug*",
+    "destination": "/wallets/custodians/:slug*"
+  },
+  {
+    "source": "/walletguide/explorer-submission",
+    "destination": "/wallets/walletguide/submit-wallet"
+  },
+  {
+    "source": "/walletguide/explorer",
+    "destination": "/wallets/walletguide/explorer-api"
+  },
+  {
+    "source": "/walletguide/chains/overview",
+    "destination": "/wallets/walletguide/submit-chain"
+  },
+  {
+    "source": "/walletguide/chains/chain-list",
+    "destination": "/wallets/walletguide/chain-list"
+  },
+  {
+    "source": "/walletguide/wallets/wallet-list",
+    "destination": "/wallets/walletguide/wallet-list"
+  },
+  {
+    "source": "/walletguide/:slug*",
+    "destination": "/wallets/walletguide/:slug*"
+  },
+  {
+    "source": "/token-dynamics/intro",
+    "destination": "/network/WCT-token/overview"
+  },
+  {
+    "source": "/token-dynamics/fees",
+    "destination": "/network/WCT-token/overview"
+  },
+  {
+    "source": "/token-dynamics/wallet-rewards",
+    "destination": "/network/WCT-token/rewards"
+  },
+  {
+    "source": "/token-dynamics/rewards",
+    "destination": "/network/WCT-token/rewards"
+  },
+  {
+    "source": "/token-dynamics/service-node-rewards",
+    "destination": "/network/WCT-token/service-node-rewards"
+  },
+  {
+    "source": "/wct-staking/overview",
+    "destination": "/network/WCT-token/staking"
+  },
+  {
+    "source": "/wct-staking/faq",
+    "destination": "/network/WCT-token/faq"
+  },
+  {
+    "source": "/governance",
+    "destination": "/network/WCT-token/governance"
+  },
+  {
+    "source": "/contracts",
+    "destination": "/network/WCT-token/contracts"
+  },
+  {
+    "source": "/service-nodes",
+    "destination": "/network/service-nodes"
+  },
+  {
+    "source": "/overview",
+    "destination": "/network"
+  },
+  {
+    "source": "/wallets/overview",
+    "destination": "/wallets"
+  },
+  {
+    "source": "/apps/overview",
+    "destination": "/apps"
+  },
+  {
+    "source": "/payments/overview",
+    "destination": "/payments"
+  },
+  {
+    "source": "/wallets/guides/tonconnect-walletconnect",
+    "destination": "/apps/guides/tonconnect-walletconnect"
+  }
+]

@@ -1,0 +1,84 @@
+---
+mode: "frame"
+title: "WalletConnect Documentation"
+sidebarTitle: "Home"
+description: "The Connectivity Layer for the Financial Internet"
+---
+
+<div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
+  <Container>
+    <div className="flex flex-col w-full mb-8">
+      <Title>
+        WalletConnect Ecosystem Quickstart
+      </Title>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
+        WalletConnect powers apps, wallets and end-users via the WalletConnect network.
+      </p>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mt-4">
+        <strong>Check out our quickstart guides to get started!</strong>
+      </p>
+    </div>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <ProductCard
+        title="Wallets"
+        description="Reach users on the network by joining our ecosystem of wallets."
+        href="/wallets"
+        img="/images/wallet.svg"
+        imgDark="/images/wallet-dark.svg"
+      />
+      <ProductCard
+        title="Apps"
+        description="Provide wallet connections and user authentication for your app."
+        href="/apps"
+        img="/images/app.svg"
+        imgDark="/images/app-dark.svg"
+      />
+      <ProductCard
+        title="Payments"
+        description="Enable stablecoin and crypto payments as a wallet, app, PSP or merchant."
+        href="/payments"
+        img="/images/credit-card.svg"
+        imgDark="/images/credit-card-dark.svg"
+      />
+      <ProductCard
+        title="WalletConnect Network"
+        description="Discover the network powering 700+ wallets and 80,000+ apps."
+        href="/network"
+        img="/images/network.svg"
+        imgDark="/images/network-dark.svg"
+      />
+    </div>
+    <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
+  </Container>
+
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        Resources
+      </Title>
+    </div>
+    <Cards className="grid-cols-3">
+      <Card
+        title="WalletConnect Blog"
+        icon={<Icon icon="newspaper" />}
+        href="https://walletconnect.com/blog"
+      >
+        Read the latest news and updates from the WalletConnect team
+      </Card>
+      <Card
+        title="Join the WalletConnect Community"
+        icon={<Icon icon="discord" />}
+        href="https://discord.walletconnect.network/"
+      >
+        Discord community for WalletConnect Network and WCT Token
+      </Card>
+      <Card
+        title="Twitter"
+        icon={<Icon icon="twitter" />}
+        href="https://x.com/WalletConnect"
+      >
+        Follow WalletConnect on X (Twitter) to stay updated on the announcements
+      </Card>
+    </Cards>
+  </Container>
+</div>
