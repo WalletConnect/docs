@@ -40,15 +40,50 @@ How your wallet should read `verifyContext` depends on how the dApp connects:
 
 ### Implementation
 
-To check the Verify API validations and whether or not your user is interacting with potentially malicious dapp, you can do so by accessing the `verifyContext` included in the `SessionProposalEvent`:
+`onSessionProposal` and `onSessionAuthRequest` include a `verifyContext`. `onSessionRequest` doesn't, so read it from the matching pending request. Map it to one of the four states once, then use that state in each handler.
 
-```javascript
+```dart
+enum VerifyState { threat, mismatch, unverified, domainMatch }
+
+VerifyState getVerifyState(VerifyContext? verifyContext) {
+  return switch (verifyContext?.validation) {
+    // Threat: only set over relay, since Link Mode has no scam check
+    Validation.SCAM => VerifyState.threat,
+    Validation.INVALID => VerifyState.mismatch,
+    Validation.VALID => VerifyState.domainMatch,
+    // UNKNOWN: expected for native dApps over relay. Link Mode never returns UNKNOWN
+    _ => VerifyState.unverified,
+  };
+}
+
+// Session proposals from a web or native dApp
 _walletKit!.onSessionProposal.subscribe((SessionProposalEvent? args) {
-  if (args != null) {
-    final scamApp = args.verifyContext?.validation.scam;
-    final invalidApp = args.verifyContext?.validation.invalid;
-    final validApp = args.verifyContext?.validation.valid;
-    final unknown = args.verifyContext?.validation.unknown;
-  }
+  if (args == null) return;
+  final state = getVerifyState(args.verifyContext);
+  // show the state on the approval screen
+});
+
+// One-click auth requests can arrive over relay or Link Mode
+_walletKit!.onSessionAuthRequest.subscribe((SessionAuthRequest? args) {
+  if (args == null) return;
+  final state = getVerifyState(args.verifyContext);
+  final isLinkMode = args.transportType.isLinkMode;
+  // in Link Mode, MISMATCH means the universal link domain doesn't match metadata.url
+});
+
+// Session requests: read verifyContext from the pending request
+_walletKit!.onSessionRequest.subscribe((SessionRequestEvent? args) {
+  if (args == null) return;
+  final pendingRequest = _walletKit!.pendingRequests.get(args.id.toString());
+  final state = getVerifyState(pendingRequest?.verifyContext);
+  final isLinkMode = args.transportType.isLinkMode;
+  // show the state on the signing screen
 });
 ```
+
+Present each state like this:
+
+- `THREAT`: Block the request, or require the user to explicitly accept the risk. Check before anything else, so the user doesn't also see a Mismatch warning.
+- `MISMATCH`: Show a warning and proceed only if the user accepts the risk.
+- `UNVERIFIED`: Show a neutral "Cannot verify" label. Don't block the request, since native dApps over relay always land here.
+- `DOMAIN_MATCH`: Show a verified badge and proceed as normal.

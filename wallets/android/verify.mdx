@@ -40,19 +40,66 @@ How your wallet should read `verifyContext` depends on how the dApp connects:
 
 ### Implementation
 
-Wallet.Event.VerifyContext provides a domain verification information about SessionProposal, SessionRequest and AuthRequest.
-
-It consists of origin of an app from where the request has been sent, validation Enum that says whether origin is `VALID`, `INVALID` or `UNKNOWN` and verify url server.
+`WalletKit.WalletDelegate` passes a `Wallet.Model.VerifyContext` to `onSessionProposal`, `onSessionAuthenticate` and `onSessionRequest`:
 
 ```kotlin
 data class VerifyContext(
     val id: Long,
     val origin: String,
-    val validation: Model.Validation,
-    val verifyUrl: String
+    val validation: Validation,
+    val verifyUrl: String,
+    val isScam: Boolean?,
 )
 
 enum class Validation {
     VALID, INVALID, UNKNOWN
 }
 ```
+
+Map it to one of the four states once, then use that state in each callback.
+
+```kotlin
+enum class VerifyState { THREAT, MISMATCH, UNVERIFIED, DOMAIN_MATCH }
+
+fun Wallet.Model.VerifyContext.toVerifyState(): VerifyState = when {
+    // Threat: only set over relay, since Link Mode has no scam check
+    isScam == true -> VerifyState.THREAT
+    validation == Wallet.Model.Validation.VALID -> VerifyState.DOMAIN_MATCH
+    validation == Wallet.Model.Validation.INVALID -> VerifyState.MISMATCH
+    // UNKNOWN: expected for native dApps over relay. Link Mode never returns UNKNOWN
+    else -> VerifyState.UNVERIFIED
+}
+
+val walletDelegate = object : WalletKit.WalletDelegate {
+    // Session proposals from a web or native dApp
+    override fun onSessionProposal(sessionProposal: Wallet.Model.SessionProposal, verifyContext: Wallet.Model.VerifyContext) {
+        val state = verifyContext.toVerifyState()
+        // show the state on the approval screen
+    }
+
+    // One-click auth requests can arrive over relay or Link Mode
+    override val onSessionAuthenticate: ((Wallet.Model.SessionAuthenticate, Wallet.Model.VerifyContext) -> Unit)
+        get() = { sessionAuthenticate, verifyContext ->
+            val state = verifyContext.toVerifyState()
+            val isLinkMode = sessionAuthenticate.participant.metadata?.linkMode == true
+            // in Link Mode, MISMATCH means the universal link domain doesn't match metadata.url
+        }
+
+    override fun onSessionRequest(sessionRequest: Wallet.Model.SessionRequest, verifyContext: Wallet.Model.VerifyContext) {
+        val state = verifyContext.toVerifyState()
+        val isLinkMode = sessionRequest.peerMetaData?.linkMode == true
+        // show the state on the signing screen
+    }
+
+    // ...other WalletDelegate callbacks
+}
+```
+
+WalletKit doesn't expose the transport a request arrived on. To detect Link Mode, read `linkMode` from the dApp's metadata, as shown above.
+
+Present each state like this:
+
+- `THREAT`: Block the request, or require the user to explicitly accept the risk. Check before anything else, so the user doesn't also see a Mismatch warning.
+- `MISMATCH`: Show a warning and proceed only if the user accepts the risk.
+- `UNVERIFIED`: Show a neutral "Cannot verify" label. Don't block the request, since native dApps over relay always land here.
+- `DOMAIN_MATCH`: Show a verified badge and proceed as normal.
