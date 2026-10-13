@@ -7,9 +7,20 @@ WalletConnect's documentation site, built with [Fumadocs](https://fumadocs.dev) 
 ```bash
 pnpm install
 pnpm dev        # http://localhost:3000
-pnpm build      # production build: statically generates every page and fails on any broken MDX
+pnpm build      # static export to out/: generates every page and fails on any broken MDX
+pnpm preview    # build, then serve out/ through the Cloudflare Worker at http://localhost:8787
 pnpm lint
 ```
+
+`pnpm dev` doesn't run the Worker, so redirects and `.md` URLs only work in `pnpm preview`.
+
+## Hosting
+
+The site is a static export (`output: 'export'`) served by Cloudflare Workers Static Assets, configured in `wrangler.jsonc`. There is no Next.js server.
+
+- `out/`: every page, `/api/search.json`, `/llms*.txt`, the `.md` files, and OG images, all built by `pnpm build`.
+- `worker/index.ts`: runs in front of page URLs and handles the redirects from `redirects.json`, `/<page>.md`, and Markdown for clients sending `Accept: text/markdown`. Anything else is served straight from `out/`; unknown URLs get `out/404.html`.
+- Deploys: Workers Builds deploys `main` to production and posts a preview URL for every other branch. `pnpm run deploy` deploys by hand.
 
 ## Project layout
 
@@ -18,7 +29,7 @@ pnpm lint
 | `content/docs/**/*.mdx` | Pages. The file path is the URL (`content/docs/network/specs.mdx` → `/network/specs`; an `index.mdx` maps to its folder, so `content/docs/wallets/index.mdx` → `/wallets`). |
 | `content/navigation.json` | Sidebar and tabs. It uses the same schema as Mintlify's `docs.json` → `navigation`. |
 | `content/snippets/` | Reusable MDX partials (formerly `/snippets`). |
-| `redirects.json` | Redirects, loaded by `next.config.mjs`. |
+| `redirects.json` | Redirects, applied by the Cloudflare Worker (`worker/index.ts`). |
 | `openapi/*.json` | WalletConnect Pay OpenAPI specs, one per API version. |
 | `public/` | Images, logos, and other static files. |
 | `components/mintlify.tsx` | Mintlify-compatible components: `Card`, `CardGroup`, `Columns`, `Tabs`/`Tab`, `CodeGroup`, `Steps`/`Step`, `Note`/`Info`/`Tip`/`Warning`/`Check`/`Danger`, `Accordion`/`AccordionGroup`, `Frame`, `Tooltip`, `Expandable`, and the legacy `Table`. |
@@ -57,7 +68,7 @@ API reference pages render `<APIPage document="<version>.json" operations={[...]
 
 ## Built-in extras
 
-- `⌘K` search, built on Orama with a static index.
+- `⌘K` search: the index is exported to `/api/search.json` at build time and searched in the browser (`components/search.tsx`).
 - The `.md` version of every page (`/wallets.md`), plus `/llms.txt` and `/llms-full.txt`.
 - Per-page actions: "Copy Markdown" and "Open in ChatGPT / Claude / …".
 - OG images under `/og/...`.

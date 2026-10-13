@@ -112,3 +112,6 @@ temp/
 
 
 pnpm-lock.yaml
+
+# cloudflare
+.wrangler
