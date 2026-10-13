@@ -2,7 +2,7 @@ import { createGetUrl } from 'fumadocs-core/source';
 
 export const appName = 'WalletConnect Docs';
 export const appDescription = 'The Connectivity Layer for the Financial Internet';
-export const siteUrl = 'https://docs.walletconnect.network';
+export const siteUrl = 'https://docs.walletconnect.com';
 
 // Docs are served from the site root so every URL from the Mintlify site keeps working.
 export const docsRoute = '/';

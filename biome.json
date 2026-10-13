@@ -11,6 +11,8 @@
       "**",
       "!node_modules",
       "!.next",
+      "!out",
+      "!.wrangler",
       "!dist",
       "!build",
       "!.source",

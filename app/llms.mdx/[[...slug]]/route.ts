@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getPageMarkdownUrl } from '@/lib/shared';
 import { docsLlms, source } from '@/lib/source';
 
+export const dynamic = 'force-static';
 export const revalidate = false;
 
 export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/[[...slug]]'>) {

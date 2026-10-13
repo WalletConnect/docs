@@ -5,6 +5,7 @@ import './global.css';
 import 'katex/dist/katex.css';
 import { Inter } from 'next/font/google';
 import { PostHogProvider } from '@/components/posthog';
+import SearchDialog from '@/components/search';
 import { appDescription, appName, siteUrl } from '@/lib/shared';
 
 const inter = Inter({
@@ -22,7 +23,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
         <PostHogProvider>
-          <RootProvider>{children}</RootProvider>
+          <RootProvider search={{ SearchDialog }}>{children}</RootProvider>
         </PostHogProvider>
         {/* Powers the "Copy prompt" button on /payments/webhooks (ported from Mintlify) */}
         <Script src="/copy-agent-prompt.js" strategy="lazyOnload" />

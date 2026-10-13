@@ -5,7 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start",
+    "preview": "next build && wrangler dev",
+    "deploy": "next build && wrangler deploy",
     "types:check": "next typegen && tsc --noEmit",
     "lint": "biome check",
     "format": "biome format --write",
@@ -13,10 +14,10 @@
   },
   "dependencies": {
     "cn": "^0.4.0",
-    "fumadocs-core": "16.17.1",
+    "fumadocs-core": "16.17.2",
     "fumadocs-mdx": "15.4.7",
-    "fumadocs-openapi": "^12.4.1",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.1",
+    "fumadocs-openapi": "^12.4.2",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.2",
     "katex": "^0.19.0",
     "lucide-react": "^1.55.0",
     "mermaid": "^12.1.0",
@@ -40,7 +41,8 @@
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.150.0"
   },
   "type": "module"
 }

@@ -163,7 +163,7 @@ async function buildNavigation(currentNavigation, stableVersions, previewVersion
   const apiReferenceGroup = {
     group: API_REFERENCE_GROUP,
     pages: [
-      'payments/api-reference/',
+      'payments/api-reference/index',
       'payments/api-reference/authentication',
       'payments/api-reference/versioning',
       ...versionGroups,

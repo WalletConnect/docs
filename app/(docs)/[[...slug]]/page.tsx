@@ -1,7 +1,7 @@
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import { appName, getPageImageUrl, siteUrl } from '@/lib/shared';
 import { source } from '@/lib/source';
@@ -9,8 +9,7 @@ import { source } from '@/lib/source';
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
-  // Unknown URLs land on the home page instead of a 404
-  if (!page) redirect('/');
+  if (!page) notFound();
 
   const MDX = page.data.body;
   const components = getMDXComponents({
@@ -42,17 +41,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   }
 
   return (
-    <DocsPage
-      toc={page.data.toc}
-      full={page.data.full ?? page.data.mode === 'wide'}
-      // Fumadocs styles the prev/next links like <Card>, so a page ending in a "Next steps"
-      // card grid runs straight into look-alike boxes. Set the pager apart as plain navigation:
-      // a divider above, borderless items, and the "Previous/Next Page" hint as a small label.
-      footer={{
-        className:
-          'mt-8 border-t pt-6 [&>a]:flex-col-reverse [&>a]:gap-1 [&>a]:border-transparent [&>a>p]:text-xs',
-      }}
-    >
+    <DocsPage toc={page.data.toc} full={page.data.full ?? page.data.mode === 'wide'}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
@@ -69,7 +58,7 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
-  if (!page) redirect('/');
+  if (!page) notFound();
 
   const { metatags } = page.data;
   return {

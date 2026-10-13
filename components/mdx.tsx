@@ -8,7 +8,7 @@ import { Icon } from '@/components/icon';
 import { Img } from '@/components/img';
 import { Mermaid } from '@/components/mermaid';
 import { ChainList, WalletList } from '@/components/snippets/explorer-lists';
-import { Container, ProductCard, Title } from '@/components/snippets/home';
+import { Container, ProductCard, ProductCards, Title } from '@/components/snippets/home';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -30,6 +30,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Container,
     Title,
     ProductCard,
+    ProductCards,
     ...components,
   } satisfies MDXComponents;
 }

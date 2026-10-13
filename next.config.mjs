@@ -1,15 +1,14 @@
 import { createMDX } from 'fumadocs-mdx/next';
-import redirects from './redirects.json' with { type: 'json' };
 
 const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
-  // Carried over from Mintlify docs.json → redirects
-  async redirects() {
-    return redirects.map(({ source, destination, permanent = true }) => ({ source, destination, permanent }));
-  },
+  // Plain files in out/, served by Cloudflare. Redirects and Markdown negotiation live in worker/index.ts.
+  output: 'export',
+  // No image optimizer without a server; images are served as they are in public/
+  images: { unoptimized: true },
 };
 
 export default withMDX(config);

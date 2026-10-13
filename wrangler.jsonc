@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "walletconnect-docs",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    // `pnpm build` (output: 'export' in next.config.mjs)
+    "directory": "./out",
+    "binding": "ASSETS",
+    // /wallets → out/wallets.html
+    "html_handling": "auto-trailing-slash",
+    // unknown URLs → out/404.html with a 404 status
+    "not_found_handling": "404-page",
+    // Page URLs go through worker/index.ts for redirects and Markdown. Files that can never be a
+    // page are served straight from out/ — the same paths proxy.ts skipped, plus the RSC payloads
+    // (*.txt) Next fetches on client-side navigation.
+    "run_worker_first": [
+      "/*",
+      "!/_next/*",
+      "!/api/*",
+      "!/og/*",
+      "!/llms.mdx/*",
+      "!/images/*",
+      "!/logo/*",
+      "!/*.txt",
+      "!/favicon.ico",
+      "!/copy-agent-prompt.js"
+    ]
+  }
+}

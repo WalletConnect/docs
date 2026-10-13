@@ -38,7 +38,7 @@ How your wallet should read `verifyContext` depends on how the dApp connects:
 
 - **Web dApp over QR code or deep link (relay):** This is the full Verify API, including scam checks. Show all four states: `VALID` as Domain match, `UNKNOWN` as Cannot verify, `INVALID` as Mismatch, and `isScam` as Security risk (ideally blocking or requiring the user to confirm).
 - **Native dApp over relay:** Native apps can't create a Verify attestation, so `UNKNOWN` is expected here. We suggest a neutral "Cannot verify" label rather than an alarming warning.
-- **[Link Mode](/wallets/features/link-mode) (native to native):** The domain check above applies, with no scam check. `INVALID` means the dApp's universal link domain doesn't match its `metadata.url`. The wallet's own Link Mode setup also needs to be complete, or the result falls back to `INVALID`.
+- **[Link Mode](/wallets/android/link-mode) (native to native):** The domain check above applies, with no scam check. `INVALID` means the dApp's universal link domain doesn't match its `metadata.url`. The wallet's own Link Mode setup also needs to be complete, or the result falls back to `INVALID`.
 
 ### Implementation
 

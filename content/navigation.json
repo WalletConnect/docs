@@ -360,7 +360,7 @@
             {
               "group": "API Reference",
               "pages": [
-                "payments/api-reference/",
+                "payments/api-reference/index",
                 "payments/api-reference/authentication",
                 "payments/api-reference/versioning",
                 {
