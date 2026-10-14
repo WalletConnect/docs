@@ -473,6 +473,12 @@
               "payments/overview",
               "payments/for-users",
               {
+                "group": "Features",
+                "pages": [
+                  "payments/wallet-verification"
+                ]
+              },
+              {
                 "group": "Coverage & Reference",
                 "pages": [
                   "payments/token-and-chain-coverage",

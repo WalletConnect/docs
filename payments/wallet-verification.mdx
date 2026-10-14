@@ -1,0 +1,119 @@
+---
+title: "Wallet Verification"
+description: "Prove that your customer controls their self-custody wallet with one signature, before funds move. No transaction, no gas, and a reusable record returned to your systems."
+sidebarTitle: "Wallet Verification"
+---
+
+This feature proves that your customer controls their wallet, before funds move. The customer opens a link, connects the wallet they already use and signs a message. WalletConnect Pay checks the signature against the wallet address and returns a timestamped record to your systems.
+
+A signed message is not a transaction, so no funds move and the customer pays no gas.
+
+## Why Wallet Verification
+
+A wallet address is not a person. It has no name attached and no directory to check it against, and nothing tells you whether the customer who typed it actually controls it. That causes three problems:
+
+- **Self-declaration isn't proof.** A screenshot of a wallet app or a typed address shows that someone knows an address, not that they control it.
+- **Mistakes are permanent.** A stablecoin transfer to a mistyped address, or to the right address on the wrong chain, can't be recalled.
+- **Microtransaction tests add friction.** Asking a customer to send a small amount means they need funds on the right chain and pay gas, just to prove ownership.
+
+Wallet Verification fixes all three. Only the holder of the private key can sign for an address, so a valid signature is cryptographic proof of control, and the address comes from the connected wallet instead of being typed.
+
+## How it works
+
+<Steps>
+  <Step title="Your business starts a verification">
+    One API call creates a verification and returns a link to a hosted verification page, branded for your business.
+  </Step>
+  <Step title="You send the link to your customer">
+    Share the link wherever you already reach the customer, for example in an email before their next payout.
+
+    <Frame>
+      <img src="/images/wallet-verification-link.png" alt="Email from Crestline Payroll asking the recipient to verify their wallet before their next payment, with a Verify Your Wallet button and a branded verification link" />
+    </Frame>
+  </Step>
+  <Step title="The customer connects their wallet">
+    The customer chooses from 700+ wallets, including mobile, browser extension and hardware wallets.
+
+    <Frame>
+      <img src="/images/wallet-verification-connect.png" alt="Hosted verification page on the Connect step, showing a wallet search field and a grid of wallets including MetaMask, Trust Wallet, Ledger, Coinbase and Phantom" />
+    </Frame>
+  </Step>
+  <Step title="The customer signs a message">
+    The wallet address and network are filled in from the connected wallet, next to the recipient details you have on file. The customer signs a message to prove control. Signing can't move funds.
+
+    <Frame>
+      <img src="/images/wallet-verification-sign.png" alt="Hosted verification page on the Verify step, showing the recipient on file, the connected MetaMask wallet on Ethereum with its address, and a Sign Message button" />
+    </Frame>
+  </Step>
+  <Step title="The record is returned to your systems">
+    WalletConnect Pay verifies the signature against the address and returns the verification record to your systems. The wallet is now linked to the customer's account.
+
+    <Frame>
+      <img src="/images/wallet-verification-verified.png" alt="Hosted verification page on the Done step, showing Wallet verified with the recipient, wallet, network and wallet address, and a confirmation that the wallet is linked to the customer's account" />
+    </Frame>
+  </Step>
+</Steps>
+
+## Key benefits
+
+<Columns cols={2}>
+  <Card title="Works with 700+ wallets" icon="wallet">
+    Verify ownership across self-custody wallets compatible with WalletConnect, including retail, hardware and institutional wallets, on EVM chains and Solana.
+  </Card>
+  <Card title="No funds, no gas" icon="signature">
+    The customer signs a message instead of sending a transaction, so they don't need funds on the chain.
+  </Card>
+  <Card title="No copy-paste errors" icon="circle-check">
+    The address and chain come from the connected wallet, so there's no manual entry and no right address on the wrong chain.
+  </Card>
+  <Card title="Verify once, reuse everywhere" icon="repeat">
+    A verified wallet is reused across payouts, payments, deposits and other money movement flows, so the customer isn't asked again.
+  </Card>
+</Columns>
+
+## Use cases
+
+| Use case | Who it's for | How Wallet Verification helps |
+|---|---|---|
+| **Stablecoin and crypto payouts** | Payroll and remittance platforms, marketplaces, creator platforms, iGaming | Confirm the recipient controls the payout wallet before the first transfer, and reuse the result for every payout after. |
+| **Exchange and platform withdrawals** | Exchanges, brokers, neobanks | Prove the destination wallet belongs to the customer before releasing a withdrawal. |
+| **Self-custody wallets in an existing compliance program** | Banks, fintechs, payment firms | Get proof of wallet control in a form your existing controls and audit trails can store. |
+
+## What you get for each verification
+
+Each verification returns a record to your systems, so retention stays under your control:
+
+- Signature as proof of control
+- Wallet address and chain
+- Timestamp
+- Signed message details, such as domain, URI and nonce
+- Connected wallet details
+
+Optionally, the wallet address can be screened against sanctions lists (OFAC, EU, UK and UN) during verification, with the result returned in the same record.
+
+<Note>
+  Wallet Verification proves control of a wallet. It is not identity verification and doesn't replace KYC, customer due diligence or your AML program. You remain responsible for determining which regulatory obligations apply to your business.
+</Note>
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Does the customer send a transaction?">
+    No. The customer signs a message. No funds move and no gas is needed.
+  </Accordion>
+  <Accordion title="Which wallets are supported?">
+    Self-custody wallets compatible with WalletConnect on EVM chains and Solana.
+  </Accordion>
+  <Accordion title="Does the customer need to verify again for every payment?">
+    No. A wallet is verified once and the result is reused for later payments to or from that wallet.
+  </Accordion>
+  <Accordion title="Do I need to use WalletConnect Pay payments to use Wallet Verification?">
+    No. Wallet Verification can be added to any WalletConnect Pay flow or embedded in your own flow.
+  </Accordion>
+</AccordionGroup>
+
+## Get started
+
+<Card title="Contact us" icon="envelope" href="https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s">
+  Talk to the WalletConnect Pay team about Wallet Verification.
+</Card>
