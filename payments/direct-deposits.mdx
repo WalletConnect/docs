@@ -38,6 +38,14 @@ Direct Deposits fixes all three. Each payment gets its own address and an exact 
   </Step>
 </Steps>
 
+## Open the deposit page directly
+
+To skip wallet connection and take the payer straight to the deposit address, send them to the deposit page for the payment. Replace `<PaymentId>` with the `paymentId` returned when the payment is created.
+
+```text Deposit page URL
+https://pay.walletconnect.com/deposit/?pid=<PaymentId>
+```
+
 ## Key benefits
 
 <Columns cols={2}>
