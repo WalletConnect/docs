@@ -40,37 +40,53 @@ How your wallet should read `verifyContext` depends on how the dApp connects:
 
 ### Implementation
 
-To check the Verify API validations and whether or not your user is interacting with potentially malicious app, you can do so by accessing the `verifyContext` included in the request payload.
+Every `session_proposal`, `session_authenticate` and `session_request` event includes a `verifyContext`. Map it to one of the four states once, then use that state in each handler.
 
 ```javascript
-...
-walletKit.on("auth_request", async (authRequest) => {
-  const { verifyContext } = authRequest
-  const validation = verifyContext.verified.validation // can be VALID, INVALID or UNKNOWN
-  const origin = verifyContext.verified.origin // the actual verified origin of the request
-  const isScam = verifyContext.verified.isScam // true if the domain is flagged as malicious
+function getVerifyState(verifyContext) {
+  const { validation, isScam } = verifyContext.verified
 
-  // if the domain is flagged as malicious, you should warn the user as they may lose their funds - check the `Threat` case for more info
-  if(isScam) {
-    // show a warning screen to the user
-    // and proceed only if the user accepts the risk
-  }
+  // Threat: only set over relay, since Link Mode has no scam check
+  if (isScam) return "THREAT"
 
-  switch(validation) {
+  switch (validation) {
     case "VALID":
-      // proceed with the request - check the `Domain match` case for more info
-      break
+      return "DOMAIN_MATCH"
     case "INVALID":
-      // show a warning dialog to the user - check the `Mismatch` case for more info
-      // and proceed only if the user accepts the risk
-      break
-    case "UNKNOWN":
-      // show a warning dialog to the user - check the `Unverified` case for more info
-      // and proceed only if the user accepts the risk
-      break
+      return "MISMATCH"
+    default:
+      // UNKNOWN: expected for native dApps over relay. Link Mode never returns UNKNOWN
+      return "UNVERIFIED"
   }
+}
+
+// Session proposals always arrive over relay, from a web or native dApp
+walletKit.on("session_proposal", async (proposal) => {
+  const state = getVerifyState(proposal.verifyContext)
+  // show the state on the approval screen
+})
+
+// One-click auth requests can arrive over relay or Link Mode
+walletKit.on("session_authenticate", async (payload) => {
+  const state = getVerifyState(payload.verifyContext)
+  const isLinkMode = payload.transportType === "link_mode"
+  // in Link Mode, MISMATCH means the universal link domain doesn't match metadata.url
+})
+
+// Session requests: read the transport from the session they belong to
+walletKit.on("session_request", async (request) => {
+  const state = getVerifyState(request.verifyContext)
+  const { transportType } = walletKit.getActiveSessions()[request.topic]
+  // show the state on the signing screen
 })
 ```
+
+Present each state like this:
+
+- `THREAT`: Block the request, or require the user to explicitly accept the risk. Check before anything else, so the user doesn't also see a Mismatch warning.
+- `MISMATCH`: Show a warning and proceed only if the user accepts the risk.
+- `UNVERIFIED`: Show a neutral "Cannot verify" label. Don't block the request, since native dApps over relay always land here.
+- `DOMAIN_MATCH`: Show a verified badge and proceed as normal.
 
 For live demo examples of the intended Verify API flows, check out our demo apps:
 
