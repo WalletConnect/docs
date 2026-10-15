@@ -475,7 +475,8 @@
               {
                 "group": "Features",
                 "pages": [
-                  "payments/direct-deposits"
+                  "payments/direct-deposits",
+                  "payments/features/deposit-with-exchange"
                 ]
               },
               {
