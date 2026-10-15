@@ -1,0 +1,39 @@
+---
+title: "Deposit with Exchange"
+description: "Let customers pay or fund their account directly from a centralized exchange balance with WalletConnect Pay."
+sidebarTitle: "Deposit with Exchange"
+---
+
+Deposit with Exchange lets customers use the balance they already hold on a centralized exchange, such as Binance, to pay at checkout or to fund an account on a platform, without first withdrawing to a self-custody wallet. The customer approves the transaction in the exchange app they already use and then returns to the flow.
+
+To check which exchanges are available, see [CEX Coverage](https://docs.walletconnect.com/payments/cex-coverage#cex-exchange-integrations).
+
+## Why use Deposit with Exchange?
+
+<Steps>
+  <Step title="Instant access to existing funds" icon="bolt">
+    Customers pay or top up with funds already on their exchange account. No withdrawal to a self-custody wallet and no extra KYC, since the customer is already verified with their exchange.
+  </Step>
+  <Step title="Reach more customers" icon="users">
+    Roughly 90% of crypto holders keep their funds on a centralized exchange. Accepting exchange balances extends reach beyond self-custody wallet users to the wider crypto-holding population.
+  </Step>
+  <Step title="Direct settlement" icon="building-columns">
+    The exchange executes the transaction internally and settles funds directly into the receiving business's own exchange account, with no intermediary transit account.
+  </Step>
+  <Step title="No network fees" icon="gas-pump">
+    The transfer happens inside the exchange, so no onchain transaction is broadcast and no gas fees apply.
+  </Step>
+  <Step title="Non-custodial and compliant" icon="shield-check">
+    WalletConnect Pay never holds, custodies, or moves funds in this flow. The exchange handles KYC, sanctions screening, and Travel Rule obligations end-to-end.
+  </Step>
+</Steps>
+
+<Note>
+To accept exchange balances, merchants and platforms onboard directly with each exchange and then activate it in the WalletConnect Pay Merchant Dashboard.
+</Note>
+
+## Supported exchanges
+
+<Card title="CEX Coverage" icon="building-columns" href="https://docs.walletconnect.com/payments/cex-coverage#cex-exchange-integrations">
+  See the centralized exchanges WalletConnect Pay supports and their current availability.
+</Card>
