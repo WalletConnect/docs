@@ -1,0 +1,68 @@
+---
+title: "Wallet Verification Dashboard"
+description: "Request access, manage API keys, review verification activity, export CSVs, and customize the hosted page in the WalletConnect Pay merchant dashboard."
+sidebarTitle: "Dashboard"
+---
+
+You manage Wallet Verification in the [WalletConnect Pay merchant dashboard](https://merchant.pay.walletconnect.com/en/api-keys).
+
+## Request access
+
+1. Open the **API keys** page and select the **Wallet Verification** tab.
+2. Click **Request access**. You can add an optional message.
+3. The status shows **Request received** while the WalletConnect team reviews your request. Once access is enabled, you can create API keys.
+
+## API keys
+
+<Frame>
+  <img src="/images/wallet-verification/dashboard-api-keys.png" alt="API keys page on the Wallet verification tab, listing two keys with masked values and creation dates" />
+</Frame>
+
+- Give each key a name of 1–64 characters.
+- You can have up to 10 active keys.
+- The full key is shown only once, at creation. Copy it to a secret manager. The list shows a masked key.
+- Keys start with `wv_` and go in the `Authorization: Bearer` header.
+
+Keys can be revoked but not edited. To rotate a key, create a new one, deploy it, then revoke the old one.
+
+<Warning>
+Requests with a revoked key return `401 unauthorized`. Deploy the new key before you revoke the old one.
+</Warning>
+
+## Activity
+
+The **Activity** page lists every verification on your account with its date, address, wallet, network, reference, and status. Sort by any column and click **Load more** to see older verifications.
+
+<Frame>
+  <img src="/images/wallet-verification/dashboard-activity.png" alt="Activity page listing verifications with date, address, wallet, network, reference and status, and an Export CSV button" />
+</Frame>
+
+### Export CSV
+
+Click **Export CSV** to download verifications from the last 90 days.
+
+- The file is prepared in the background and downloads automatically when ready, usually within seconds.
+- If it takes more than 2 minutes, the dashboard shows **Taking longer than usual** with a retry option.
+- Download links last 15 minutes. Exported files are deleted after 7 days.
+
+## Customization
+
+The **Customization** page controls how the [hosted page](/wallet-verification/hosted-page) looks to your users.
+
+<Frame>
+  <img src="/images/wallet-verification/dashboard-customization.png" alt="Customization page with business name, page title and logo fields, and Preview and Save buttons" />
+</Frame>
+
+| Setting | Limit | Where it appears |
+|---------|-------|------------------|
+| Business name | Up to 120 characters | Hosted page and the [signed message](/wallet-verification/attestations#signed-message) |
+| Page title | Up to 120 characters | Hosted page |
+| Logo | Image upload | Hosted page |
+
+<Tip>
+Set your business name before you go live. Users see it in their wallet when they sign, which helps them trust the request.
+</Tip>
+
+## Integration settings
+
+Allowed return-URL origins and embedding origins are not in the dashboard yet. Contact your WalletConnect contact to register them. See [Return to your app](/wallet-verification/hosted-page#return-to-your-app) and [Embed in an iframe](/wallet-verification/hosted-page#embed-in-an-iframe).

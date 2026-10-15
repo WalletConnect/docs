@@ -585,6 +585,27 @@
         ]
       },
       {
+        "tab": "Wallet Verification",
+        "icon": "shield-check",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "wallet-verification/overview",
+              "wallet-verification/quickstart"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "wallet-verification/hosted-page",
+              "wallet-verification/attestations",
+              "wallet-verification/dashboard"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "icon": "code",
         "versions": [
