@@ -473,6 +473,12 @@
               "payments/overview",
               "payments/for-users",
               {
+                "group": "Features",
+                "pages": [
+                  "payments/features/deposit-with-exchange"
+                ]
+              },
+              {
                 "group": "Coverage & Reference",
                 "pages": [
                   "payments/token-and-chain-coverage",
