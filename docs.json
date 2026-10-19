@@ -474,9 +474,17 @@
               "payments/for-users",
               {
                 "group": "Features",
+                "expanded": true,
                 "pages": [
-                  "payments/direct-deposits",
-                  "payments/features/deposit-with-exchange"
+                  {
+                    "group": "Deposits",
+                    "root": "payments/features/deposits",
+                    "pages": [
+                      "payments/features/direct-deposits",
+                      "payments/features/deposit-with-exchange"
+                    ]
+                  },
+                  "agents/overview"
                 ]
               },
               {
@@ -581,12 +589,6 @@
               "payments/ecommerce/overview",
               "payments/ecommerce/integration",
               "payments/ecommerce/api-reference"
-            ]
-          },
-          {
-            "group": "AI Agents",
-            "pages": [
-              "agents/overview"
             ]
           }
         ]
