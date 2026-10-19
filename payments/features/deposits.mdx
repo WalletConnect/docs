@@ -17,8 +17,8 @@ Users choose how to fund their account from wherever their funds are.
   <Card title="Send to a deposit address" icon="qrcode">
     Send the exact amount to a one-time deposit address from any wallet, exchange or custody account.
   </Card>
-  <Card title="Pay from an exchange" icon="building-columns">
-    Use an existing exchange balance, such as Binance, and approve the deposit in the exchange app.
+  <Card title="Pay from an exchange" icon="building-columns" href="/payments/cex-coverage">
+    Use an existing exchange balance, such as Binance, and approve the deposit in the exchange app. More exchanges are coming soon.
   </Card>
 </Columns>
 
@@ -43,7 +43,10 @@ Users choose how to fund their account from wherever their funds are.
 
 <Columns cols={2}>
   <Card title="Largest wallet coverage" icon="wallet">
-    Accept deposits from 700+ wallets, plus any exchange or custody account by deposit address.
+    Accept deposits from 700+ wallets and major exchange accounts, reaching 900M+ users, plus any exchange or custody account by deposit address.
+  </Card>
+  <Card title="Fewer drop-offs at funding" icon="arrow-right-to-bracket">
+    Users fund their account without leaving your platform, with no redirect, card declines or bank delays, and a clear status for every deposit.
   </Card>
   <Card title="Largest chain and token coverage" icon="link">
     Every major chain and token is supported, with new chains added regularly. See [Token and Chain Coverage](/payments/token-and-chain-coverage).
@@ -54,14 +57,14 @@ Users choose how to fund their account from wherever their funds are.
   <Card title="Smart routing" icon="route">
     Accept any token on any chain and receive the token and chain you choose, through swap and bridge providers.
   </Card>
-  <Card title="Instant, flexible settlement" icon="bolt">
-    Receive stablecoins to your wallet, or fiat to your bank account. See [Fiat Coverage](/payments/fiat-coverage).
+  <Card title="Fast, flexible settlement" icon="bolt">
+    Stablecoins settle to your wallet in seconds. Fiat settles to your bank account through a regulated partner, with timing set by that partner. See [Fiat Coverage](/payments/fiat-coverage).
   </Card>
   <Card title="Reconciliation data" icon="file-invoice">
     Every deposit includes the payment data needed to match and credit it automatically, with no manual work.
   </Card>
   <Card title="Sanctions and IP screening" icon="shield-check">
-    Wallets and users are screened against OFAC sanctions lists, and restricted-region IPs are blocked, before funds move. The outcome is enforced automatically.
+    Wallets and users are screened against OFAC sanctions lists, and restricted-region IPs are blocked, before funds move, on the policy you configure. The screening record is returned to your systems.
   </Card>
   <Card title="Travel Rule information capture" icon="id-card">
     Confirm user wallet ownership and collect the Travel Rule information your platform requires.
@@ -74,9 +77,13 @@ Users choose how to fund their account from wherever their funds are.
   </Card>
 </Columns>
 
+<Note>
+WalletConnect Pay runs screening and Travel Rule capture inside the deposit flow. Your platform keeps its own compliance policy, customer due diligence (CDD), case management, reporting and record retention.
+</Note>
+
 ## Credit accounts automatically
 
-Each deposit is a WalletConnect Pay payment, so your platform tracks it the same way as any other payment:
+Each deposit is a WalletConnect Pay payment, so your platform tracks it the same way as any other payment. Instant confirmation lets you credit users without manual reconciliation:
 
 - Set a `referenceId` when you create the payment, such as the user's account ID, and match it on your side when the deposit settles.
 - Subscribe to [webhooks](/payments/webhooks) to credit the account as soon as the `payment.succeeded` event arrives.
