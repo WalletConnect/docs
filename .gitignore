@@ -111,7 +111,5 @@ temp/
 .mintlify/
 
 
-pnpm-lock.yaml
-
 # cloudflare
 .wrangler
