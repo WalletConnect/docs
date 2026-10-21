@@ -217,6 +217,7 @@
                 "group": "More",
                 "pages": [
                   "wallets/more/best-practices",
+                  "wallets/more/push-notifications",
                   "wallets/more/updating-wallet-sdk",
                   {
                     "group": "Web3Wallet to Wallet SDK",
