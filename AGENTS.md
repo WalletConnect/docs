@@ -29,6 +29,8 @@ pnpm generate      # refetch the OpenAPI specs and regenerate the API reference
 
 Before finishing a change, run `pnpm build` for content changes, and `pnpm lint` plus `pnpm types:check` for code changes. For changes to routing, redirects, `next.config.mjs`, `worker/` or `wrangler.jsonc`, also check them in `pnpm preview`.
 
+`pnpm-lock.yaml` is committed and CI installs with `--frozen-lockfile`. When you change `package.json`, commit the updated lockfile.
+
 ## Project layout
 
 | Path | What it is |
@@ -160,6 +162,8 @@ Always wrap `<Accordion>` in `<Accordions>`. Use them for FAQs and optional deta
 
 - Prefer Markdown images, `![Copy the Project ID from the dashboard](/images/cloud/1.png)`: they get dimensions at build time and click-to-zoom. A raw `<img>` has neither, so use it only when you need attributes Markdown can't express.
 - Always write alt text that describes what the image shows.
+- Put every image and video in `public/images/` and reference it as `/images/...`. Don't link to Mintlify's CDN (`mintcdn.com`, `mintlify.s3...`): those files are going away.
+- Videos go in `public/images/videos/`, each under 25 MiB (Cloudflare's per-file limit). Use a `<video>` tag with `controls`.
 - Diagrams: a ` ```mermaid ` code block.
 - Math: `$$ ... $$` (KaTeX).
 
