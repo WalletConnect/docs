@@ -234,7 +234,7 @@ curl -H 'Accept: text/markdown' localhost:8787/wallets/android/usage
 curl -I localhost:8787/nope                                       # 404
 ```
 
-Deploys run in the `Deploy` GitHub Actions workflow (`.github/workflows/deploy.yml`): pushes to `docs/v3` go to `docs-next.walletconnect.com` (`main` and `docs.walletconnect.com` after the Mintlify cutover), and every PR gets a preview URL. Custom domains are managed by Terraform in `WalletConnect/infra`, so don't add `routes` to `wrangler.jsonc`. Don't run `wrangler deploy` or `pnpm run deploy` yourself, and don't change Cloudflare settings or DNS, unless you're asked to.
+Deploys run in the `Deploy` GitHub Actions workflow (`.github/workflows/deploy.yml`): pushes to `docs/v3` go to `docs-next.walletconnect.com` (`main` and `docs.walletconnect.com` after the Mintlify cutover), and every PR gets a preview URL. Custom domains are managed by Terraform in `WalletConnect/infra`, so don't add `routes` to `wrangler.jsonc`. Don't connect Cloudflare Workers Builds to this repo: two deployers on one Worker overwrite each other. Don't run `wrangler deploy` or `pnpm run deploy` yourself, and don't change Cloudflare settings or DNS, unless you're asked to.
 
 ## Writing style
 

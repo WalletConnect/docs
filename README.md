@@ -20,7 +20,7 @@ The site is a static export (`output: 'export'`) served by Cloudflare Workers St
 
 - `out/`: every page, `/api/search.json`, `/llms*.txt`, the `.md` files, and OG images, all built by `pnpm build`.
 - `worker/index.ts`: runs in front of page URLs and handles the redirects from `redirects.json`, `/<page>.md`, and Markdown for clients sending `Accept: text/markdown`. Anything else is served straight from `out/`; unknown URLs get `out/404.html`.
-- Deploys: the `Deploy` GitHub Actions workflow (`.github/workflows/deploy.yml`) runs `wrangler deploy` on every push to `docs/v3`, served at `docs-next.walletconnect.com` (`main` and `docs.walletconnect.com` after the Mintlify cutover). Every PR gets a preview URL in a PR comment. `pnpm run deploy` deploys by hand.
+- Deploys: the `Deploy` GitHub Actions workflow (`.github/workflows/deploy.yml`) runs `wrangler deploy` on every push to `docs/v3`, served at `docs-next.walletconnect.com` (`main` and `docs.walletconnect.com` after the Mintlify cutover). Every PR gets a preview URL in a PR comment. `pnpm run deploy` deploys by hand. Don't also connect Cloudflare Workers Builds, or the two deployers overwrite each other.
 
 ## Project layout
 
