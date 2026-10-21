@@ -3,6 +3,10 @@
   "name": "walletconnect-docs",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-06",
+  // Custom domains (docs-next, later docs.walletconnect.com) are bound by Terraform in
+  // WalletConnect/infra. Don't add routes here. workers.dev stays on for PR preview URLs.
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     // `pnpm build` (output: 'export' in next.config.mjs)
     "directory": "./out",
