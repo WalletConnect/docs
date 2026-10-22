@@ -42,6 +42,8 @@ jobs:
       - name: Upload preview
         if: github.event_name == 'pull_request'
         id: preview
+        # An explicit `shell: bash` adds -o pipefail, so tee cannot hide a wrangler failure
+        shell: bash
         run: |
           pnpm exec wrangler versions upload --preview-alias "pr-${{ github.event.pull_request.number }}" | tee upload.log
           url=$(grep -oE 'https://pr-[^ ]+\.workers\.dev' upload.log | head -1)
