@@ -596,11 +596,11 @@
             ]
           },
           {
-            "group": "Guides",
+            "group": "Integration",
             "pages": [
+              "wallet-verification/dashboard",
               "wallet-verification/hosted-page",
-              "wallet-verification/attestations",
-              "wallet-verification/dashboard"
+              "wallet-verification/attestations"
             ]
           }
         ]

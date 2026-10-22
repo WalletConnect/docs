@@ -19,7 +19,7 @@ Use staging for integration testing only; attestations created there are not evi
 
 <Step title="Get access and an API key" stepNumber="1">
 
-In the WalletConnect Pay merchant dashboard, open the **Wallet Verification** tab on the [API keys](https://merchant.pay.walletconnect.com/en/api-keys) page and request access. Once access is enabled, create an API key. The full key is shown only once, so store it in a secret manager. See [Dashboard](/wallet-verification/dashboard) for details.
+In the WalletConnect Pay merchant dashboard, open the **Wallet Verification** tab on the [API keys](https://merchant.pay.walletconnect.com/en/api-keys) page and request access. Once access is enabled, create an API key. The full key is shown only once, so store it in a secret manager. See [Dashboard & API keys](/wallet-verification/dashboard) for details.
 
 Send the key as a bearer token on every request:
 
@@ -87,7 +87,7 @@ The `url` is returned only in this response. Store it with the verification `id`
 
 <Step title="Send the user the link" stepNumber="3">
 
-Give the user the `url` however fits your product: send it as a link, redirect the browser to it, or embed it in an iframe. The [hosted page](/wallet-verification/hosted-page) walks the user through connecting and signing.
+Give the user the `url` however fits your product: send it as a link, redirect the browser to it, or embed it in an iframe. The [verification page](/wallet-verification/hosted-page) walks the user through connecting and signing.
 
 </Step>
 
@@ -108,9 +108,9 @@ To find verifications later, list them with `GET /verifications`. Results are ne
 
 </Step>
 
-<Step title="Read the attestation" stepNumber="5">
+<Step title="Read the result" stepNumber="5">
 
-When `state` is `verified`, the `attestation` field holds the address, the exact signed message, the signature, and how it was checked. See [Attestations](/wallet-verification/attestations) for every field and how to re-check the signature yourself.
+When `state` is `verified`, the `attestation` field holds the address, the exact signed message, the signature, and how it was checked. See [Results & attestations](/wallet-verification/attestations) for every field and how to re-check the signature yourself.
 
 </Step>
 
@@ -142,7 +142,7 @@ Each `reference_id` can have only one `pending` verification at a time. Creating
 }
 ```
 
-Once the earlier verification reaches a terminal state, you can create a new one with the same `reference_id`.
+Once the earlier verification reaches a terminal state, create a new one with the same `reference_id`. Use the `re_verification` purpose so the signed message says why.
 
 ## Cancel a verification
 
@@ -188,21 +188,10 @@ Errors use one envelope. Switch on `code`. The `message` text may change.
 ## Frequently Asked Questions
 
 <AccordionGroup>
-  <Accordion title="Can I re-verify the same wallet?">
-    Yes. After a verification for a `reference_id` reaches a terminal state, create a new one with the same `reference_id`. Use the `re_verification` purpose so the signed message says why.
-  </Accordion>
   <Accordion title="What happens if the link expires?">
     The verification moves to `expired` once `expires_at` passes without a signature, and the link stops working. Create a new verification to get a new link.
-  </Accordion>
-  <Accordion title="Can I pin the address or the chain?">
-    Yes. Set `chain_id` to pin the network and `expected_address` to pin the wallet. The hosted page refuses any other network or address.
   </Accordion>
   <Accordion title="Can I get the link again?">
     No. The `url` is returned only in the first `201` response. If you lose it, cancel the verification and create a new one.
   </Accordion>
-  <Accordion title="Are there webhooks?">
-    No. Poll `GET /verifications/{id}` until the state is terminal.
-  </Accordion>
 </AccordionGroup>
-
-The API reference is coming soon.
