@@ -1,13 +1,16 @@
 'use client';
 
 /**
- * Searchable lists backed by the WalletConnect Explorer API; clicking an entry copies its ID.
+ * Searchable lists backed by the Explorer API (wallets) and the web3modal API (chains); clicking an entry copies its ID.
  * Ported from Mintlify snippets/chainlist.mdx and snippets/walletlist.mdx.
  */
 import { useEffect, useMemo, useState } from 'react';
 
-const EXPLORER = 'https://explorer-api.walletconnect.com/v3';
 const PROJECT_ID = '8e998cd112127e42dce5e2bf74122539';
+const SOURCES = {
+  chains: `https://api.web3modal.org/getChains?projectId=${PROJECT_ID}&st=docs&sv=1.0.0`,
+  wallets: `https://explorer-api.walletconnect.com/v3/wallets?projectId=${PROJECT_ID}`,
+};
 
 interface Entry {
   id: string;
@@ -19,11 +22,16 @@ function useExplorer(kind: 'chains' | 'wallets') {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [error, setError] = useState(false);
   useEffect(() => {
-    fetch(`${EXPLORER}/${kind}?projectId=${PROJECT_ID}`)
+    fetch(SOURCES[kind])
       .then((res) => res.json())
       .then((data) => {
         if (kind === 'chains') {
-          setEntries(Object.entries<{ name: string }>(data.chains).map(([id, c]) => ({ id, name: c.name })));
+          setEntries(
+            (data.data as { name: string; namespace: string; reference: string }[]).map((c) => ({
+              id: `${c.namespace}:${c.reference}`,
+              name: c.name,
+            })),
+          );
         } else {
           setEntries(
             Object.values<{ id: string; name: string; image_url: { sm: string } }>(data.listings).map((w) => ({
