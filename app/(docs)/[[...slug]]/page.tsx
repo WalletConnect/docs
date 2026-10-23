@@ -1,9 +1,9 @@
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle, MarkdownCopyButton } from 'fumadocs-ui/layouts/notebook/page';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
-import { appName, getPageImageUrl, siteUrl } from '@/lib/shared';
+import { appName, getPageImageUrl, getPageMarkdownUrl, siteUrl } from '@/lib/shared';
 import { source } from '@/lib/source';
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -42,7 +42,19 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full ?? page.data.mode === 'wide'}>
-      <DocsTitle>{page.data.title}</DocsTitle>
+      <div className="flex items-start justify-between gap-4">
+        <DocsTitle>{page.data.title}</DocsTitle>
+        {/* Mintlify's "Copy page" button as an icon only, without its dropdown of AI and Markdown links.
+            The empty string replaces Fumadocs' "Copy Markdown" label: `null` would fall back to it. */}
+        <MarkdownCopyButton
+          markdownUrl={getPageMarkdownUrl(page).url}
+          aria-label="Copy page"
+          title="Copy page"
+          className="mt-1 size-8 shrink-0 p-0"
+        >
+          {''}
+        </MarkdownCopyButton>
+      </div>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
         <MDX components={components} />
