@@ -1,4 +1,4 @@
-# WalletConnect Docs
+# WalletConnect Docs 
 
 WalletConnect's documentation site, built with [Fumadocs](https://fumadocs.dev) on Next.js. It was migrated from Mintlify, and every URL from the Mintlify site still works.
 
