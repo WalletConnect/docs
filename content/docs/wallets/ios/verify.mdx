@@ -37,20 +37,77 @@ How your wallet should read `verifyContext` depends on how the dApp connects:
 
 ### Implementation
 
-VerifyContext provides a domain verification information about Session.Proposal and Request and is relevant to the `verifyDapp` function.
-
-It consists of origin of an app from where the request has been sent, validation enum that says whether origin is unknown, valid or invalid and verify URL server.
+`sessionProposalPublisher`, `authenticateRequestPublisher` and `sessionRequestPublisher` each emit a `VerifyContext?` alongside the request:
 
 ```swift
-public struct VerifyContext: Equatable, Hashable {
-   public enum ValidationStatus {
-       case unknown
-       case valid
-       case invalid
-   }
+public struct VerifyContext: Equatable, Hashable, Codable {
+    public enum ValidationStatus: Codable {
+        case unknown
+        case valid
+        case invalid
+        case scam
+    }
 
-   public let origin: String?
-   public let validation: ValidationStatus
-   public let verifyUrl: String
+    public let origin: String?
+    public let validation: ValidationStatus
 }
 ```
+
+Map it to one of the four states once, then use that state in each subscriber.
+
+```swift
+enum VerifyState { case threat, mismatch, unverified, domainMatch }
+
+func verifyState(for context: VerifyContext?) -> VerifyState {
+    switch context?.validation {
+    case .scam:
+        // Threat: only set over relay, since Link Mode has no scam check
+        return .threat
+    case .invalid:
+        return .mismatch
+    case .valid:
+        return .domainMatch
+    case .unknown, .none:
+        // UNKNOWN: expected for native dApps over relay
+        return .unverified
+    }
+}
+
+// Session proposals from a web or native dApp
+WalletKit.instance.sessionProposalPublisher
+    .receive(on: DispatchQueue.main)
+    .sink { proposal, context in
+        let state = verifyState(for: context)
+        // show the state on the approval screen
+    }
+    .store(in: &publishers)
+
+// One-click auth requests can arrive over relay or Link Mode
+WalletKit.instance.authenticateRequestPublisher
+    .receive(on: DispatchQueue.main)
+    .sink { request, context in
+        let state = verifyState(for: context)
+        // in Link Mode, MISMATCH means the universal link domain doesn't match metadata.url
+    }
+    .store(in: &publishers)
+
+WalletKit.instance.sessionRequestPublisher
+    .receive(on: DispatchQueue.main)
+    .sink { request, context in
+        let state = verifyState(for: context)
+        // show the state on the signing screen
+    }
+    .store(in: &publishers)
+```
+
+Keep in mind:
+
+- WalletKit doesn't expose the transport a request arrived on. To detect Link Mode, check for `wc_ev` in the incoming universal link before passing it to `WalletKit.instance.dispatchEnvelope(_:)`, and keep track of that request's topic.
+- Session requests sent over Link Mode arrive with a `nil` context, so they map to `UNVERIFIED`.
+
+Present each state like this:
+
+- `THREAT`: Block the request, or require the user to explicitly accept the risk. Check before anything else, so the user doesn't also see a Mismatch warning.
+- `MISMATCH`: Show a warning and proceed only if the user accepts the risk.
+- `UNVERIFIED`: Show a neutral "Cannot verify" label. Don't block the request, since native dApps over relay always land here.
+- `DOMAIN_MATCH`: Show a verified badge and proceed as normal.
