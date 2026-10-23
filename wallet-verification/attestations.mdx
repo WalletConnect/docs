@@ -1,7 +1,7 @@
 ---
-title: "Wallet Verification Attestations"
-description: "Verification states, the verification and attestation objects, the signed message format, and how to re-check a signature yourself."
-sidebarTitle: "Attestations"
+title: "Wallet Verification Results and Attestations"
+description: "Verification states, the verification and attestation objects, how to re-check a signature yourself, and the signed message format."
+sidebarTitle: "Results & attestations"
 ---
 
 When a user signs, Wallet Verification checks the signature and stores an attestation on the verification. The attestation holds everything you need to re-check the proof independently.
@@ -53,35 +53,9 @@ The create response also includes `url`. No other response returns it.
 
 `ecrecover` and `ed25519` are stateless. `erc1271` and `erc6492` call the wallet contract, so they record the block.
 
-## Signed message
-
-EVM wallets sign an [EIP-4361](https://eips.ethereum.org/EIPS/eip-4361) (Sign-In with Ethereum) message. Solana wallets sign the equivalent [CAIP-122](https://chainagnostic.org/CAIPs/caip-122) message.
-
-```text Signed message format
-{page host} wants you to sign in with your {Ethereum|Solana} account:
-{address}
-
-{Requester name} asks you to verify wallet ownership to {purpose text}.
-
-URI: {page origin}/s
-Version: 1
-Chain ID: {EVM: chain number, e.g. 1 | Solana: full CAIP-2 id}
-Nonce: {nonce}
-Issued At: {created_at}
-Expiration Time: {expires_at}
-Request ID: {verification id, ver_…}
-```
-
-| Purpose | Purpose text |
-|---------|--------------|
-| `withdrawal` | authorise a withdrawal to this wallet |
-| `payout` | receive payouts at this wallet |
-| `onboarding` | complete onboarding |
-| `re_verification` | re-confirm ownership of this wallet |
-
-The requester name is the business name from [Customization](/wallet-verification/dashboard#customization), with accents stripped to fit the format. Without one, it reads "The requester". Your `reference_id` and `metadata` are not part of the message.
-
-To fetch only the signed text, call `GET /verifications/{id}/message`. It returns `text/plain`, or `409 not_verified` if the verification is not `verified`.
+<Note>
+Attestations are kept for 5 years.
+</Note>
 
 ## Verify an attestation yourself
 
@@ -140,6 +114,32 @@ These examples are illustrative. Use them as a starting point and adapt chain se
   </Tab>
 </Tabs>
 
-## Retention
+## Signed message
 
-Attestations are kept for 5 years.
+EVM wallets sign an [EIP-4361](https://eips.ethereum.org/EIPS/eip-4361) (Sign-In with Ethereum) message. Solana wallets sign the equivalent [CAIP-122](https://chainagnostic.org/CAIPs/caip-122) message.
+
+```text Signed message format
+{page host} wants you to sign in with your {Ethereum|Solana} account:
+{address}
+
+{Requester name} asks you to verify wallet ownership to {purpose text}.
+
+URI: {page origin}/s
+Version: 1
+Chain ID: {EVM: chain number, e.g. 1 | Solana: full CAIP-2 id}
+Nonce: {nonce}
+Issued At: {created_at}
+Expiration Time: {expires_at}
+Request ID: {verification id, ver_…}
+```
+
+| Purpose | Purpose text |
+|---------|--------------|
+| `withdrawal` | authorise a withdrawal to this wallet |
+| `payout` | receive payouts at this wallet |
+| `onboarding` | complete onboarding |
+| `re_verification` | re-confirm ownership of this wallet |
+
+The requester name is the business name from [Customization](/wallet-verification/dashboard#customization), with accents stripped to fit the format. Without one, it reads "The requester". Your `reference_id` and `metadata` are not part of the message.
+
+To fetch only the signed text, call `GET /verifications/{id}/message`. It returns `text/plain`, or `409 not_verified` if the verification is not `verified`.
