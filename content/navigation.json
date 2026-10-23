@@ -61,6 +61,7 @@
               "group": "More",
               "pages": [
                 "wallets/more/best-practices",
+                "wallets/more/push-notifications",
                 "wallets/more/updating-wallet-sdk",
                 {
                   "group": "Web3Wallet to Wallet SDK",
@@ -535,6 +536,27 @@
           "group": "AI Agents",
           "pages": [
             "agents/overview"
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "Wallet Verification",
+      "icon": "shield-check",
+      "groups": [
+        {
+          "group": "Get Started",
+          "pages": [
+            "wallet-verification/overview",
+            "wallet-verification/quickstart"
+          ]
+        },
+        {
+          "group": "Integration",
+          "pages": [
+            "wallet-verification/dashboard",
+            "wallet-verification/hosted-page",
+            "wallet-verification/attestations"
           ]
         }
       ]
