@@ -32,6 +32,16 @@
 }
 
 /*
+ * A full page caps its content at 1285px and aligns it left, which leaves the start page off-centre
+ * under the wider navbar. `width` keeps the content stretched: an auto margin alone would shrink a
+ * flex item to fit its content.
+ */
+article[data-home] > * {
+  width: 100%;
+  margin-inline: auto;
+}
+
+/*
  * The dropdown switcher (Wallets → Web, Android, …) lives at the top of the sidebar, so drop the
  * copy Fumadocs renders at the start of the navbar tab row. The tabs are links; it's the button.
  */
