@@ -148,6 +148,10 @@
     "destination": "/payments"
   },
   {
+    "source": "/wallet-verification/overview",
+    "destination": "/wallet-verification"
+  },
+  {
     "source": "/wallets/guides/tonconnect-walletconnect",
     "destination": "/apps/guides/tonconnect-walletconnect"
   }

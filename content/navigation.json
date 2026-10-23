@@ -547,7 +547,7 @@
         {
           "group": "Get Started",
           "pages": [
-            "wallet-verification/overview",
+            "wallet-verification/index",
             "wallet-verification/quickstart"
           ]
         },

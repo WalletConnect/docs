@@ -53,6 +53,7 @@ Before finishing a change, run `pnpm build` for content changes, and `pnpm lint`
 - Create the `.mdx` file under `content/docs/`, then add its path (no extension, e.g. `"wallets/features/verify"`) to `content/navigation.json`. A page missing from the navigation still builds and has a URL, but no sidebar entry; `lib/navigation.tsx` warns about navigation entries that point to missing pages.
 - Moving or renaming a page changes its URL. Add a redirect from the old path to `redirects.json` and update links to it across `content/`.
 - Use folder names in lowercase kebab-case, matching the existing tree (`wallets/react-native/cloud/relay.mdx`).
+- A navbar tab links to its first page, so make that page the tab folder's `index.mdx` and list it first in the tab's navigation: the Wallet Verification tab opens `/wallet-verification`, not `/wallet-verification/overview`. Label it in the sidebar with `sidebarTitle: "Overview"` if needed. Every tab follows this (`/wallets`, `/apps`, `/network`, `/payments`, `/wallet-verification`).
 
 ## Frontmatter
 
