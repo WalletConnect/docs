@@ -1,6 +1,6 @@
 // Fetches the WalletConnect Pay OpenAPI specs for every published API version, writes them to
 // openapi/, generates one page per operation under content/docs/payments/api-reference/<version>/
-// and updates the API Reference group (Payments tab → Get Started) in content/navigation.json
+// and updates the API Reference tab in content/navigation.json
 // + the "latest" redirect.
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -114,7 +114,9 @@ async function generatePages(version, spec) {
       expectedFiles.add(filename);
       const title = (op.summary || `${method} ${path}`).replace(/["\\]/g, '\\$&');
       const operations = JSON.stringify([{ path, method: method.toLowerCase() }]);
-      const mdx = `---\ntitle: "${title}"\n---\n\n<APIPage document="${version}.json" operations={${operations}} />\n`;
+      // `_openapi.method` is the frontmatter fumadocs-openapi uses; lib/navigation.tsx reads it
+      // to put a method badge next to the page in the sidebar.
+      const mdx = `---\ntitle: "${title}"\n_openapi:\n  method: ${method}\n---\n\n<APIPage document="${version}.json" operations={${operations}} />\n`;
       writes.push(writeFile(join(dir, filename), mdx));
       pages.push(`payments/api-reference/${version}/${slug}`);
     }
@@ -143,45 +145,41 @@ async function generateSpec(version) {
   return { version, spec: merged };
 }
 
-// The API reference lives at the bottom of the Payments tab's "Get Started" section: the shared
-// overview pages first, then one collapsible group per API version (newest stable first).
-const API_REFERENCE_GROUP = 'API Reference';
+// The API reference is a navbar tab of its own, with one version per entry (newest stable first,
+// the default) switched from the dropdown at the top of the sidebar. Each version lists the
+// shared overview pages first, with no section heading, then one sidebar section per endpoint group.
+const API_REFERENCE_TAB = 'API Reference';
 
 async function buildNavigation(currentNavigation, stableVersions, previewVersions, versionSpecs) {
-  const makeVersionGroup = async (version, tag) => {
+  const makeVersion = async (version, { tag, isDefault } = {}) => {
     const spec = versionSpecs.get(version);
     const groups = await generatePages(version, spec);
     console.log(`Generated ${groups.reduce((n, g) => n + g.pages.length, 0)} pages for ${version}`);
-    return { group: tag ? `${version} (${tag})` : version, pages: groups };
+    return {
+      version,
+      ...(tag && { tag }),
+      ...(isDefault && { default: true }),
+      pages: [
+        'payments/api-reference/index',
+        'payments/api-reference/authentication',
+        'payments/api-reference/versioning',
+      ],
+      groups,
+    };
   };
 
-  const versionGroups = await Promise.all([
-    ...stableVersions.map((v, i) => makeVersionGroup(v, i === 0 ? 'Latest' : undefined)),
-    ...previewVersions.map((v) => makeVersionGroup(v, 'Preview')),
+  // Preview versions already end in `.preview`, so only the latest stable one gets a tag.
+  const versions = await Promise.all([
+    ...stableVersions.map((v, i) => makeVersion(v, i === 0 ? { tag: 'Latest', isDefault: true } : {})),
+    ...previewVersions.map((v) => makeVersion(v)),
   ]);
 
-  const apiReferenceGroup = {
-    group: API_REFERENCE_GROUP,
-    pages: [
-      'payments/api-reference/index',
-      'payments/api-reference/authentication',
-      'payments/api-reference/versioning',
-      ...versionGroups,
-    ],
-  };
-
-  const isApiReference = (page) => typeof page === 'object' && page.group === API_REFERENCE_GROUP;
-  const tabs = currentNavigation.tabs
-    .filter((t) => t.tab !== API_REFERENCE_GROUP)
-    .map((t) => {
-      if (t.tab !== 'Payments') return t;
-      const groups = t.groups.map((g) =>
-        g.group === 'Get Started'
-          ? { ...g, pages: [...g.pages.filter((p) => !isApiReference(p)), apiReferenceGroup] }
-          : g,
-      );
-      return { ...t, groups };
-    });
+  // Keeps any other settings on an existing tab (`align`).
+  const existing = currentNavigation.tabs.find((t) => t.tab === API_REFERENCE_TAB);
+  const apiReferenceTab = { tab: API_REFERENCE_TAB, icon: 'code', align: 'end', ...existing, versions };
+  const tabs = existing
+    ? currentNavigation.tabs.map((t) => (t === existing ? apiReferenceTab : t))
+    : [...currentNavigation.tabs, apiReferenceTab];
 
   return { ...currentNavigation, tabs };
 }

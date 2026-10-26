@@ -60,7 +60,7 @@ export function ProductCard({ img, imgDark, href, title, description, model, typ
   );
 }
 
-/** The four product entry points, shown on the home page and the 404 page. */
+/** The product entry points, shown on the home page and the 404 page. */
 export function ProductCards() {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -91,6 +91,20 @@ export function ProductCards() {
         href="/network"
         img="/images/network.svg"
         imgDark="/images/network-dark.svg"
+      />
+      <ProductCard
+        title="Wallet Verification"
+        description="Prove that a user controls a crypto wallet by having them sign a message."
+        href="/wallet-verification"
+        img="/images/wallet-verification.svg"
+        imgDark="/images/wallet-verification-dark.svg"
+      />
+      <ProductCard
+        title="API Reference"
+        description="Explore every WalletConnect Pay API endpoint, with authentication and versioning."
+        href="/payments/api-reference"
+        img="/images/api-reference.svg"
+        imgDark="/images/api-reference-dark.svg"
       />
     </div>
   );

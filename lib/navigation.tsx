@@ -39,6 +39,8 @@ interface NavTab extends NavContainer {
   tab: string;
   /** Keep the tab out of the navbar tab row; its pages still get a sidebar and a URL. */
   hidden?: boolean;
+  /** `end` pushes the tab to the far right of the navbar tab row (API Reference). */
+  align?: 'start' | 'end';
   /** Replace global anchors with the same `anchor` label (others are appended) on this tab. */
   anchors?: NavAnchor[];
   dropdowns?: NavDropdown[];
@@ -51,14 +53,34 @@ export interface NavAnchor {
   icon?: string;
 }
 
-/** Carries `hidden` and `anchors` on the page tree, so they can be read back from it. */
-export type TabFolder = PageTree.Folder & { hidden?: boolean; anchors?: NavAnchor[] };
+/** Carries `hidden`, `align` and `anchors` on the page tree, so they can be read back from it. */
+export type TabFolder = PageTree.Folder & { hidden?: boolean; align?: NavTab['align']; anchors?: NavAnchor[] };
 
 let nextId = 0;
 const id = (prefix: string) => `${prefix}-${nextId++}`;
 
 function icon(name?: string) {
   return name ? <Icon icon={name} /> : undefined;
+}
+
+// Mintlify's method pills in the API reference sidebar, in the colours fumadocs-openapi uses for
+// methods on the page itself. `self-start` keeps the pill on the first line of a wrapped title.
+const methodColors: Record<string, string> = {
+  GET: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  POST: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  PUT: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+  PATCH: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  DELETE: 'bg-red-500/10 text-red-600 dark:text-red-400',
+};
+
+function methodBadge(method: string) {
+  return (
+    <span
+      className={`mt-0.5 w-11 shrink-0 self-start rounded-md py-0.5 text-center font-mono font-semibold text-[0.625rem] leading-4 ${methodColors[method] ?? 'bg-fd-muted text-fd-muted-foreground'}`}
+    >
+      {method === 'DELETE' ? 'DEL' : method}
+    </span>
+  );
 }
 
 function pageNode(path: string): PageTree.Item | undefined {
@@ -72,6 +94,7 @@ function pageNode(path: string): PageTree.Item | undefined {
     $id: page.url,
     type: 'page',
     name: page.data.sidebarTitle ?? page.data.title,
+    icon: page.data._openapi && methodBadge(page.data._openapi.method),
     url: page.url,
     $ref: page.path,
   };
@@ -127,7 +150,7 @@ function buildTab(tab: NavTab): PageTree.Folder {
       type: 'folder',
       root: 'version',
       name: v.tag ? `${v.version} (${v.tag})` : v.version,
-      description: v.description ?? `API version ${v.version}`,
+      description: v.description,
       icon: icon(v.icon ?? 'code-branch'),
       children: containerChildren(v),
     }));
@@ -142,6 +165,7 @@ function buildTab(tab: NavTab): PageTree.Folder {
     name: tab.tab,
     icon: icon(tab.icon),
     hidden: tab.hidden,
+    align: tab.align,
     anchors: tab.anchors && mergeAnchors(getGlobalAnchors(), tab.anchors),
     children,
   } as TabFolder;
@@ -213,14 +237,19 @@ function mergeAnchors(global: NavAnchor[], overrides: NavAnchor[]): NavAnchor[] 
   return [...merged, ...overrides.filter((a) => !global.some((g) => g.anchor === a.anchor))];
 }
 
-function firstUrl(nodes: PageTree.Node[]): string | undefined {
+function firstUrl(nodes: PageTree.Node[], skip?: Set<string>): string | undefined {
   for (const node of nodes) {
-    if (node.type === 'page' && !node.external) return node.url;
+    if (node.type === 'page' && !node.external && !skip?.has(node.url)) return node.url;
     if (node.type === 'folder') {
-      const url = node.index?.url ?? firstUrl(node.children);
+      const url = node.index && !skip?.has(node.index.url) ? node.index.url : firstUrl(node.children, skip);
       if (url) return url;
     }
   }
+}
+
+function tabClassName(tab: TabFolder) {
+  if (tab.hidden) return { className: 'hidden' };
+  if (tab.align === 'end') return { className: 'lg:ms-auto' };
 }
 
 /**
@@ -229,10 +258,20 @@ function firstUrl(nodes: PageTree.Node[]): string | undefined {
  */
 export function getNavigationTabs(tree = getNavigationTree()): LayoutTab[] {
   const tabs: LayoutTab[] = [];
+  // API versions all start with the same Overview pages, so a later version would link to the
+  // first version's page and the switcher could never select it. Each dropdown option links to
+  // the first page that an earlier option doesn't already claim.
+  const claimed = new Set<string>();
   const visit = (nodes: PageTree.Node[]) => {
     for (const node of nodes) {
       if (node.type !== 'folder') continue;
-      const url = node.root ? (node.index?.url ?? firstUrl(node.children)) : undefined;
+      let url: string | undefined;
+      if (typeof node.root === 'string') {
+        url = firstUrl([node], claimed);
+        if (url) for (const u of collectUrls([node])) claimed.add(u);
+      } else if (node.root) {
+        url = node.index?.url ?? firstUrl(node.children);
+      }
       if (url) {
         tabs.push({
           title: node.name,
@@ -242,7 +281,8 @@ export function getNavigationTabs(tree = getNavigationTree()): LayoutTab[] {
           icon: node.icon ? <div className="size-full [&_svg]:size-full">{node.icon}</div> : undefined,
           // `hidden` tabs stay in the list so the tree still resolves them (and the mobile
           // switcher still labels the current one) — they just don't render in the tab row.
-          props: (node as TabFolder).hidden ? { className: 'hidden' } : undefined,
+          // `lg:` because the tab row only shows from `lg`; below it the tabs are a dropdown list.
+          props: tabClassName(node as TabFolder),
         });
       }
       visit(node.children);

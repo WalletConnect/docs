@@ -19,6 +19,8 @@ const docs = defineDocs({
       /** `frame` renders the page without title, TOC and page chrome (landing pages). */
       mode: z.enum(['default', 'wide', 'frame', 'custom', 'center']).optional(),
       metatags: z.record(z.string(), z.string()).optional(),
+      /** Set on generated API reference pages; the sidebar shows the method as a badge. */
+      _openapi: z.object({ method: z.string() }).optional(),
     }),
     mdxOptions: applyMdxPreset({
       // ```mermaid code blocks → <Mermaid chart="..." />
