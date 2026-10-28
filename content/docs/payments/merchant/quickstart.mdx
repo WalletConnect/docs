@@ -1,0 +1,199 @@
+---
+title: "Quickstart"
+sidebarTitle: "Quickstart"
+description: "Go from zero to your first payment with the WalletConnect Pay Merchant API in six steps."
+---
+
+This guide takes you from zero to your first payment in six steps.
+
+Every account has two modes: **test**, where payments are simulated and no funds move, and **live**, where payments execute on-chain for real. Both use the same API — the only difference is which API key you use (`wcp_test_…` vs `wcp_…`). This guide runs through the flow in **test mode first**, so you can build and verify everything safely. See [Test mode](/payments/test-mode) for the full picture.
+
+1. **Create a test API key** in the dashboard.
+2. **Authenticate** your requests with the key.
+3. **Create your first merchant** via `POST /v1/merchants`.
+4. **Configure crypto settlement** via `POST /v1/merchants/{merchantId}/settlements/crypto`.
+5. **Create your first payment** via `POST /v1/payments`.
+6. **Check the payment status** via `GET /v1/payments/{id}/status`.
+
+<Callout type="info">
+Don't have access to the dashboard yet? [Contact sales](https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s) to get started.
+</Callout>
+
+<Steps>
+
+<Step>
+## Create a test API key
+
+1. Open [**API Keys**](https://merchant.pay.walletconnect.com/en/api-keys) in the dashboard and sign in if prompted.
+2. Create a **test key** — it starts with `wcp_test_`. Copy the key — it is shown only once.
+3. Store it in a secret manager. Anyone with this key can act on behalf of your account.
+
+With a test key, everything in this guide behaves like production except that no funds move. See [Test mode](/payments/test-mode) for exactly what test payments do and don't do.
+
+</Step>
+
+<Step>
+## Authenticate
+
+Every request to the Merchant API uses the `Api-Key` header.
+
+```bash
+export WCP_API_KEY="wcp_test_…"      # the test key you just created
+export WCP_BASE="https://api.pay.walletconnect.com"
+```
+
+A quick sanity check — list your merchants:
+
+```bash
+curl "$WCP_BASE/v1/merchants" \
+  -H "Api-Key: $WCP_API_KEY"
+```
+
+A `200 OK` with a (possibly empty) `data` array confirms the key works. A `401` means the key is wrong; a `403` means the key is valid but lacks permission for this account.
+
+<Callout type="idea">
+Pin requests to a specific API version with the `WCP-Version` header (for example, `WCP-Version: 2026-02-18`). Without it, your account's default version is used. See [Versioning](/payments/api-reference/versioning) for the full policy.
+</Callout>
+
+</Step>
+
+<Step>
+## Create your first merchant
+
+A **merchant** is the entity that receives payments. One account can hold many merchants — typically one per brand, storefront, or legal entity.
+
+```bash
+curl -X POST "$WCP_BASE/v1/merchants" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantName": "Acme Store",
+    "merchantEmail": "billing@acme.store"
+  }'
+```
+
+The response includes the merchant `id` — save it, you'll need it for every payment.
+
+```json
+{
+  "merchant": {
+    "id": "mrch_7kBz2qR9xPvLmN4Yw",
+    "name": "Acme Store",
+    "email": "billing@acme.store",
+    "status": "active",
+    "createdAt": "2026-02-18T10:30:00.000Z"
+  }
+}
+```
+
+```bash
+export WCP_MERCHANT_ID="mrch_7kBz2qR9xPvLmN4Yw"
+```
+
+<Callout type="info">
+`Idempotency-Key` is required on this endpoint. Use a fresh UUID per merchant — replays with the same key return the original result instead of creating a duplicate.
+</Callout>
+
+See the full schema and field reference in [Create a merchant](/payments/api-reference/latest/post-v1-merchants).
+
+</Step>
+
+<Step>
+## Configure crypto settlement
+
+Before you can accept payments, tell us where to deliver settled funds. Each settlement entry pairs a [CAIP-19](https://chainagnostic.org/CAIPs/caip-19) `asset` (the token you want to settle in) with a [CAIP-10](https://chainagnostic.org/CAIPs/caip-10) `destination` wallet on the same chain.
+
+```bash
+curl -X POST "$WCP_BASE/v1/merchants/$WCP_MERCHANT_ID/settlements/crypto" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "settlements": [
+      {
+        "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "destination": "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
+      }
+    ]
+  }'
+```
+
+The example above registers USDC on Base. For the full list of supported `asset` values and the chains we settle to, see [Token & Chain Coverage](/payments/token-and-chain-coverage).
+
+<Callout type="info">
+Each `(merchant, asset)` pair must be unique — registering the same asset twice returns `settlement_asset_conflict`. To change a destination, use [Update a crypto settlement](/payments/api-reference/latest/put-v1-merchants-merchantid-settlements-crypto-id) instead.
+</Callout>
+
+See the full schema in [Create crypto settlements](/payments/api-reference/latest/post-v1-merchants-merchantid-settlements-crypto).
+
+</Step>
+
+<Step>
+## Create your first payment
+
+A **payment** is a request for funds against one of your merchants. You pass the merchant via the `Merchant-Id` header and your own order identifier as `referenceId`.
+
+```bash
+curl -X POST "$WCP_BASE/v1/payments" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Merchant-Id: $WCP_MERCHANT_ID" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "ORDER-123",
+    "amount": {
+      "unit": "iso4217/USD",
+      "value": "100"
+    }
+  }'
+```
+
+The response includes the payment `id` and a link your buyer can open in any WalletConnect-compatible wallet. Hand that link to your checkout, share it directly, or render it as a QR code.
+
+```bash
+export WCP_PAYMENT_ID="pay_…"        # from the response above
+```
+
+</Step>
+
+<Step>
+## Check the payment status
+
+Poll the status endpoint to know when the payment has completed:
+
+```bash
+curl "$WCP_BASE/v1/payments/$WCP_PAYMENT_ID/status" \
+  -H "Api-Key: $WCP_API_KEY" \
+  -H "Merchant-Id: $WCP_MERCHANT_ID"
+```
+
+```json
+{
+  "status": "succeeded",
+  "isFinal": true,
+  "pollInMs": null,
+  "info": {
+    "txId": "test:pay_…",
+    "optionAmount": {
+      "unit": "caip19/eip155:8453/erc20:0x...",
+      "value": "1000000"
+    }
+  }
+}
+```
+
+Use `isFinal` to decide when to stop polling. While the payment is still in flight, the response returns `isFinal: false` and a `pollInMs` hint for how long to wait before polling again. Once `isFinal` is `true`, `status` is one of `succeeded`, `failed`, `cancelled`, or `expired` and `pollInMs` is `null`.
+
+<Callout type="info">
+In test mode the `txId` is synthetic (`test:{paymentId}`) — no transaction is executed on-chain. Live payments return a real transaction hash.
+</Callout>
+
+See the full response schema in [Get the payment status](/payments/api-reference/latest/get-v1-payments-id-status).
+
+</Step>
+
+</Steps>
+
+## From test to live
+
+That's the whole flow. Repeating these same six steps with a **live key** (`wcp_` prefix) means every payment you create is a **real payment** — on-chain execution, real funds, real settlement. Nothing else changes: same API, same endpoints, same code. Test-mode data doesn't carry over, so you'll create your merchants and settlement configuration again with the live key.

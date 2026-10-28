@@ -1,0 +1,986 @@
+---
+title: "AI Integration Prompt - Flutter"
+description: "Comprehensive AI integration prompt for Flutter wallet developers integrating WalletConnect Pay via WalletKit."
+sidebarTitle: "Flutter AI Prompt"
+---
+
+# WalletConnect Pay Integration Guide for Flutter (via WalletKit)
+
+This guide enables Flutter wallet developers to integrate WalletConnect Pay for processing crypto payment links through `reown_walletkit`. The integration allows wallet applications to accept and process payment requests from merchants using the WalletConnect Pay protocol.
+
+## Important Approach
+
+**Study and adapt, don't blindly copy.** Before implementing, examine how your existing wallet app handles:
+- Deep links and QR code scanning
+- Modal/bottom sheet presentation
+- State management patterns
+- Signing implementations for different methods
+
+Maintain consistent architecture and naming conventions with your existing codebase.
+
+---
+
+## Prerequisites
+
+Before starting, ensure your wallet app has:
+
+1. **WalletKit SDK integrated** (`reown_walletkit: ^1.5.1` package or newer, which bundles `walletconnect_pay` 1.1.0)
+2. **EVM signing capability** supporting:
+   - `eth_signTypedData_v4` (EIP-712 typed data signing)
+   - `personal_sign` (message signing)
+3. **Async/await patterns** for handling asynchronous operations
+4. **UI modal/bottom sheet system** for presenting payment flows
+5. **Understanding of CAIP-10 account format**: `{namespace}:{chainId}:{address}` (e.g., `eip155:1:0x1234...`)
+
+---
+
+## Core Concepts
+
+### Payment Flow Overview
+
+```
+Payment Link → Detect → Get Options → [WebView Data Collection] → Get Actions → Sign Actions → Confirm Payment → Result
+```
+
+1. **Payment Link Detection**: Identify incoming payment links from QR codes, deep links, or text input
+2. **Get Payment Options**: Retrieve available payment methods with merchant information
+3. **WebView Data Collection** (optional): Display WebView form for KYC/compliance data if required by the payment. The WebView submits data directly to the backend, so this must happen BEFORE fetching actions.
+4. **Get Actions**: Fetch the required signing actions via `getRequiredPaymentActions` (only needed when the selected option's `actions` are empty)
+5. **Sign Actions**: Execute wallet signing operations (typically `eth_signTypedData_v4`)
+6. **Confirm Payment**: Submit the wallet RPC results (`data`) to complete the transaction
+7. **Handle Result**: Display success/failure and handle polling if needed
+
+### Key Data Models
+
+| Model | Purpose |
+|-------|---------|
+| `GetPaymentOptionsRequest` | Request to fetch available payment options |
+| `PaymentOptionsResponse` | Contains payment ID, options, merchant info, and data collection requirements |
+| `PaymentOption` | Individual payment option with amount, account, and actions |
+| `Action` / `WalletRpcAction` | Signing request with chain ID, method, and parameters |
+| `CollectDataAction` | Optional data collection with WebView URL |
+| `ConfirmPaymentRequest` | Request to confirm payment with the wallet RPC results (`data`) |
+| `ConfirmPaymentResponse` | Payment status and polling information |
+| `PaymentStatus` | Enum: `requires_action`, `processing`, `succeeded`, `failed`, `expired` |
+
+---
+
+## Step-by-Step Integration
+
+### Step 1: Dependency Setup
+
+The `walletconnect_pay` package is already a dependency of `reown_walletkit` and is re-exported. No additional dependencies are needed.
+
+```yaml
+# pubspec.yaml
+dependencies:
+  reown_walletkit: ^1.5.1  # Check for latest version
+```
+
+All Pay-related types are exported from `reown_walletkit`:
+
+```dart
+import 'package:reown_walletkit/reown_walletkit.dart';
+// This includes: WalletConnectPay, PaymentOptionsResponse, PaymentOption,
+// Action, WalletRpcAction, ConfirmPaymentRequest, PaymentStatus, etc.
+```
+
+### Step 2: WalletKit Initialization
+
+Pay is automatically initialized when you call `walletKit.init()`. No separate Pay configuration is required.
+
+```dart
+// Create WalletKit instance
+final walletKit = ReownWalletKit(
+  core: ReownCore(
+    projectId: 'YOUR_PROJECT_ID',
+    logLevel: LogLevel.info,
+  ),
+  metadata: PairingMetadata(
+    name: 'Your Wallet Name',
+    description: 'Your wallet description',
+    url: 'https://yourwallet.app',
+    icons: ['https://yourwallet.app/icon.png'],
+    redirect: Redirect(
+      native: 'yourwallet://',
+      universal: 'https://yourwallet.app',
+    ),
+  ),
+);
+
+// Initialize - this also initializes Pay
+await walletKit.init();
+
+// Pay is now available via walletKit.pay or through delegated methods
+```
+
+### Step 3: Payment Link Detection
+
+Use `walletKit.isPaymentLink()` to detect payment links. This check must occur at ALL URI entry points in your app.
+
+```dart
+/// Check if a URI is a payment link
+bool isPaymentLink(String uri) {
+  return walletKit.isPaymentLink(uri);
+}
+```
+
+**CRITICAL**: Add payment link detection to:
+- QR code scanner results
+- Deep link handlers (cold start and warm start)
+- Paste/text input handlers
+- Universal link handlers
+
+**Important**: Payment links are HTTPS URLs. Ensure the `isPaymentLink()` check happens BEFORE any generic HTTPS URL handling to prevent opening payment links in a browser.
+
+```dart
+// Example: In your pairing/URI handler
+Future<void> handleUri(String uri) async {
+  if (walletKit.isPaymentLink(uri)) {
+    // Handle as payment
+    // See fetchPaymentOptions on Step 4
+  } else {
+    // Handle as standard WalletConnect pairing
+    await walletKit.pair(uri: Uri.parse(uri));
+  }
+}
+```
+
+### Step 4: Get Payment Options
+
+Retrieve available payment options using the wallet's accounts in CAIP-10 format.
+
+```dart
+/// Get payment options for a payment link
+Future<PaymentOptionsResponse> fetchPaymentOptions(String paymentLink) async {
+  // Get wallet accounts in CAIP-10 format
+  // Format: eip155:{chainId}:{address}
+  final accounts = await getWalletAccounts();
+  // Example: ['eip155:1:0x123...', 'eip155:137:0x123...', 'eip155:42161:0x123...']
+
+  final request = GetPaymentOptionsRequest(
+    paymentLink: paymentLink,
+    accounts: accounts,
+    includePaymentInfo: true, // Include merchant and payment details
+  );
+
+  try {
+    final response = await walletKit.getPaymentOptions(request: request);
+    return response;
+  } on GetPaymentOptionsError catch (e) {
+    // Handle specific error codes
+    // e.code: 'PaymentExpired', 'PaymentNotFound', 'InvalidAccount', etc.
+    throw e;
+  }
+}
+
+/// Helper: Get wallet accounts in CAIP-10 format
+Future<List<String>> getWalletAccounts() async {
+  final List<String> accounts = [];
+
+  // For each supported chain, add the account
+  // Adjust this based on your wallet's key management
+  for (final chainId in supportedChainIds) {
+    final address = await getAddressForChain(chainId);
+    accounts.add('$chainId:$address');
+  }
+
+  return accounts;
+}
+```
+
+**Response Structure:**
+
+```dart
+class PaymentOptionsResponse {
+  final String paymentId;           // Unique ID for this payment session
+  final PaymentInfo? info;          // Merchant and payment details
+  final List<PaymentOption> options; // Available payment methods
+  final CollectDataAction? collectData; // Optional data collection with WebView URL
+  final PaymentResultInfo? resultInfo; // Transaction result details (present when payment already completed)
+}
+
+class PaymentResultInfo {
+  final String txId;               // Transaction ID
+  final PayAmount optionAmount;    // Token amount details
+}
+
+class CollectDataAction {
+  final String url;                // WebView URL for data collection
+  final String? schema;            // JSON schema describing required fields
+}
+
+class PaymentInfo {
+  final PaymentStatus status;
+  final PayAmount amount;           // Payment amount with display info
+  final int expiresAt;              // Unix timestamp
+  final MerchantInfo merchant;      // Merchant name and icon
+  final BuyerInfo? buyer;
+}
+
+class PaymentOption {
+  final String id;                  // Option ID for subsequent requests
+  final String account;             // CAIP-10 account to pay from
+  final PayAmount amount;           // Amount in this option's token
+  final int etaSeconds;             // Estimated completion time
+  final List<Action> actions;       // Signing actions (may be empty initially)
+  final CollectDataAction? collectData; // Per-option data collection (null if not required)
+}
+```
+
+### Step 5: Handle Data Collection via WebView
+
+If the selected option's `collectData` is not null and has a `url`, display the URL in a WebView for data collection. The hosted form handles rendering, validation, and T&C acceptance.
+
+The form URL accepts optional query parameters — append them to `selectedOption.collectData.url` before loading, preserving existing query parameters:
+- `prefill` — base64url-encoded JSON of known user fields. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`).
+- `theme` — `light` or `dark`, to match your wallet's color mode.
+- `themeVariables` — a base64url string exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) that overrides design tokens (font, font size, some colors, button/input border radius). Append it verbatim.
+
+```dart
+String buildFormUrl(
+  String baseUrl, {
+  Map<String, String> prefillData = const {},
+  String? theme,           // "light" or "dark"
+  String? themeVariables,  // base64url string exported from the Pay Dashboard
+}) {
+  final uri = Uri.parse(baseUrl);
+  final params = {...uri.queryParameters};
+  if (prefillData.isNotEmpty) {
+    params['prefill'] = base64Url.encode(utf8.encode(jsonEncode(prefillData))).replaceAll('=', '');
+  }
+  if (theme != null) params['theme'] = theme;
+  if (themeVariables != null) params['themeVariables'] = themeVariables;
+  return uri.replace(queryParameters: params).toString();
+}
+```
+
+```dart
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// Show WebView for data collection
+Future<bool> showDataCollectionWebView(
+  BuildContext context,
+  String url,
+) async {
+  final completer = Completer<bool>();
+
+  Navigator.push(context, MaterialPageRoute(
+    builder: (_) => PayDataCollectionWebView(
+      url: url,
+      onComplete: () {
+        Navigator.pop(context);
+        completer.complete(true);
+      },
+      onError: (error) {
+        Navigator.pop(context);
+        completer.complete(false);
+        showError('Data collection failed: $error');
+      },
+    ),
+  ));
+
+  return completer.future;
+}
+
+class PayDataCollectionWebView extends StatefulWidget {
+  final String url;
+  final VoidCallback onComplete;
+  final ValueChanged<String> onError;
+
+  const PayDataCollectionWebView({
+    super.key,
+    required this.url,
+    required this.onComplete,
+    required this.onError,
+  });
+
+  @override
+  State<PayDataCollectionWebView> createState() =>
+      _PayDataCollectionWebViewState();
+}
+
+class _PayDataCollectionWebViewState extends State<PayDataCollectionWebView> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(NavigationDelegate(
+        onPageFinished: (_) => setState(() => _isLoading = false),
+        onNavigationRequest: (request) {
+          if (!request.url.contains('pay.walletconnect.com')) {
+            launchUrl(Uri.parse(request.url),
+                mode: LaunchMode.externalApplication);
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+      ))
+      ..addJavaScriptChannel(
+        'ReactNativeWebView',
+        onMessageReceived: (message) {
+          try {
+            final data = jsonDecode(message.message) as Map<String, dynamic>;
+            switch (data['type']) {
+              case 'IC_COMPLETE':
+                widget.onComplete();
+                break;
+              case 'IC_ERROR':
+                widget.onError(data['error'] ?? 'Unknown error');
+                break;
+            }
+          } catch (_) {}
+        },
+      )
+      ..loadRequest(Uri.parse(widget.url));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Information Collection')),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
+        ],
+      ),
+    );
+  }
+}
+```
+
+> **Important:** When using the WebView approach, do **not** pass `collectedData` to `confirmPayment()`. The WebView submits data directly to the backend.
+
+Add `webview_flutter` and `url_launcher` to your dependencies:
+
+```yaml
+dependencies:
+  webview_flutter: ^4.10.0
+  url_launcher: ^6.1.0
+```
+
+### Step 6: Get Required Payment Actions
+
+If the selected payment option has empty `actions`, fetch them explicitly.
+
+```dart
+/// Get signing actions for a payment option
+Future<List<Action>> fetchRequiredActions(
+  String paymentId,
+  String optionId,
+) async {
+  final request = GetRequiredPaymentActionsRequest(
+    paymentId: paymentId,
+    optionId: optionId,
+  );
+
+  try {
+    return await walletKit.getRequiredPaymentActions(request: request);
+  } on GetRequiredActionsError catch (e) {
+    throw e;
+  }
+}
+```
+
+**Action Structure:**
+
+```dart
+class Action {
+  final WalletRpcAction walletRpc;
+}
+
+class WalletRpcAction {
+  final String chainId;   // CAIP-2 chain ID (e.g., 'eip155:1')
+  final String method;    // JSON-RPC method (e.g., 'eth_signTypedData_v4')
+  final String params;    // JSON string of parameters
+}
+```
+
+### Step 7: Sign Payment Actions
+
+**CRITICAL**: The `params` field contains a JSON string. Handle it appropriately for your signing library.
+
+```dart
+/// Sign all actions and return the wallet RPC results, in action order
+Future<List<Object>> signActions(List<Action> actions) async {
+  final List<Object> data = [];
+
+  for (final action in actions) {
+    final signature = await signAction(action);
+    data.add(signature);
+  }
+
+  return data;
+}
+
+/// Sign a single action
+Future<String> signAction(Action action) async {
+  final walletRpc = action.walletRpc;
+  final chainId = walletRpc.chainId;
+  final method = walletRpc.method;
+  final params = walletRpc.params;
+
+  switch (method) {
+    case 'eth_signTypedData_v4':
+      return await signTypedDataV4(chainId, params);
+    case 'personal_sign':
+      return await personalSign(chainId, params);
+    default:
+      throw UnimplementedError('Unsupported signing method: $method');
+  }
+}
+```
+
+#### EIP-712 Typed Data Signing (`eth_signTypedData_v4`)
+
+```dart
+import 'dart:convert';
+import 'package:eth_sig_util_plus/eth_sig_util_plus.dart' as eth_sig_util;
+
+/// Sign typed data (EIP-712)
+String signTypedDataV4(String chainId, String params) {
+  // Parse the params - it's a JSON array: [address, typedData]
+  final decodedParams = jsonDecode(params) as List<dynamic>;
+  final typedData = decodedParams.last; // The typed data object or string
+
+  // Get the typed data as a JSON string
+  final String jsonData;
+  if (typedData is String) {
+    jsonData = typedData;
+  } else {
+    jsonData = jsonEncode(typedData);
+  }
+
+  // Normalize hex values (some values may have odd-length hex strings)
+  final normalizedData = _normalizeHexValues(jsonData);
+
+  // Get the private key for the chain
+  final privateKey = getPrivateKeyForChain(chainId);
+
+  // Sign using eth_sig_util
+  final signature = eth_sig_util.EthSigUtil.signTypedData(
+    privateKey: privateKey,
+    jsonData: normalizedData,
+    version: eth_sig_util.TypedDataVersion.V4,
+  );
+
+  return signature;
+}
+
+/// Normalize hex values to have even length
+String _normalizeHexValues(String jsonString) {
+  // Pad odd-length hex values (e.g., "0x186a0" -> "0x0186a0")
+  return jsonString.replaceAllMapped(
+    RegExp(r'"0x([0-9a-fA-F]+)"'),
+    (match) {
+      final hex = match.group(1)!;
+      return hex.length % 2 == 0 ? match.group(0)! : '"0x0$hex"';
+    },
+  );
+}
+```
+
+#### Personal Sign
+
+```dart
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:eth_sig_util_plus/eth_sig_util_plus.dart' as eth_sig_util;
+import 'package:eth_sig_util_plus/util/utils.dart' as eth_sig_util_util;
+
+/// Sign a personal message
+String personalSign(String chainId, String params) {
+  // Parse the params - it's a JSON array: [message, address]
+  final decodedParams = jsonDecode(params) as List<dynamic>;
+  final message = decodedParams.first as String;
+
+  // Get the private key
+  final privateKey = getPrivateKeyForChain(chainId);
+  final credentials = EthPrivateKey.fromHex(privateKey);
+
+  // Sign the message
+  final Uint8List messageBytes;
+  if (message.startsWith('0x')) {
+    messageBytes = eth_sig_util_util.hexToBytes(message.substring(2));
+  } else {
+    messageBytes = utf8.encode(message);
+  }
+
+  final signature = credentials.signPersonalMessageToUint8List(messageBytes);
+  return eth_sig_util_util.bytesToHex(signature, include0x: true);
+}
+```
+
+### Step 8: Confirm Payment
+
+Submit the wallet RPC results (`data`) to complete the payment. Each element of `data` is either a plain `String` (a signature or transaction hash) or, for chains like Tron, a `Map<String, dynamic>` JSON object; the SDK forwards each element verbatim. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
+```dart
+/// Confirm the payment with the wallet RPC results
+Future<ConfirmPaymentResponse> confirmPayment({
+  required String paymentId,
+  required String optionId,
+  required List<Object> data,
+}) async {
+  final request = ConfirmPaymentRequest(
+    paymentId: paymentId,
+    optionId: optionId,
+    data: data,
+    maxPollMs: 60000, // Poll for up to 60 seconds
+  );
+
+  try {
+    final response = await walletKit.confirmPayment(request: request);
+    return response;
+  } on ConfirmPaymentError catch (e) {
+    // Handle specific errors
+    // e.code: 'InvalidSignature', 'PaymentExpired', 'RouteExpired', etc.
+    throw e;
+  }
+}
+```
+
+**CRITICAL**: The `data` list must match the actions array order exactly. Misalignment causes payment failures.
+
+<Callout type="warning">
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is null.
+</Callout>
+
+### Step 9: Handle Payment Result
+
+```dart
+/// Handle the payment response
+Future<void> handlePaymentResult(ConfirmPaymentResponse response) async {
+  switch (response.status) {
+    case PaymentStatus.succeeded:
+      // Payment completed successfully
+      showSuccessScreen();
+      break;
+
+    case PaymentStatus.processing:
+      // Payment is being processed
+      if (!response.isFinal && response.pollInMs != null) {
+        // Continue polling
+        await Future.delayed(Duration(milliseconds: response.pollInMs!));
+        // Call confirmPayment again to check status
+      }
+      break;
+
+    case PaymentStatus.failed:
+      showErrorScreen('Payment failed');
+      break;
+
+    case PaymentStatus.expired:
+      showErrorScreen('Payment expired');
+      break;
+
+    case PaymentStatus.requires_action:
+      // Should not reach here after signing
+      showErrorScreen('Additional action required');
+      break;
+  }
+}
+```
+
+---
+
+## Complete Payment Flow Example
+
+```dart
+/// Complete payment processing flow
+Future<void> processPayment(String paymentLink) async {
+  try {
+    // Step 1: Get payment options
+    final accounts = await getWalletAccounts();
+    final options = await walletKit.getPaymentOptions(
+      request: GetPaymentOptionsRequest(
+        paymentLink: paymentLink,
+        accounts: accounts,
+        includePaymentInfo: true,
+      ),
+    );
+
+    if (options.options.isEmpty) {
+      throw Exception('No payment options available');
+    }
+
+    // Step 2: Show payment UI and let user select option
+    final selectedOption = await showPaymentOptionsModal(options);
+    if (selectedOption == null) return; // User cancelled
+
+    // Step 3: Collect data via WebView if required for selected option
+    if (selectedOption.collectData?.url != null) {
+      final success = await showDataCollectionWebView(
+        context,
+        selectedOption.collectData!.url,
+      );
+      if (!success) return; // User cancelled or error
+    }
+
+    // Step 4: Get actions if not included in option
+    List<Action> actions = selectedOption.actions;
+    if (actions.isEmpty) {
+      actions = await walletKit.getRequiredPaymentActions(
+        request: GetRequiredPaymentActionsRequest(
+          paymentId: options.paymentId,
+          optionId: selectedOption.id,
+        ),
+      );
+    }
+
+    // Step 5: Sign all actions
+    final data = await signActions(actions);
+
+    // Step 6: Confirm payment
+    final result = await walletKit.confirmPayment(
+      request: ConfirmPaymentRequest(
+        paymentId: options.paymentId,
+        optionId: selectedOption.id,
+        data: data,
+        maxPollMs: 60000,
+      ),
+    );
+
+    // Step 7: Handle result
+    await handlePaymentResult(result);
+
+  } on GetPaymentOptionsError catch (e) {
+    showError('Failed to get payment options: ${e.message}');
+  } on GetRequiredActionsError catch (e) {
+    showError('Failed to get signing actions: ${e.message}');
+  } on ConfirmPaymentError catch (e) {
+    showError('Failed to confirm payment: ${e.message}');
+  } catch (e) {
+    showError('Payment error: $e');
+  }
+}
+```
+
+---
+
+## UI Implementation Guidelines
+
+### Recommended Screens/Modals
+
+1. **Loading State**: Show while fetching payment options
+2. **Payment Details**: Display merchant info, amount, and payment options
+3. **Data Collection** (conditional): Collect required fields
+4. **Processing State**: Show while confirming payment
+5. **Result Screen**: Success or failure with details
+
+### Example Modal Structure
+
+```dart
+/// Payment details modal
+class PaymentDetailsModal extends StatefulWidget {
+  final PaymentOptionsResponse options;
+
+  const PaymentDetailsModal({required this.options});
+
+  @override
+  State<PaymentDetailsModal> createState() => _PaymentDetailsModalState();
+}
+
+class _PaymentDetailsModalState extends State<PaymentDetailsModal> {
+  late PaymentOption _selectedOption;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedOption = widget.options.options.first;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final info = widget.options.info;
+
+    return Container(
+      child: Column(
+        children: [
+          // Merchant header
+          if (info != null) ...[
+            MerchantHeader(merchant: info.merchant),
+            AmountDisplay(amount: info.amount),
+          ],
+
+          // Payment options selector
+          PaymentOptionSelector(
+            options: widget.options.options,
+            selected: _selectedOption,
+            onSelected: (option) => setState(() => _selectedOption = option),
+          ),
+
+          // Pay button
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, _selectedOption),
+            child: Text('Pay ${formatAmount(info?.amount)}'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+---
+
+## Utility Functions
+
+### Format Payment Amount
+
+```dart
+/// Format a PayAmount for display
+String formatPayAmount(PayAmount payAmount) {
+  // Handle fiat currency (ISO 4217)
+  if (payAmount.unit.startsWith('iso4217')) {
+    return _formatFiatAmount(payAmount);
+  }
+
+  // Handle crypto amount using the extension
+  return payAmount.formatAmount();
+}
+
+String _formatFiatAmount(PayAmount payAmount) {
+  final unitOrCode = payAmount.unit;
+  final code = unitOrCode.contains('/')
+      ? unitOrCode.split('/').last.toUpperCase()
+      : unitOrCode.toUpperCase();
+
+  const Map<String, String> symbols = {
+    'USD': r'$', 'EUR': '€', 'GBP': '£', 'JPY': '¥',
+    'CAD': r'$', 'AUD': r'$', 'CHF': 'CHF', 'CNY': '¥',
+    // Add more as needed
+  };
+
+  final symbol = symbols[code] ?? code;
+  return '$symbol${payAmount.formatAmount(withSymbol: false).trim()}';
+}
+```
+
+### Format Expiration Time
+
+```dart
+/// Format expiration time
+String formatExpiration(int expiresAt) {
+  final expiry = DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000);
+  final remaining = expiry.difference(DateTime.now());
+
+  if (remaining.isNegative) return 'Expired';
+  if (remaining.inMinutes < 1) return '${remaining.inSeconds}s';
+  if (remaining.inHours < 1) return '${remaining.inMinutes}m';
+  return '${remaining.inHours}h ${remaining.inMinutes % 60}m';
+}
+```
+
+### Date Formatting for Data Collection
+
+```dart
+extension DateTimeFormatting on DateTime {
+  /// Format date as YYYY-MM-DD for data collection
+  String get formatted {
+    return '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+  }
+}
+```
+
+---
+
+## Error Handling
+
+### Error Types
+
+| Error Class | When Thrown |
+|-------------|-------------|
+| `GetPaymentOptionsError` | Failed to fetch payment options |
+| `GetRequiredActionsError` | Failed to fetch signing actions |
+| `ConfirmPaymentError` | Failed to confirm payment |
+| `PayInitializeError` | Failed to initialize Pay SDK |
+
+### Common Error Codes
+
+**GetPaymentOptions:**
+- `PaymentExpired` - Payment link has expired
+- `PaymentNotFound` - Invalid payment link
+- `InvalidAccount` - Provided account format is invalid
+- `ComplianceFailed` - Compliance check failed
+
+**ConfirmPayment:**
+- `InvalidSignature` - Signature verification failed
+- `PaymentExpired` - Payment expired during process
+- `RouteExpired` - Selected payment route expired
+- `UnsupportedMethod` - Signing method not supported
+
+### Error Handling Pattern
+
+```dart
+try {
+  final response = await walletKit.getPaymentOptions(request: request);
+  // Handle success
+} on GetPaymentOptionsError catch (e) {
+  switch (e.code) {
+    case 'PaymentExpired':
+      showError('This payment link has expired');
+      break;
+    case 'PaymentNotFound':
+      showError('Invalid payment link');
+      break;
+    case 'InvalidAccount':
+      showError('Please check your wallet configuration');
+      break;
+    default:
+      showError('Error: ${e.message}');
+  }
+} catch (e) {
+  showError('Unexpected error: $e');
+}
+```
+
+---
+
+## Common Pitfalls
+
+### 1. Account Format
+**Wrong**: `0x1234...`
+**Correct**: `eip155:1:0x1234...` (CAIP-10 format)
+
+### 2. Result Order
+**CRITICAL**: `data` must be in the same order as actions.
+
+```dart
+// CORRECT
+final data = <Object>[];
+for (final action in actions) {
+  data.add(await signAction(action));
+}
+
+// WRONG - parallel execution may change order
+final data = await Future.wait(
+  actions.map((a) => signAction(a)),
+);
+```
+
+### 3. JSON Params Handling
+The `walletRpc.params` is a JSON string. Parse appropriately:
+
+```dart
+// For eth_signTypedData_v4
+final decodedParams = jsonDecode(params) as List<dynamic>;
+final typedData = decodedParams.last; // May be String or Map
+```
+
+### 4. Hex Value Normalization
+Some hex values may have odd length. Normalize before signing:
+
+```dart
+// "0x186a0" -> "0x0186a0"
+```
+
+### 5. Deep Link Handling Order
+Check for payment links BEFORE generic URL handling:
+
+```dart
+if (walletKit.isPaymentLink(uri)) {
+  await processPayment(uri);  // Handle as payment
+} else if (uri.startsWith('wc:')) {
+  await walletKit.pair(uri: Uri.parse(uri));  // WalletConnect pairing
+} else if (uri.startsWith('https://')) {
+  // Generic HTTPS - this should come LAST
+}
+```
+
+### 6. Empty Actions
+Payment options may have empty `actions` array initially. Always check and fetch if needed:
+
+```dart
+List<Action> actions = option.actions;
+if (actions.isEmpty) {
+  actions = await walletKit.getRequiredPaymentActions(...);
+}
+```
+
+---
+
+## Testing
+
+### Test Payment Links
+
+Create test payment links from the WalletConnect Pay dashboard using a test-mode API key:
+
+```
+https://pay.walletconnect.com/?pid=<payment-id>
+```
+
+### Debug Logging
+
+Enable logging during development:
+
+```dart
+final walletKit = ReownWalletKit(
+  core: ReownCore(
+    projectId: 'YOUR_PROJECT_ID',
+    logLevel: LogLevel.all,  // Enable all logs
+  ),
+  // ...
+);
+```
+
+---
+
+## Summary
+
+### Quick Reference - API Methods
+
+```dart
+// Check if URI is a payment link
+walletKit.isPaymentLink(uri)
+
+// Get payment options
+walletKit.getPaymentOptions(request: GetPaymentOptionsRequest(...))
+
+// Get signing actions
+walletKit.getRequiredPaymentActions(request: GetRequiredPaymentActionsRequest(...))
+
+// Confirm payment
+walletKit.confirmPayment(request: ConfirmPaymentRequest(...))
+
+// Direct access to Pay instance
+walletKit.pay
+```
+
+### Integration Checklist
+
+- [ ] WalletKit initialized with `await walletKit.init()`
+- [ ] Payment link detection added to all URI entry points
+- [ ] `isPaymentLink()` check occurs BEFORE generic URL handling
+- [ ] Accounts formatted in CAIP-10 format
+- [ ] `eth_signTypedData_v4` signing implemented
+- [ ] Hex value normalization for typed data signing
+- [ ] `data` order matches action order
+- [ ] WebView data collection for compliance (using webview_flutter)
+- [ ] Error handling for all error types
+- [ ] Loading states during API calls
+- [ ] Success/failure result screens
+- [ ] Polling handled for non-final responses
+
+---
+
+## Reference Implementation
+
+See the complete working implementation in the WalletKit example app:
+- `packages/reown_walletkit/example/lib/dependencies/walletkit_service.dart`
+- `packages/reown_walletkit/example/lib/walletconnect_pay/` (UI modals)
+- `packages/reown_walletkit/example/lib/dependencies/chain_services/evm_service.dart` (signing)
+
+## Resources
+
+- [Reown Documentation](https://docs.reown.com)
+- [WalletKit Flutter Docs](https://docs.reown.com/walletkit/flutter/installation)
+- [pub.dev Package](https://pub.dev/packages/reown_walletkit)
