@@ -1,0 +1,20 @@
+allowBuilds:
+  core-js: false
+  esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - '@fumadocs/base-ui@16.17.2'
+  - fumadocs-core@16.17.2
+  - fumadocs-openapi@12.4.2
+  - miniflare@5.20261006.2-beta
+  - wrangler@4.150.0
+  - '@next/env@16.4.3'
+  - '@next/swc-darwin-arm64@16.4.3'
+  - '@next/swc-darwin-x64@16.4.3'
+  - '@next/swc-linux-arm64-gnu@16.4.3'
+  - '@next/swc-linux-arm64-musl@16.4.3'
+  - '@next/swc-linux-x64-gnu@16.4.3'
+  - '@next/swc-linux-x64-musl@16.4.3'
+  - '@next/swc-win32-arm64-msvc@16.4.3'
+  - '@next/swc-win32-x64-msvc@16.4.3'
+  - next@16.4.3

@@ -1,0 +1,59 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-openapi/css/preset.css";
+
+/* Tailwind classes used directly in MDX content */
+@source "../content";
+
+/* WalletConnect brand (docs.json → colors.primary) */
+:root {
+  --color-fd-primary: #0988f0;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-ring: #0988f0;
+}
+.dark {
+  --color-fd-primary: #3ba1f5;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-ring: #3ba1f5;
+}
+
+/*
+ * The start page renders full-width, with no sidebar column. Fumadocs sizes that column from
+ * `--fd-sidebar-width`, which the sidebar placeholder sets on the layout via `:has()` — and
+ * `:has()` matches on presence, so the variable has to be overridden as well as the element
+ * hidden. The mobile drawer is a separate element, so the hamburger still works below `md`.
+ */
+#nd-notebook-layout:has(article[data-home]) {
+  --fd-sidebar-width: 0px;
+}
+#nd-notebook-layout:has(article[data-home]) [data-sidebar-placeholder] {
+  display: none;
+}
+
+/*
+ * A full page caps its content at 1285px and aligns it left, which leaves the start page off-centre
+ * under the wider navbar. `width` keeps the content stretched: an auto margin alone would shrink a
+ * flex item to fit its content.
+ */
+article[data-home] > * {
+  width: 100%;
+  margin-inline: auto;
+}
+
+/*
+ * The dropdown switcher (Wallets → Web, Android, …) lives at the top of the sidebar, so drop the
+ * copy Fumadocs renders at the start of the navbar tab row. The tabs are links; it's the button.
+ */
+#nd-subnav [data-header-tabs] > button {
+  display: none;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

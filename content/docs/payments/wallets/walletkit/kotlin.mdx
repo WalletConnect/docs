@@ -1,0 +1,732 @@
+---
+title: "WalletConnect Pay via WalletKit - Kotlin"
+description: "Integrate WalletConnect Pay through WalletKit for a unified payment experience in your Android wallet."
+sidebarTitle: "Kotlin"
+---
+
+import AppIdSnippet from "@/content/snippets/app-id.mdx";
+import WebViewOverview from "@/content/snippets/webview-data-collection-overview.mdx";
+import WebViewBestPractices from "@/content/snippets/webview-data-collection-best-practices.mdx";
+import WebViewMessageTypes from "@/content/snippets/webview-message-types.mdx";
+
+This documentation covers integrating WalletConnect Pay through WalletKit. This approach provides a unified API where Pay is automatically initialized alongside WalletKit, simplifying the integration for wallet developers.
+
+## Sample Wallet
+
+For a complete working example, check out our sample wallet implementation:
+
+<Card title="Sample Wallet - Kotlin (WalletKit)" icon={<Icon icon="github" />} href="https://github.com/reown-com/reown-kotlin/tree/develop/sample/wallet">
+  A reference Android wallet app demonstrating WalletConnect Pay via WalletKit.
+</Card>
+
+<Callout type="idea">
+**Using AI for Integration?** If you're using an AI IDE or assistant to help with integration, you can provide it with our comprehensive [AI integration prompt](/payments/wallets/walletkit/ai-prompts/kotlin) for better context and guidance.
+</Callout>
+
+## Requirements
+
+- **Min SDK**: 23 (Android 6.0)
+- **WalletKit**: 1.9.0+ (`com.reown:walletkit`)
+- **WalletConnect Pay**: 1.3.0+ (`com.walletconnect:pay`, bundled with WalletKit; ships yttrium-wcpay 0.10.60). Required for the `data` parameter in `confirmPayment`.
+
+<AppIdSnippet  components={props.components} />
+
+## Installation
+
+First, add the required repositories to your project's `settings.gradle.kts` or root `build.gradle.kts`:
+
+```kotlin
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+Then add WalletKit to your app's `build.gradle.kts` using the BOM (Bill of Materials):
+
+```kotlin
+releaseImplementation(platform("com.reown:android-bom:$BOM_VERSION"))
+releaseImplementation("com.reown:android-core")
+releaseImplementation("com.reown:walletkit")
+```
+
+WalletConnectPay is automatically included as a dependency of WalletKit.
+
+<Callout type="info">
+Check the [GitHub releases](https://github.com/reown-com/reown-kotlin/releases) for the latest BOM version.
+</Callout>
+
+## Initialization
+
+WalletConnectPay is automatically initialized when you initialize WalletKit. No additional setup is required.
+
+```kotlin
+import com.reown.android.Core
+import com.reown.android.CoreClient
+import com.reown.walletkit.client.WalletKit
+import com.reown.walletkit.client.Wallet
+
+// First, initialize CoreClient in your Application class
+val projectId = "" // Get Project ID at https://dashboard.walletconnect.com/
+val appMetaData = Core.Model.AppMetaData(
+    name = "Wallet Name",
+    description = "Wallet Description",
+    url = "Wallet URL",
+    icons = listOf(/* list of icon url strings */),
+    redirect = "kotlin-wallet-wc:/request" // Custom Redirect URI
+)
+
+CoreClient.initialize(
+    projectId = projectId,
+    application = this,
+    metaData = appMetaData,
+)
+
+// Then initialize WalletKit
+val initParams = Wallet.Params.Init(core = CoreClient)
+
+WalletKit.initialize(initParams) { error ->
+    // Error will be thrown if there's an issue during initialization
+}
+```
+
+The Pay SDK is initialized internally with:
+- `wcpId` from your WalletConnect Project ID
+- `packageName` from your application context
+
+<Callout type="info">
+For more details on WalletKit initialization, see the [WalletKit Usage documentation](/wallets/android/usage#initialization).
+</Callout>
+
+## Payment Link Detection
+
+Use `WalletKit.Pay.isPaymentLink()` to determine if a scanned URI is a payment link or a standard WalletConnect pairing URI:
+
+```kotlin
+fun handleScannedUri(uri: String, accounts: List<String>) {
+    if (WalletKit.Pay.isPaymentLink(uri)) {
+        // Handle as payment - call getPaymentOptions
+        WalletKit.Pay.getPaymentOptions(uri, accounts)
+    } else {
+        // Handle as WalletConnect pairing
+        WalletKit.pair(Wallet.Params.Pair(uri))
+    }
+}
+```
+
+## Payment Flow
+
+The payment flow consists of six main steps:
+
+**Detect Payment Link -> Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Wallet
+    participant WalletKit as WalletKit.Pay
+    participant Backend as WalletConnect Pay
+    participant WebView
+
+    User->>Wallet: Scan QR / Open payment link
+    Wallet->>WalletKit: isPaymentLink(uri)
+    WalletKit-->>Wallet: true
+    Wallet->>WalletKit: getPaymentOptions(link, accounts)
+    WalletKit->>Backend: Fetch payment options
+    Backend-->>WalletKit: Payment options + merchant info
+    WalletKit-->>Wallet: PaymentOptionsResponse
+    Wallet->>User: Display payment options
+    
+    User->>Wallet: Select payment option
+
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
+        WebView->>User: Display data collection form
+        User->>WebView: Fill form & accept T&C
+        WebView-->>Wallet: IC_COMPLETE message
+    end
+
+    Wallet->>WalletKit: getRequiredPaymentActions(params)
+    WalletKit->>Backend: Get signing actions
+    Backend-->>WalletKit: Required wallet RPC actions
+    WalletKit-->>Wallet: List of actions to sign
+    
+    Wallet->>User: Request signature(s)
+    User->>Wallet: Approve & sign
+
+    Wallet->>WalletKit: confirmPayment(params)
+    WalletKit->>Backend: Submit payment
+    Backend-->>WalletKit: Payment status
+    WalletKit-->>Wallet: ConfirmPaymentResponse
+    Wallet->>User: Show result
+```
+
+<Steps>
+
+<Step>
+### Get Payment Options
+
+Retrieve available payment options for a payment link:
+
+```kotlin
+import com.reown.walletkit.client.WalletKit
+import com.reown.walletkit.client.Wallet
+
+viewModelScope.launch {
+    val result = WalletKit.Pay.getPaymentOptions(
+        paymentLink = "https://pay.walletconnect.com/pay_xxx",
+        accounts = listOf(
+            "eip155:1:0xYourAddress",      // Ethereum
+            "eip155:8453:0xYourAddress",   // Base
+            "eip155:10:0xYourAddress",     // Optimism
+            "eip155:137:0xYourAddress",    // Polygon
+            "eip155:42161:0xYourAddress"   // Arbitrum
+        )
+    )
+
+    result.onSuccess { response ->
+        // Payment metadata
+        val paymentId = response.paymentId
+        val paymentInfo = response.info  // Merchant info, amount, expiry
+        
+        // Available payment options
+        val options = response.options
+        options.forEach { option ->
+            println("Option: ${option.id}")
+            println("Amount: ${option.amount.value} ${option.amount.unit}")
+            println("Account: ${option.account}")
+            println("Requires IC: ${option.collectData != null}")
+        }
+    }.onFailure { error ->
+        handleError(error)
+    }
+}
+```
+
+</Step>
+
+<Step>
+### Collect User Data (If Required)
+
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
+
+<WebViewOverview  components={props.components} />
+
+```kotlin
+// Check per-option data collection requirement after user selects an option
+selectedOption.collectData?.let { collectAction ->
+    val url = collectAction.url
+    if (url != null) {
+        // Build prefill URL with known user data
+        // Use the "required" list from collectAction.schema to determine which fields to prefill
+        val prefillJson = JSONObject().apply {
+            put("fullName", "John Doe")
+            put("dob", "1990-01-15")
+            put("pobAddress", "123 Main St, New York, NY 10001")
+        }.toString()
+        // Encode prefill as base64url (URL-safe, no padding)
+        val prefillBase64 = Base64.encodeToString(
+            prefillJson.toByteArray(),
+            Base64.NO_WRAP or Base64.URL_SAFE or Base64.NO_PADDING
+        )
+        val webViewUrl = Uri.parse(url).buildUpon()
+            .appendQueryParameter("prefill", prefillBase64)
+            // Optional appearance params (see "Form URL parameters"):
+            .appendQueryParameter("theme", "dark") // "light" | "dark"
+            // themeVariables is a base64url string exported from the Pay Dashboard:
+            // .appendQueryParameter("themeVariables", themeVariables)
+            .build().toString()
+
+        // Show WebView for this specific option and wait for IC_COMPLETE message
+        showWebView(webViewUrl)
+    }
+}
+```
+
+<WebViewMessageTypes  components={props.components} />
+
+</Step>
+
+<Step>
+### Get Required Actions
+
+Get the wallet RPC actions needed to complete the payment. Make sure any required data collection has already completed before calling this:
+
+```kotlin
+val actionsResult = WalletKit.Pay.getRequiredPaymentActions(
+    Wallet.Params.RequiredPaymentActions(
+        paymentId = paymentId,
+        optionId = selectedOption.id
+    )
+)
+
+actionsResult.onSuccess { actions ->
+    actions.forEach { action ->
+        when (action) {
+            is Wallet.Model.RequiredAction.WalletRpc -> {
+                val rpcAction = action.action
+                // rpcAction.chainId - e.g., "eip155:8453"
+                // rpcAction.method - e.g., "eth_signTypedData_v4" or "personal_sign"
+                // rpcAction.params - JSON string with signing parameters
+            }
+        }
+    }
+}.onFailure { error ->
+    handleError(error)
+}
+```
+
+</Step>
+
+<Step>
+### Sign Actions
+
+Sign each required action using your wallet's signing implementation:
+
+```kotlin
+val data = actions.map { action ->
+    when (action) {
+        is Wallet.Model.RequiredAction.WalletRpc -> {
+            val rpc = action.action
+            when (rpc.method) {
+                "eth_signTypedData_v4" -> signTypedDataV4(rpc.params)
+                "personal_sign" -> personalSign(rpc.params)
+                "eth_sendTransaction" -> sendTransaction(rpc.params)
+                else -> throw UnsupportedOperationException("Unsupported: ${rpc.method}")
+            }
+        }
+    }
+}
+```
+
+#### Signing eth_signTypedData_v4
+
+```kotlin
+import org.json.JSONArray
+import org.web3j.crypto.ECKeyPair
+import org.web3j.crypto.Sign
+import org.web3j.crypto.StructuredDataEncoder
+
+fun signTypedDataV4(params: String): String {
+    // params is a JSON array: [address, typedData]
+    val paramsArray = JSONArray(params)
+    val requestedAddress = paramsArray.getString(0)
+    val typedData = paramsArray.getString(1)
+    
+    // Use StructuredDataEncoder for proper EIP-712 hashing
+    val encoder = StructuredDataEncoder(typedData)
+    val hash = encoder.hashStructuredData()
+    
+    val keyPair = ECKeyPair.create(privateKeyBytes)
+    val signatureData = Sign.signMessage(hash, keyPair, false)
+    
+    val rHex = signatureData.r.bytesToHex()
+    val sHex = signatureData.s.bytesToHex()
+    val v = signatureData.v[0].toInt() and 0xff
+    val vHex = v.toString(16).padStart(2, '0')
+    
+    return "0x$rHex$sHex$vHex".lowercase()
+}
+```
+
+<Callout type="info">
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.action.method` (or `rpc.method` if you assign the action payload to a local variable) and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/token-chain-support/usdt-support).
+</Callout>
+
+<Callout type="warning">
+Keep `data` in the same order as the actions array.
+</Callout>
+
+</Step>
+
+<Step>
+### Confirm Payment
+
+Submit the wallet RPC results (`data`) and finalize the payment. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object encoded as a string; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
+```kotlin
+val confirmResult = WalletKit.Pay.confirmPayment(
+    Wallet.Params.ConfirmPayment(
+        paymentId = paymentId,
+        optionId = selectedOption.id,
+        data = data
+    )
+)
+
+confirmResult.onSuccess { response ->
+    when (response.status) {
+        Wallet.Model.PaymentStatus.SUCCEEDED -> {
+            // Payment completed successfully
+        }
+        Wallet.Model.PaymentStatus.PROCESSING -> {
+            // Payment is being processed
+        }
+        Wallet.Model.PaymentStatus.FAILED -> {
+            // Payment failed
+        }
+        Wallet.Model.PaymentStatus.EXPIRED -> {
+            // Payment expired
+        }
+        Wallet.Model.PaymentStatus.REQUIRES_ACTION -> {
+            // Additional action required
+        }
+        Wallet.Model.PaymentStatus.CANCELLED -> {
+            // Payment cancelled by user
+        }
+    }
+}.onFailure { error ->
+    handleError(error)
+}
+```
+
+<Callout type="warning">
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Callout>
+
+</Step>
+
+</Steps>
+
+## Data Collection Implementation
+
+When `selectedOption.collectData.url` is present, display the URL in a WebView. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices  components={props.components} />
+
+```kotlin
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.WebResourceRequest
+import android.content.Intent
+import android.net.Uri
+import android.util.Base64
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.viewinterop.AndroidView
+import org.json.JSONObject
+
+@Composable
+fun PayDataCollectionWebView(
+    url: String,
+    onComplete: () -> Unit,
+    onError: (String) -> Unit
+) {
+    AndroidView(factory = { context ->
+        WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = false
+
+            addJavascriptInterface(
+                object {
+                    @JavascriptInterface
+                    fun onDataCollectionComplete(json: String) {
+                        val message = JSONObject(json)
+                        when (message.optString("type")) {
+                            "IC_COMPLETE" -> onComplete()
+                            "IC_ERROR" -> onError(
+                                message.optString("error", "Unknown error")
+                            )
+                        }
+                    }
+                },
+                "AndroidWallet"
+            )
+
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val requestUrl = request?.url?.toString() ?: return false
+                    if (!requestUrl.contains("pay.walletconnect.com")) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(requestUrl)))
+                        return true
+                    }
+                    return false
+                }
+            }
+
+            loadUrl(url)
+        }
+    })
+}
+```
+
+## Complete Example
+
+Here's a complete implementation example:
+
+```kotlin
+import com.reown.walletkit.client.WalletKit
+import com.reown.walletkit.client.Wallet
+import kotlinx.coroutines.launch
+
+class PaymentViewModel : ViewModel() {
+
+    fun handleScannedUri(uri: String) {
+        if (WalletKit.Pay.isPaymentLink(uri)) {
+            processPayment(uri)
+        } else {
+            // Handle as WalletConnect pairing
+            WalletKit.pair(Wallet.Params.Pair(uri))
+        }
+    }
+
+    fun processPayment(paymentLink: String) {
+        viewModelScope.launch {
+            val walletAddress = "0xYourAddress"
+            
+            // Step 1: Get payment options
+            val optionsResult = WalletKit.Pay.getPaymentOptions(
+                paymentLink = paymentLink,
+                accounts = listOf(
+                    "eip155:1:$walletAddress",
+                    "eip155:8453:$walletAddress",
+                    "eip155:10:$walletAddress"
+                )
+            )
+
+            optionsResult.onSuccess { response ->
+                val paymentId = response.paymentId
+                val selectedOption = response.options.first()
+
+                // Step 2: Collect data via WebView if required for selected option.
+                // IC must happen BEFORE fetching the required actions — the WebView
+                // submits the data directly to the backend.
+                selectedOption.collectData?.url?.let { webViewUrl ->
+                    showDataCollectionWebView(webViewUrl)
+                    return@launch // Resume after WebView reports IC_COMPLETE
+                }
+
+                // Step 3: Get required actions
+                val actionsResult = WalletKit.Pay.getRequiredPaymentActions(
+                    Wallet.Params.RequiredPaymentActions(
+                        paymentId = paymentId,
+                        optionId = selectedOption.id
+                    )
+                )
+
+                actionsResult.onSuccess { actions ->
+                    // Step 4: Sign actions
+                    val data = signActions(actions)
+
+                    // Step 5: Confirm payment
+                    val confirmResult = WalletKit.Pay.confirmPayment(
+                        Wallet.Params.ConfirmPayment(
+                            paymentId = paymentId,
+                            optionId = selectedOption.id,
+                            data = data
+                        )
+                    )
+
+                    confirmResult.onSuccess { confirmation ->
+                        handlePaymentStatus(confirmation.status)
+                    }.onFailure { error ->
+                        handleError(error)
+                    }
+                }.onFailure { error ->
+                    handleError(error)
+                }
+            }.onFailure { error ->
+                handleError(error)
+            }
+        }
+    }
+
+    private suspend fun signActions(
+        actions: List<Wallet.Model.RequiredAction>
+    ): List<String> {
+        return actions.map { action ->
+            when (action) {
+                is Wallet.Model.RequiredAction.WalletRpc -> {
+                    signWithWallet(action.action)
+                }
+            }
+        }
+    }
+
+    private fun handlePaymentStatus(status: Wallet.Model.PaymentStatus) {
+        when (status) {
+            Wallet.Model.PaymentStatus.SUCCEEDED -> showSuccess()
+            Wallet.Model.PaymentStatus.PROCESSING -> showProcessing()
+            Wallet.Model.PaymentStatus.FAILED -> showFailure()
+            Wallet.Model.PaymentStatus.EXPIRED -> showExpired()
+            Wallet.Model.PaymentStatus.REQUIRES_ACTION -> { /* Handle */ }
+            Wallet.Model.PaymentStatus.CANCELLED -> showCancelled()
+        }
+    }
+}
+```
+
+## API Reference
+
+**WalletKit.Pay**
+
+The payment operations object within WalletKit.
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `isPaymentLink(uri: String): Boolean` | Check if URI is a payment link |
+| `getPaymentOptions(paymentLink, accounts)` | Get available payment options |
+| `getRequiredPaymentActions(params)` | Get actions requiring signatures |
+| `confirmPayment(params)` | Confirm and finalize payment |
+
+**Parameters**
+
+**Wallet.Params.RequiredPaymentActions**
+
+```kotlin
+data class RequiredPaymentActions(
+    val paymentId: String,
+    val optionId: String
+)
+```
+
+**Wallet.Params.ConfirmPayment**
+
+```kotlin
+data class ConfirmPayment(
+    val paymentId: String,
+    val optionId: String,
+    @Deprecated("Use data instead")
+    val signatures: List<String> = emptyList(),   // Deprecated alias for data, still accepted
+    val collectedData: List<Wallet.Model.CollectDataFieldResult>? = null,
+    val data: List<String>? = null                 // Wallet RPC results in action order: plain strings or JSON-encoded objects (e.g. Tron); falls back to signatures when null
+)
+```
+
+## Data Models
+
+**Wallet.Model.PaymentOptionsResponse**
+
+```kotlin
+data class PaymentOptionsResponse(
+    val paymentId: String,
+    val info: PaymentInfo?,
+    val options: List<PaymentOption>,
+    val collectDataAction: CollectDataAction?,
+    val resultInfo: PaymentResultInfo?   // Transaction result details (present when payment already completed)
+)
+
+data class PaymentResultInfo(
+    val txId: String,                    // Transaction ID
+    val optionAmount: PaymentAmount      // Token amount details
+)
+```
+
+**Wallet.Model.PaymentInfo**
+
+```kotlin
+data class PaymentInfo(
+    val status: PaymentStatus,
+    val amount: PaymentAmount,
+    val expiresAt: Long,
+    val merchant: MerchantInfo
+)
+
+data class MerchantInfo(
+    val name: String,
+    val iconUrl: String?
+)
+```
+
+**Wallet.Model.PaymentOption**
+
+```kotlin
+data class PaymentOption(
+    val id: String,
+    val amount: PaymentAmount,
+    val account: String,
+    val estimatedTxs: Int?,
+    val collectData: CollectDataAction?  // Per-option data collection (null if not required)
+)
+```
+
+**Wallet.Model.PaymentAmount**
+
+```kotlin
+data class PaymentAmount(
+    val value: String,
+    val unit: String,
+    val display: PaymentAmountDisplay?
+)
+
+data class PaymentAmountDisplay(
+    val assetSymbol: String,
+    val assetName: String,
+    val decimals: Int,
+    val iconUrl: String?,
+    val networkName: String?,
+    val networkIconUrl: String?
+)
+```
+
+**Wallet.Model.WalletRpcAction**
+
+```kotlin
+data class WalletRpcAction(
+    val chainId: String,   // CAIP-2 chain ID (e.g., "eip155:8453")
+    val method: String,    // RPC method (e.g., "eth_signTypedData_v4", "eth_sendTransaction")
+    val params: String     // JSON-encoded parameters
+)
+```
+
+**Wallet.Model.CollectDataAction**
+
+```kotlin
+data class CollectDataAction(
+    val url: String,               // WebView URL for data collection
+    val schema: String?            // JSON schema describing required fields
+)
+```
+
+**Wallet.Model.ConfirmPaymentResponse**
+
+```kotlin
+data class ConfirmPaymentResponse(
+    val status: PaymentStatus,
+    val isFinal: Boolean,
+    val pollInMs: Long?,
+    val info: PaymentResultInfo?      // Transaction result details (present on success)
+)
+```
+
+**Wallet.Model.PaymentStatus**
+
+| Status | Description |
+|--------|-------------|
+| `REQUIRES_ACTION` | Additional action needed |
+| `PROCESSING` | Payment in progress |
+| `SUCCEEDED` | Payment completed |
+| `FAILED` | Payment failed |
+| `EXPIRED` | Payment expired |
+| `CANCELLED` | Payment cancelled by user |
+
+## Best Practices
+
+1. **Use WalletKit Integration**: If your wallet already uses WalletKit, prefer this approach for automatic configuration
+
+2. **Use `isPaymentLink()` for Detection**: Use the utility method instead of manual URL parsing for reliable payment link detection
+
+3. **Account Format**: Always use CAIP-10 format for accounts: `eip155:{chainId}:{address}`
+
+4. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
+
+5. **Result Order**: Keep `data` in the same order as the actions array
+
+6. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
+
+7. **Loading States**: Show loading indicators during API calls and signing operations
+
+8. **Expiration**: Check `paymentInfo.expiresAt` and warn users if time is running low
+
+9. **User Data**: Only collect data when `collectData` is present on the selected payment option and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
+
+10. **WebView Data Collection**: When `selectedOption.collectData?.url` is present, display the URL in a WebView rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+
+11. **Per-Option Data Collection**: When displaying payment options, check each option's `collectData` field. Show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present — use the option's `collectData.url` which is already scoped to that option's account.
