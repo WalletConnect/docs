@@ -27,6 +27,7 @@
       "!/images/*",
       "!/logo/*",
       "!/*.txt",
+      "!/sitemap.xml",
       "!/favicon.ico",
       "!/copy-agent-prompt.js"
     ]
