@@ -1,0 +1,103 @@
+---
+title: "Direct Deposits"
+description: "Give every payment its own one-time deposit address, so stablecoins sent from any wallet, exchange or custody account are matched, checked and settled automatically."
+sidebarTitle: "Direct Deposits"
+---
+
+This feature gives every payment its own one-time deposit address. The payer sends the exact amount from any wallet, exchange account or custody account, without connecting anything. WalletConnect Pay matches the transfer to that payment, screens the sender and settles the funds to your address.
+
+It works like a bank payment reference for stablecoins: each transfer arrives already linked to the order or invoice it pays.
+
+## Why Direct Deposits
+
+Most stablecoin transfers still start with "here is an address, send to it". A shared address causes three problems:
+
+- **No way to tell who paid.** Two senders of the same amount look identical, so operations teams match transfers by hand using amount and time.
+- **Mistakes are permanent.** A stablecoin transfer can't be recalled, and a misdirected deposit can take days to resolve.
+- **Not every sender can connect a wallet.** Wallet connection reaches self-custody wallets. It doesn't reach funds held on exchanges or in company custody accounts, where transfers need internal approvals.
+
+Direct Deposits fixes all three. Each payment gets its own address and an exact amount, so every transfer matches itself, from any sender.
+
+## How it works
+
+<Steps>
+  <Step title="A payment is created">
+    WalletConnect Pay creates a deposit address that belongs to that payment only.
+  </Step>
+  <Step title="The payer sees an address, an exact amount and a timer">
+    On the WalletConnect Pay payment page, the payer can connect a wallet or choose to send to the deposit address instead.
+  </Step>
+  <Step title="The payer sends from wherever they hold funds">
+    Any self-custody wallet, exchange account or custody platform that can send to an address works. Nothing needs to be connected or integrated.
+  </Step>
+  <Step title="The transfer is detected and matched">
+    The payer sees the transfer as soon as it appears on-chain, before it is final. WalletConnect Pay checks that the transfer matches the payment.
+  </Step>
+  <Step title="The sender is screened and funds settle">
+    The sender address is screened against sanctions lists before funds move on. Funds then settle to your own address.
+  </Step>
+</Steps>
+
+## Open the deposit page directly
+
+To skip wallet connection and take the payer straight to the deposit address, send them to the deposit page for the payment. Replace `<PaymentId>` with the `paymentId` returned when the payment is created.
+
+```text Deposit page URL
+https://pay.walletconnect.com/deposit/?pid=<PaymentId>
+```
+
+## Key benefits
+
+<Columns cols={2}>
+  <Card title="Reach every sender" icon="globe">
+    Accept payments from 700+ wallets by connection, plus any exchange or custody account by deposit address.
+  </Card>
+  <Card title="Every transfer matches itself" icon="link">
+    One address and one exact amount per payment means no matching by hand using amount and time.
+  </Card>
+  <Card title="See it before it's final" icon="eye">
+    Transfers show up as soon as they appear on-chain, and the sender is screened before funds move on.
+  </Card>
+  <Card title="WalletConnect Pay never holds your funds" icon="shield-check">
+    Funds settle straight to your own address.
+  </Card>
+</Columns>
+
+## Use cases
+
+| Use case | Who it's for | How Direct Deposits helps |
+|---|---|---|
+| **Complete a payment when the wallet can't** | Merchants and platforms on WalletConnect Pay | When a wallet errors, times out or isn't supported, the payer can still finish the payment by sending to a deposit address. |
+| **Top up an account from an exchange** | Neobanks, card programs, brokers, gaming platforms | Many users keep stablecoins on an exchange. A deposit address works from any exchange, not only integrated ones. |
+| **Fund from institutional custody** | Banks, payment firms, stablecoin issuers | Company funds sit on custody platforms behind approval rules. Those platforms can send to an address but can't scan a QR code. |
+| **B2B collections matched to an invoice** | Payment firms, payout platforms, treasury teams | One address per invoice, so each transfer is matched to its invoice before you credit it. |
+
+## What you get for each deposit
+
+Each deposit is tied to one payment. It appears in the Merchant Dashboard next to wallet-connected payments, with the same data and a label showing which route it took:
+
+- Sender address
+- Transaction hash
+- Amount
+- Time
+- Sender sanctions screening result (OFAC, EU, UK and UN lists)
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Does the payer need to connect a wallet?">
+    No. The payer sends the exact amount to the deposit address from any wallet, exchange or custody account.
+  </Accordion>
+  <Accordion title="Can a deposit address be reused?">
+    No. Each address belongs to one payment. Create a new payment for each transfer.
+  </Accordion>
+  <Accordion title="Does WalletConnect Pay hold the funds?">
+    No. Funds settle to your own address.
+  </Accordion>
+</AccordionGroup>
+
+## Get started
+
+<Card title="Contact us" icon="envelope" href="https://share.hsforms.com/19Dpp4ayYR9uriB3xNAh0JAnxw6s">
+  Talk to the WalletConnect Pay team about Direct Deposits.
+</Card>

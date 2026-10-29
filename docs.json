@@ -474,6 +474,12 @@
               "payments/overview",
               "payments/for-users",
               {
+                "group": "Features",
+                "pages": [
+                  "payments/direct-deposits"
+                ]
+              },
+              {
                 "group": "Coverage & Reference",
                 "pages": [
                   "payments/token-and-chain-coverage",
