@@ -415,7 +415,8 @@
                 "payments/wallets/token-chain-support",
                 "payments/wallets/token-chain-support/usdt-support",
                 "payments/wallets/token-chain-support/solana-support",
-                "payments/wallets/token-chain-support/tron-support"
+                "payments/wallets/token-chain-support/tron-support",
+                "payments/wallets/token-chain-support/stellar-support"
               ]
             }
           ]
