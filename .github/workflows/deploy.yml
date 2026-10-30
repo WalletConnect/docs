@@ -2,8 +2,7 @@ name: Deploy
 
 on:
   push:
-    # docs/v3 deploys to docs-next.walletconnect.com during QA. Switch to main at cutover.
-    branches: [docs/v3]
+    branches: [main]
   pull_request:
 
 permissions:
