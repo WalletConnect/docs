@@ -17,6 +17,8 @@ const SERVICES = [
   { name: 'MX', baseUrl: 'https://api.merchant.pay.walletconnect.com' },
 ];
 
+const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
+
 const VERSION_RE = /^\d{4}-\d{2}-\d{2}(\.preview)?$/;
 
 async function fetchJson(url) {
@@ -44,9 +46,21 @@ function mergeSpecs(specs, version) {
 
   const seenTags = new Set();
 
-  for (const spec of specs) {
+  for (const [i, spec] of specs.entries()) {
+    // Core and MX share paths (`/v1/payments` is `POST` on Core, `GET` on MX), so the host and auth
+    // go on each operation rather than the path or the document. Otherwise every MX operation
+    // would show Core's host and API key schemes.
+    const servers = [{ url: SERVICES[i].baseUrl }];
     for (const [path, methods] of Object.entries(spec.paths || {})) {
-      merged.paths[path] = { ...(merged.paths[path] || {}), ...methods };
+      const ops = Object.fromEntries(
+        Object.entries(methods).map(([method, op]) => [
+          method,
+          HTTP_METHODS.has(method)
+            ? { ...op, servers: op.servers ?? servers, security: op.security ?? spec.security ?? [] }
+            : op,
+        ]),
+      );
+      merged.paths[path] = { ...(merged.paths[path] || {}), ...ops };
       for (const op of Object.values(methods)) {
         for (const tagName of op.tags || []) {
           if (!seenTags.has(tagName)) {
