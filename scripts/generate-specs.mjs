@@ -12,9 +12,20 @@ const NAVIGATION_PATH = join(ROOT, 'content', 'navigation.json');
 const REDIRECTS_PATH = join(ROOT, 'redirects.json');
 
 const VERSIONS_URL = 'https://api.pay.walletconnect.com/versions';
-const SERVICES = [
-  { name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' },
-  { name: 'MX', baseUrl: 'https://api.merchant.pay.walletconnect.com' },
+// Only the Core API is documented. The merchant (MX) API at api.merchant.pay.walletconnect.com
+// isn't part of the public reference.
+const SERVICES = [{ name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' }];
+
+// Operations Core serves but doesn't publish in its spec yet, copied from the spec of the service
+// that documents them and shown on Core's host. Remove an entry once Core's spec has it.
+// `security` names Core's schemes, since the source spec's schemes aren't copied.
+const BORROWED_OPERATIONS = [
+  {
+    baseUrl: 'https://api.merchant.pay.walletconnect.com',
+    path: '/v1/payments',
+    method: 'get',
+    security: [{ 'API Key': [] }],
+  },
 ];
 
 const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
@@ -47,9 +58,9 @@ function mergeSpecs(specs, version) {
   const seenTags = new Set();
 
   for (const [i, spec] of specs.entries()) {
-    // Core and MX share paths (`/v1/payments` is `POST` on Core, `GET` on MX), so the host and auth
-    // go on each operation rather than the path or the document. Otherwise every MX operation
-    // would show Core's host and API key schemes.
+    // Services can share a path with different methods (MX had `GET /v1/payments`, Core has `POST`),
+    // so the host and auth go on each operation rather than the path or the document. Otherwise
+    // every operation would show the first service's host and API key schemes.
     const servers = [{ url: SERVICES[i].baseUrl }];
     for (const [path, methods] of Object.entries(spec.paths || {})) {
       const ops = Object.fromEntries(
@@ -149,8 +160,52 @@ async function generatePages(version, spec) {
   return groups;
 }
 
+// Copies every schema `node` references, directly or through other schemas, from `source` to `target`.
+function copySchemas(node, source, target) {
+  const prefix = '#/components/schemas/';
+  if (Array.isArray(node)) {
+    for (const item of node) copySchemas(item, source, target);
+    return;
+  }
+  if (!node || typeof node !== 'object') return;
+  if (typeof node.$ref === 'string' && node.$ref.startsWith(prefix)) {
+    const name = node.$ref.slice(prefix.length);
+    const schema = source.components?.schemas?.[name];
+    if (!schema) throw new Error(`Missing schema ${name}`);
+    const existing = target.components.schemas[name];
+    if (!existing) {
+      target.components.schemas[name] = schema;
+      copySchemas(schema, source, target);
+    } else if (JSON.stringify(existing) !== JSON.stringify(schema)) {
+      console.warn(`Schema collision: ${name} — keeping Core's`);
+    }
+  }
+  for (const value of Object.values(node)) copySchemas(value, source, target);
+}
+
+async function addBorrowedOperations(spec, version) {
+  const sources = new Map();
+  for (const { baseUrl, path, method, security } of BORROWED_OPERATIONS) {
+    const label = `${method.toUpperCase()} ${path}`;
+    if (spec.paths?.[path]?.[method]) {
+      console.warn(`${version}: Core now documents ${label}; remove it from BORROWED_OPERATIONS`);
+      continue;
+    }
+    if (!sources.has(baseUrl)) sources.set(baseUrl, await fetchJson(`${baseUrl}/spec/${version}/openapi.json`));
+    const source = sources.get(baseUrl);
+    const op = source.paths?.[path]?.[method];
+    if (!op) throw new Error(`${baseUrl} has no ${label} in ${version}`);
+    spec.paths[path] = { ...spec.paths[path], [method]: { ...op, security } };
+    spec.components ??= {};
+    spec.components.schemas ??= {};
+    copySchemas(op, source, spec);
+    console.log(`${version}: borrowed ${label} from ${baseUrl}`);
+  }
+}
+
 async function generateSpec(version) {
   const specs = await Promise.all(SERVICES.map(({ baseUrl }) => fetchJson(`${baseUrl}/spec/${version}/openapi.json`)));
+  await addBorrowedOperations(specs[0], version);
   const merged = mergeSpecs(specs, version);
   const outPath = join(ROOT, 'openapi', `${version}.json`);
   await mkdir(dirname(outPath), { recursive: true });
