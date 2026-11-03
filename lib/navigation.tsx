@@ -41,7 +41,10 @@ interface NavTab extends NavContainer {
   hidden?: boolean;
   /** `end` pushes the tab to the far right of the navbar tab row (API Reference). */
   align?: 'start' | 'end';
-  /** Replace global anchors with the same `anchor` label (others are appended) on this tab. */
+  /**
+   * Replace global anchors with the same `anchor` label (others go above Report an Issue) on this tab. An
+   * override with `hidden: true` drops that global anchor from the tab instead.
+   */
   anchors?: NavAnchor[];
   dropdowns?: NavDropdown[];
   versions?: NavVersion[];
@@ -51,6 +54,8 @@ export interface NavAnchor {
   anchor: string;
   href: string;
   icon?: string;
+  /** In a tab's `anchors`, `{ "anchor": "Blog", "hidden": true }` drops that global anchor (no `href` needed). */
+  hidden?: boolean;
 }
 
 /** Carries `hidden`, `align` and `anchors` on the page tree, so they can be read back from it. */
@@ -234,7 +239,11 @@ export function getGlobalAnchors(): NavAnchor[] {
 function mergeAnchors(global: NavAnchor[], overrides: NavAnchor[]): NavAnchor[] {
   const byLabel = new Map(overrides.map((a) => [a.anchor, a]));
   const merged = global.map((a) => byLabel.get(a.anchor) ?? a);
-  return [...merged, ...overrides.filter((a) => !global.some((g) => g.anchor === a.anchor))];
+  const added = overrides.filter((a) => !global.some((g) => g.anchor === a.anchor));
+  // A tab's own anchors go above Report an Issue, which stays last on every tab
+  const at = merged.findIndex((a) => a.anchor === 'Report an Issue');
+  const end = at === -1 ? merged.length : at;
+  return [...merged.slice(0, end), ...added, ...merged.slice(end)].filter((a) => !a.hidden);
 }
 
 function firstUrl(nodes: PageTree.Node[], skip?: Set<string>): string | undefined {
