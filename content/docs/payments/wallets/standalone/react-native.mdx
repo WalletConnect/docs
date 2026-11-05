@@ -1,0 +1,833 @@
+---
+title: "WalletConnect Pay SDK - React Native"
+description: "Integrate WalletConnect Pay into your React Native wallet to enable seamless crypto payments for your users."
+sidebarTitle: "React Native"
+---
+
+import WebViewOverview from "@/content/snippets/webview-data-collection-overview.mdx";
+import WebViewBestPractices from "@/content/snippets/webview-data-collection-best-practices.mdx";
+import WebViewMessageTypes from "@/content/snippets/webview-message-types.mdx";
+
+The WalletConnect Pay SDK allows wallet users to pay merchants using their crypto assets. The SDK handles payment option discovery, permit signing coordination, and payment confirmation while leveraging your wallet's existing signing infrastructure.
+
+## Sample Wallet
+
+For a complete working example, check out our sample wallet implementation:
+
+<Card title="Sample Wallet - React Native" icon={<Icon icon="github" />} href="https://github.com/reown-com/react-native-examples/tree/main/wallets/rn_cli_wallet">
+  A reference React Native wallet app demonstrating WalletConnect Pay integration.
+</Card>
+
+## Requirements
+
+- React Native 0.70+
+- `@walletconnect/pay` 1.1.0 or later
+- `@walletconnect/react-native-compat` 2.25.0 or later, installed and linked (ships the native Yttrium module: yttrium-wcpay 0.10.60 on Android, YttriumWrapper 0.10.59 on iOS)
+
+## Installation
+
+Install the WalletConnect Pay SDK using npm or yarn:
+
+<Tabs items={["npm", "yarn"]}>
+<Tab value="npm">
+```bash
+npm install @walletconnect/pay
+```
+</Tab>
+<Tab value="yarn">
+```bash
+yarn add @walletconnect/pay
+```
+</Tab>
+</Tabs>
+
+**React Native Setup**
+
+This SDK requires the WalletConnect React Native native module. Make sure you have `@walletconnect/react-native-compat` 2.25.0 or later installed and linked in your React Native project:
+
+```bash
+npm install @walletconnect/react-native-compat
+```
+
+## Architecture
+
+The SDK uses a provider abstraction that allows different implementations:
+
+- **NativeProvider**: Uses React Native uniffi module (current)
+- **WasmProvider**: Uses WebAssembly module (coming soon for web browsers)
+
+The SDK auto-detects the best available provider for your environment.
+
+## Initialization
+
+Initialize the WalletConnect Pay client with your credentials:
+
+```typescript
+import { WalletConnectPay } from "@walletconnect/pay";
+
+const client = new WalletConnectPay({
+  appId: "your-wcp-id",
+  // OR use apiKey instead:
+  // apiKey: "your-api-key",
+});
+```
+
+**Configuration Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `appId` | `string` | No* | WCP ID for authentication |
+| `apiKey` | `string` | No* | API key for authentication |
+| `clientId` | `string` | No | Client ID for tracking |
+| `baseUrl` | `string` | No | Custom API base URL |
+| `logger` | `Logger` | No | Custom logger instance or level |
+
+<Callout type="info">
+Either `appId` or `apiKey` must be provided for authentication.
+</Callout>
+
+<Callout type="info">
+Don't have a project ID? Create one at the [WalletConnect Dashboard](https://dashboard.walletconnect.com) by signing up and creating a new project.
+</Callout>
+
+## Supported Networks & Tokens
+
+WalletConnect Pay currently supports the following tokens and networks:
+
+| Token | Network | Chain ID | CAIP-10 Format |
+|-------|---------|----------|----------------|
+| USDC | Arbitrum | 42161 | `eip155:42161:{address}` |
+| USDC | Base | 8453 | `eip155:8453:{address}` |
+| USDC | Polygon | 137 | `eip155:137:{address}` |
+| USDC | Ethereum | 1 | `eip155:1:{address}` |
+| USDC | Optimism | 10 | `eip155:10:{address}` |
+| USDC | Monad | 143 | `eip155:143:{address}` |
+| USDC | Celo | 42220 | `eip155:42220:{address}` |
+| USDC | BSC | 56 | `eip155:56:{address}` |
+| EURC | Ethereum | 1 | `eip155:1:{address}` |
+| EURC | Base | 8453 | `eip155:8453:{address}` |
+| USDT0 | Arbitrum | 42161 | `eip155:42161:{address}` |
+| PYUSD | Ethereum | 1 | `eip155:1:{address}` |
+| PYUSD | Arbitrum | 42161 | `eip155:42161:{address}` |
+| USDG | Ethereum | 1 | `eip155:1:{address}` |
+| USDT | Ethereum | 1 | `eip155:1:{address}` |
+| USDT | Polygon | 137 | `eip155:137:{address}` |
+| USDT | BSC | 56 | `eip155:56:{address}` |
+
+<Callout type="info">
+Include accounts for all supported networks to maximize payment options for your users.
+</Callout>
+
+## Payment Flow
+
+The payment flow consists of five main steps:
+
+**Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Wallet
+    participant PaySDK as Pay SDK
+    participant Backend as WalletConnect Pay
+    participant WebView
+
+    User->>Wallet: Scan QR / Open payment link
+    Wallet->>PaySDK: getPaymentOptions(link, accounts)
+    PaySDK->>Backend: Fetch payment options
+    Backend-->>PaySDK: Payment options + merchant info
+    PaySDK-->>Wallet: PaymentOptionsResponse
+    Wallet->>User: Display payment options
+
+    User->>Wallet: Select payment option
+
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
+        WebView->>User: Display data collection form
+        User->>WebView: Fill form & accept T&C
+        WebView-->>Wallet: IC_COMPLETE message
+    end
+
+    Wallet->>PaySDK: getRequiredPaymentActions(paymentId, optionId)
+    PaySDK->>Backend: Get signing actions
+    Backend-->>PaySDK: Required wallet RPC actions
+    PaySDK-->>Wallet: List of actions to sign
+
+    Wallet->>User: Request signature(s)
+    User->>Wallet: Approve & sign
+
+    Wallet->>PaySDK: confirmPayment(data)
+    PaySDK->>Backend: Submit payment
+    Backend-->>PaySDK: Payment status
+    PaySDK-->>Wallet: ConfirmPaymentResponse
+    Wallet->>User: Show result
+```
+
+<Steps>
+
+<Step>
+### Get Payment Options
+
+When a user scans a payment QR code or opens a payment link, fetch available payment options:
+
+```typescript
+const options = await client.getPaymentOptions({
+  paymentLink: "https://pay.walletconnect.com/pay_123",
+  accounts: [
+    `eip155:1:${walletAddress}`,      // Ethereum Mainnet
+    `eip155:8453:${walletAddress}`,   // Base
+  ],
+  includePaymentInfo: true,
+});
+
+console.log("Payment ID:", options.paymentId);
+console.log("Options:", options.options);
+
+// Display merchant info
+if (options.info) {
+  console.log("Merchant:", options.info.merchant.name);
+  console.log("Amount:", options.info.amount.display.assetSymbol, options.info.amount.value);
+}
+
+// Check which options require data collection
+for (const option of options.options) {
+  if (option.collectData) {
+    console.log(`Option ${option.id} requires info capture`);
+  }
+}
+```
+
+</Step>
+
+<Step>
+### Collect User Data (If Required)
+
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
+
+<WebViewOverview  components={props.components} />
+
+```typescript
+// Check per-option data collection requirement after user selects an option
+if (selectedOption.collectData?.url) {
+  // Use the "required" list from selectedOption.collectData.schema to determine which fields to prefill
+  const prefillData = {
+    fullName: "John Doe",
+    dob: "1990-01-15",
+    pobAddress: "123 Main St, New York, NY 10001",
+  };
+  // Encode prefill as base64url (URL-safe, no padding)
+  const prefill = btoa(JSON.stringify(prefillData))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  // Optional appearance params (see "Form URL parameters"):
+  //   theme=light|dark — base color mode
+  //   themeVariables=<base64url> — exported from the WalletConnect Pay Dashboard
+  const themeVariables = "<base64url-exported-from-dashboard>";
+  const query = `prefill=${prefill}&theme=dark&themeVariables=${themeVariables}`;
+  const separator = selectedOption.collectData.url.includes("?") ? "&" : "?";
+  const webViewUrl = `${selectedOption.collectData.url}${separator}${query}`;
+
+  // Show WebView for this specific option — see Data Collection Implementation section below
+  showDataCollectionWebView(webViewUrl);
+}
+```
+
+<WebViewMessageTypes  components={props.components} />
+
+</Step>
+
+<Step>
+### Get Required Actions
+
+After the user selects a payment option, get the wallet RPC actions required to complete the payment:
+
+```typescript
+const actions = await client.getRequiredPaymentActions({
+  paymentId: options.paymentId,
+  optionId: options.options[0].id,
+});
+
+// Each action contains wallet RPC data to sign
+for (const action of actions) {
+  console.log("Chain:", action.walletRpc.chainId);
+  console.log("Method:", action.walletRpc.method);
+  console.log("Params:", action.walletRpc.params);
+}
+```
+
+</Step>
+
+<Step>
+### Sign Actions
+
+Sign each action with your wallet's signing implementation:
+
+```typescript
+// Sign each action based on its RPC method
+const data = await Promise.all(
+  actions.map(async (action) => {
+    const { chainId, method, params } = action.walletRpc;
+    const parsedParams = JSON.parse(params);
+
+    switch (method) {
+      case "eth_signTypedData_v4":
+        return await wallet.signTypedData(chainId, parsedParams);
+      case "eth_sendTransaction":
+        return await wallet.sendTransaction(chainId, parsedParams[0]);
+      case "personal_sign":
+        return await wallet.personalSign(chainId, parsedParams);
+      default:
+        throw new Error(`Unsupported RPC method: ${method}`);
+    }
+  })
+);
+```
+
+<Callout type="info">
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/token-chain-support/usdt-support).
+</Callout>
+
+<Callout type="warning">
+Keep `data` in the same order as the actions array.
+</Callout>
+
+</Step>
+
+<Step>
+### Confirm Payment
+
+Submit the wallet RPC results (`data`) and collected data to complete the payment. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object; the SDK forwards each element verbatim. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
+```typescript
+const result = await client.confirmPayment({
+  paymentId: options.paymentId,
+  optionId: options.options[0].id,
+  data,
+  collectedData, // Include if collectData was present
+});
+
+if (result.status === "succeeded") {
+  console.log("Payment successful!");
+} else if (result.status === "processing") {
+  console.log("Payment is processing...");
+} else if (result.status === "failed") {
+  console.log("Payment failed");
+}
+```
+
+<Callout type="warning">
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Callout>
+
+</Step>
+
+</Steps>
+
+## Data Collection Implementation
+
+When `selectedOption.collectData.url` is present, display the URL in a WebView using `react-native-webview`. Install the dependency:
+
+```bash
+npm install react-native-webview@13.16.0
+```
+
+<WebViewBestPractices  components={props.components} />
+
+```tsx
+import React, { useCallback } from "react";
+import { WebView, WebViewMessageEvent } from "react-native-webview";
+import { Linking, View, ActivityIndicator } from "react-native";
+
+interface PayDataCollectionWebViewProps {
+  url: string;
+  onComplete: () => void;
+  onError: (error: string) => void;
+}
+
+function PayDataCollectionWebView({
+  url,
+  onComplete,
+  onError,
+}: PayDataCollectionWebViewProps) {
+  const handleMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+        switch (data.type) {
+          case "IC_COMPLETE":
+            onComplete();
+            break;
+          case "IC_ERROR":
+            onError(data.error || "Unknown error");
+            break;
+        }
+      } catch {
+        // Ignore non-JSON messages
+      }
+    },
+    [onComplete, onError]
+  );
+
+  const handleNavigationRequest = useCallback(
+    (request: { url: string }) => {
+      // Open external links (T&C, Privacy Policy) in system browser
+      if (!request.url.includes("pay.walletconnect.com")) {
+        Linking.openURL(request.url);
+        return false;
+      }
+      return true;
+    },
+    []
+  );
+
+  return (
+    <WebView
+      source={{ uri: url }}
+      onMessage={handleMessage}
+      onShouldStartLoadWithRequest={handleNavigationRequest}
+      javaScriptEnabled
+      domStorageEnabled
+      startInLoadingState
+      renderLoading={() => (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
+    />
+  );
+}
+
+function buildFormUrl(
+  baseUrl: string,
+  options: {
+    prefill?: Record<string, string>;
+    theme?: "light" | "dark";
+    themeVariables?: string; // base64url string exported from the Pay Dashboard
+  } = {}
+): string {
+  const params: string[] = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}${params.join("&")}`;
+}
+```
+
+## Complete Example
+
+Here's a complete implementation example:
+
+```typescript
+import { WalletConnectPay, CollectDataFieldResult } from "@walletconnect/pay";
+
+class PaymentManager {
+  private client: WalletConnectPay;
+
+  constructor() {
+    this.client = new WalletConnectPay({
+      appId: "your-wcp-id",
+    });
+  }
+
+  async processPayment(paymentLink: string, walletAddress: string) {
+    try {
+      // Step 1: Get payment options
+      const options = await this.client.getPaymentOptions({
+        paymentLink,
+        accounts: [
+          `eip155:1:${walletAddress}`,
+          `eip155:137:${walletAddress}`,
+          `eip155:8453:${walletAddress}`,
+        ],
+        includePaymentInfo: true,
+      });
+
+      if (options.options.length === 0) {
+        throw new Error("No payment options available");
+      }
+
+      // Step 2: Let user select an option (simplified - use first option)
+      const selectedOption = options.options[0];
+
+      // Step 3: Collect data via WebView if required for selected option —
+      // must happen BEFORE fetching the required actions, otherwise the
+      // backend rejects the request
+      if (selectedOption.collectData?.url) {
+        // Show WebView and wait for IC_COMPLETE
+        await this.showDataCollectionWebView(selectedOption.collectData.url);
+      }
+
+      // Step 4: Get required actions
+      const actions = await this.client.getRequiredPaymentActions({
+        paymentId: options.paymentId,
+        optionId: selectedOption.id,
+      });
+
+      // Step 5: Sign all actions
+      const data = await Promise.all(
+        actions.map((action) =>
+          this.signAction(action, walletAddress)
+        )
+      );
+
+      // Step 6: Confirm payment
+      const result = await this.client.confirmPayment({
+        paymentId: options.paymentId,
+        optionId: selectedOption.id,
+        data,
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Payment failed:", error);
+      throw error;
+    }
+  }
+
+  private async signAction(action: Action, walletAddress: string): Promise<string> {
+    const { chainId, method, params } = action.walletRpc;
+    const parsedParams = JSON.parse(params);
+
+    switch (method) {
+      case "eth_signTypedData_v4":
+        return await wallet.signTypedData(chainId, parsedParams);
+      case "eth_sendTransaction":
+        return await wallet.sendTransaction(chainId, parsedParams[0]);
+      case "personal_sign":
+        return await wallet.personalSign(chainId, parsedParams);
+      default:
+        throw new Error(`Unsupported RPC method: ${method}`);
+    }
+  }
+}
+```
+
+## Provider Utilities
+
+The SDK provides utilities for checking provider availability:
+
+```typescript
+import {
+  isProviderAvailable,
+  detectProviderType,
+  isNativeProviderAvailable,
+  setNativeModule,
+} from "@walletconnect/pay";
+
+// Check if any provider is available
+if (isProviderAvailable()) {
+  // SDK can be used
+}
+
+// Detect which provider type is available
+const providerType = detectProviderType(); // 'native' | 'wasm' | null
+
+// Check specifically for native provider
+if (isNativeProviderAvailable()) {
+  // React Native native module is available
+}
+
+// Manually inject native module (if auto-discovery fails)
+import { NativeModules } from "react-native";
+setNativeModule(NativeModules.RNWalletConnectPay);
+```
+
+## API Reference
+
+**WalletConnectPay**
+
+Main client for payment operations.
+
+**Constructor**
+
+```typescript
+new WalletConnectPay(options: WalletConnectPayOptions)
+```
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `getPaymentOptions(params)` | Fetch available payment options |
+| `getRequiredPaymentActions(params)` | Get signing actions for a payment option |
+| `confirmPayment(params)` | Confirm and execute the payment |
+| `static isAvailable()` | Check if a provider is available |
+
+**Data Types**
+
+**PaymentStatus**
+
+```typescript
+type PaymentStatus = 
+  | "requires_action" 
+  | "processing" 
+  | "succeeded" 
+  | "failed" 
+  | "expired";
+```
+
+**PayProviderType**
+
+```typescript
+type PayProviderType = "native" | "wasm";
+```
+
+**CollectDataFieldType**
+
+```typescript
+type CollectDataFieldType = "text" | "date";
+```
+
+**Method Parameters**
+
+```typescript
+interface GetPaymentOptionsParams {
+  /** Payment link or ID */
+  paymentLink: string;
+  /** List of CAIP-10 accounts */
+  accounts: string[];
+  /** Whether to include payment info in response */
+  includePaymentInfo?: boolean;
+}
+
+interface GetRequiredPaymentActionsParams {
+  /** Payment ID */
+  paymentId: string;
+  /** Option ID */
+  optionId: string;
+}
+
+interface ConfirmPaymentParams {
+  /** Payment ID */
+  paymentId: string;
+  /** Option ID */
+  optionId: string;
+  /** Wallet RPC results in action order: plain strings or JSON objects (e.g. Tron) */
+  data: (string | object)[];
+  /** @deprecated Alias for `data`, still accepted */
+  signatures?: string[];
+}
+```
+
+<Callout type="info">
+The SDK types `data` as `(string | Record<string, unknown> | unknown[])[]`. A value typed with a TypeScript `interface` does not satisfy `Record<string, unknown>`; declare it as a `type` alias or spread it into an object literal.
+</Callout>
+
+**Response Types**
+
+```typescript
+interface PaymentOptionsResponse {
+  /** Payment ID extracted from the payment link */
+  paymentId: string;
+  /** Payment information (if includePaymentInfo was true) */
+  info?: PaymentInfo;
+  /** Available payment options */
+  options: PaymentOption[];
+  /** Data collection requirements (if any) */
+  collectData?: CollectDataAction;
+  /** Transaction result details (present when payment already completed) */
+  resultInfo?: PaymentResultInfo;
+}
+
+interface PaymentResultInfo {
+  /** Transaction ID */
+  txId: string;
+  /** Token amount details */
+  optionAmount: PayAmount;
+}
+
+interface ConfirmPaymentResponse {
+  /** Payment status */
+  status: PaymentStatus;
+  /** True if the payment is in a final state */
+  isFinal: boolean;
+  /** Time to poll for payment status, in milliseconds */
+  pollInMs?: number;
+}
+```
+
+**PaymentOption**
+
+```typescript
+interface PaymentOption {
+  /** ID of the option */
+  id: string;
+  /** The option's token and amount */
+  amount: PayAmount;
+  /** Estimated time to complete the option, in seconds */
+  etaS: number;
+  /** Actions required to complete the option */
+  actions: Action[];
+  /** Per-option data collection requirements */
+  collectData?: CollectDataAction;
+}
+```
+
+**Action**
+
+```typescript
+interface Action {
+  walletRpc: WalletRpcAction;
+}
+
+interface WalletRpcAction {
+  /** Chain ID in CAIP-2 format (e.g., "eip155:8453") */
+  chainId: string;
+  /** RPC method name (e.g., "eth_signTypedData_v4", "eth_sendTransaction") */
+  method: string;
+  /** JSON-encoded params array */
+  params: string;
+}
+```
+
+**Amount Types**
+
+```typescript
+interface PayAmount {
+  /** Currency unit, prefixed with either "iso4217/" or "caip19/" */
+  unit: string;
+  /** Amount value, in the currency unit's minor units */
+  value: string;
+  /** Display information for the amount */
+  display: AmountDisplay;
+}
+
+interface AmountDisplay {
+  /** Ticker/symbol of the asset */
+  assetSymbol: string;
+  /** Full name of the asset */
+  assetName: string;
+  /** Number of minor decimals of the asset */
+  decimals: number;
+  /** URL of the icon of the asset (if token) */
+  iconUrl?: string;
+  /** Name of the network of the asset (if token) */
+  networkName?: string;
+}
+```
+
+**Payment Info Types**
+
+```typescript
+interface PaymentInfo {
+  /** Payment status */
+  status: PaymentStatus;
+  /** Amount to be paid */
+  amount: PayAmount;
+  /** Payment expiration timestamp, in seconds since epoch */
+  expiresAt: number;
+  /** Merchant information */
+  merchant: MerchantInfo;
+  /** Buyer information (present if payment has been submitted) */
+  buyer?: BuyerInfo;
+}
+
+interface MerchantInfo {
+  /** Merchant name */
+  name: string;
+  /** Merchant icon URL */
+  iconUrl?: string;
+}
+
+interface BuyerInfo {
+  /** Account CAIP-10 */
+  accountCaip10: string;
+  /** Account provider name */
+  accountProviderName: string;
+  /** Account provider icon URL */
+  accountProviderIcon?: string;
+}
+```
+
+**Collect Data Types**
+
+```typescript
+interface CollectDataAction {
+  /** URL for data collection (displayed in WebView) */
+  url: string;
+  /** JSON schema describing required fields */
+  schema?: string;
+}
+```
+
+## Error Handling
+
+The SDK throws typed errors for different failure scenarios:
+
+```typescript
+import { 
+  PayError, 
+  PaymentOptionsError, 
+  PaymentActionsError,
+  ConfirmPaymentError,
+  NativeModuleNotFoundError 
+} from "@walletconnect/pay";
+
+try {
+  const options = await client.getPaymentOptions({
+    paymentLink: link,
+    accounts,
+  });
+} catch (error) {
+  if (error instanceof PaymentOptionsError) {
+    console.error("Failed to get options:", error.originalMessage);
+  } else if (error instanceof PayError) {
+    console.error("Pay error:", error.code, error.message);
+  }
+}
+```
+
+**Error Types**
+
+| Error Class | Description |
+|-------------|-------------|
+| `PayError` | Base error class for all Pay SDK errors |
+| `PaymentOptionsError` | Error when fetching payment options |
+| `PaymentActionsError` | Error when fetching required payment actions |
+| `ConfirmPaymentError` | Error when confirming payment |
+| `NativeModuleNotFoundError` | Error when native module is not available |
+
+**Error Codes**
+
+The `PayError` class includes a `code` property with one of the following values:
+
+```typescript
+type PayErrorCode =
+  | "JSON_PARSE"
+  | "JSON_SERIALIZE"
+  | "PAYMENT_OPTIONS"
+  | "PAYMENT_REQUEST"
+  | "CONFIRM_PAYMENT"
+  | "NATIVE_MODULE_NOT_FOUND"
+  | "INITIALIZATION_ERROR"
+  | "UNKNOWN";
+```
+
+## Best Practices
+
+1. **Check Provider Availability**: Always check if a provider is available before using the SDK
+
+2. **Account Format**: Always use CAIP-10 format for accounts: `eip155:{chainId}:{address}`
+
+3. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
+
+4. **Result Order**: Keep `data` in the same order as the actions array
+
+5. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
+
+6. **Loading States**: Show loading indicators during API calls and signing operations
+
+7. **Expiration**: Check `paymentInfo.expiresAt` and warn users if time is running low
+
+8. **User Data**: Only collect data when `collectData` is present on the selected payment option and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
+
+9. **WebView Data Collection**: When `selectedOption.collectData?.url` is present, display the URL in a WebView using `react-native-webview` rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+
+10. **Per-Option Data Collection**: When displaying payment options, check each option's `collectData` field. Show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present — use the option's `collectData.url` which is already scoped to that option's account.

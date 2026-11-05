@@ -20,14 +20,20 @@ jobs:
 
       - name: Check for changes
         id: diff
+        # The paths scripts/generate-specs.mjs writes or deletes. git status, not git diff:
+        # a new API version adds untracked files, which git diff doesn't see.
         run: |
-          git diff --quiet && echo "changed=false" >> "$GITHUB_OUTPUT" || echo "changed=true" >> "$GITHUB_OUTPUT"
+          if [ -n "$(git status --porcelain -- openapi/ content/docs/payments/api-reference/ content/navigation.json redirects.json)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Commit and push
         if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add api/ payments/api-reference/ docs.json
+          git add -A openapi/ content/docs/payments/api-reference/ content/navigation.json redirects.json
           git commit -m "chore: update OpenAPI specs"
           git push

@@ -1,0 +1,759 @@
+---
+title: "WalletConnect Pay via WalletKit - Swift"
+description: "Integrate WalletConnect Pay through WalletKit for a unified payment experience in your iOS wallet."
+sidebarTitle: "Swift"
+---
+
+import AppIdSnippet from "@/content/snippets/app-id.mdx";
+import WebViewOverview from "@/content/snippets/webview-data-collection-overview.mdx";
+import WebViewBestPractices from "@/content/snippets/webview-data-collection-best-practices.mdx";
+import WebViewMessageTypes from "@/content/snippets/webview-message-types.mdx";
+
+This documentation covers integrating WalletConnect Pay through WalletKit. This approach provides a unified API where Pay is automatically configured when you configure WalletKit, simplifying the integration for wallet developers.
+
+## Sample Wallet
+
+For a complete working example, check out our sample wallet implementation:
+
+<Card title="Sample Wallet - Swift (WalletKit)" icon={<Icon icon="github" />} href="https://github.com/reown-com/reown-swift/tree/develop/Example/WalletApp">
+  A reference iOS wallet app demonstrating WalletConnect Pay via WalletKit.
+</Card>
+
+<Callout type="idea">
+**Using AI for Integration?** If you're using an AI IDE or assistant to help with integration, you can provide it with our comprehensive [AI integration prompt](/payments/wallets/walletkit/ai-prompts/swift) for better context and guidance.
+</Callout>
+
+## Requirements
+
+- iOS 13.0+
+- Swift 5.7+
+- Xcode 14.0+
+- WalletKit (ReownWalletKit) 2.4.0 or later (ships YttriumWrapper 0.10.59). Required for the `data` parameter in `confirmPayment`.
+
+<AppIdSnippet  components={props.components} />
+
+## Installation
+
+**Swift Package Manager**
+
+Add ReownWalletKit to your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/reown-com/reown-swift", from: "2.4.0")
+]
+```
+
+Then add `ReownWalletKit` to your target dependencies:
+
+```swift
+.target(
+    name: "YourApp",
+    dependencies: ["ReownWalletKit"]
+)
+```
+
+WalletConnectPay is automatically included as a dependency of WalletKit.
+
+<Callout type="info">
+Check the [GitHub releases](https://github.com/reown-com/reown-swift/releases) for the latest version.
+</Callout>
+
+## Initialization
+
+When using WalletKit, Pay is automatically configured using your project's `Networking.projectId`. No separate configuration is needed.
+
+```swift
+import ReownWalletKit
+
+func application(_ application: UIApplication, didFinishLaunchingWithOptions...) {
+    // Configure WalletKit - Pay is automatically configured
+    WalletKit.configure(
+        metadata: AppMetadata(
+            name: "My Wallet",
+            description: "A crypto wallet",
+            url: "https://mywallet.com",
+            icons: ["https://mywallet.com/icon.png"]
+        ),
+        crypto: DefaultCryptoProvider(),
+        payLogging: true  // Enable Pay debug logging
+    )
+}
+```
+
+## Payment Link Detection
+
+Use the static `isPaymentLink` method to detect payment links before processing:
+
+```swift
+// Static method - can be called before configure()
+if WalletKit.isPaymentLink(scannedString) {
+    startPaymentFlow(paymentLink: scannedString)
+}
+
+// Or via the instance
+if WalletKit.instance.Pay.isPaymentLink(scannedString) {
+    startPaymentFlow(paymentLink: scannedString)
+}
+```
+
+The `isPaymentLink` utility method detects WalletConnect Pay links by checking for:
+- `pay.` hosts (e.g., pay.walletconnect.com)
+- `pay=` parameter in WalletConnect URIs
+- `pay_` prefix in bare payment IDs
+
+Call it wherever your wallet receives a link — from a deep link or a scanned QR code:
+
+```swift
+// Deep link opened from outside your app (SceneDelegate or AppDelegate)
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    if WalletKit.isPaymentLink(url.absoluteString) {
+        startPaymentFlow(paymentLink: url.absoluteString)
+    }
+}
+
+// QR code payload
+func handleScannedQR(_ content: String) {
+    if WalletKit.isPaymentLink(content) {
+        startPaymentFlow(paymentLink: content)
+    }
+}
+```
+
+## Payment Flow
+
+The payment flow consists of six main steps:
+
+**Detect Payment Link -> Get Options -> Collect Data (if required) -> Get Actions -> Sign Actions -> Confirm Payment**
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Wallet
+    participant WalletKit as WalletKit.Pay
+    participant Backend as WalletConnect Pay
+    participant WebView
+
+    User->>Wallet: Scan QR / Open payment link
+    Wallet->>WalletKit: isPaymentLink(uri)
+    WalletKit-->>Wallet: true
+    Wallet->>WalletKit: getPaymentOptions(link, accounts)
+    WalletKit->>Backend: Fetch payment options
+    Backend-->>WalletKit: Payment options + merchant info
+    WalletKit-->>Wallet: PaymentOptionsResponse
+    Wallet->>User: Display payment options
+    
+    User->>Wallet: Select payment option
+
+    alt Selected option requires data collection
+        Wallet->>WebView: Load selectedOption.collectData.url
+        WebView->>User: Display data collection form
+        User->>WebView: Fill form & accept T&C
+        WebView-->>Wallet: IC_COMPLETE message
+    end
+
+    Wallet->>WalletKit: getRequiredPaymentActions(paymentId, optionId)
+    WalletKit->>Backend: Get signing actions
+    Backend-->>WalletKit: Required wallet RPC actions
+    WalletKit-->>Wallet: List of actions to sign
+    
+    Wallet->>User: Request signature(s)
+    User->>Wallet: Approve & sign
+
+    Wallet->>WalletKit: confirmPayment(params)
+    WalletKit->>Backend: Submit payment
+    Backend-->>WalletKit: Payment status
+    WalletKit-->>Wallet: ConfirmPaymentResponse
+    Wallet->>User: Show result
+```
+
+<Steps>
+
+<Step>
+### Get Payment Options
+
+When a user scans a payment QR code or opens a payment link, fetch available payment options:
+
+```swift
+// 1. Get payment options
+let options = try await WalletKit.instance.Pay.getPaymentOptions(
+    paymentLink: paymentLink,
+    accounts: ["eip155:1:\(address)", "eip155:137:\(address)"]
+)
+
+// Display merchant info
+if let info = options.info {
+    print("Merchant: \(info.merchant.name)")
+    print("Amount: \(info.amount.display.assetSymbol) \(info.amount.value)")
+}
+
+// Show available payment options to user
+for option in options.options {
+    print("Pay with \(option.amount.display.assetSymbol) on \(option.amount.display.networkName ?? "Unknown")")
+}
+
+// Check which options require data collection
+for option in options.options {
+    if option.collectData != nil {
+        print("Option \(option.id) requires info capture")
+    }
+}
+```
+
+</Step>
+
+<Step>
+### Collect User Data (If Required)
+
+After the user selects an option, check for `collectData` on it. If present, collect the data **before** fetching the required actions.
+
+<WebViewOverview  components={props.components} />
+
+```swift
+// Check per-option data collection requirement after user selects an option
+if let collectData = selectedOption.collectData, let url = collectData.url {
+    // Use the "required" list from collectData.schema to determine which fields to prefill
+    let prefillData: [String: String] = [
+        "fullName": "John Doe",
+        "dob": "1990-01-15",
+        "pobAddress": "123 Main St, New York, NY 10001"
+    ]
+    let jsonData = try JSONSerialization.data(withJSONObject: prefillData)
+    // Encode prefill as base64url (URL-safe, no padding)
+    let prefillBase64 = jsonData.base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
+    var components = URLComponents(string: url)!
+    var queryItems = components.queryItems ?? []
+    queryItems.append(URLQueryItem(name: "prefill", value: prefillBase64))
+    // Optional appearance params (see "Form URL parameters"):
+    queryItems.append(URLQueryItem(name: "theme", value: "dark")) // "light" | "dark"
+    // themeVariables is a base64url string exported from the WalletConnect Pay Dashboard:
+    // queryItems.append(URLQueryItem(name: "themeVariables", value: themeVariables))
+    components.queryItems = queryItems
+    let webViewUrl = components.string!
+
+    // Show WebView for this specific option and wait for IC_COMPLETE message
+    showWebView(url: webViewUrl)
+}
+```
+
+<WebViewMessageTypes  components={props.components} />
+
+</Step>
+
+<Step>
+### Get Required Actions
+
+After the user selects a payment option, get the signing actions:
+
+```swift
+// 2. Get required actions for selected option
+let actions = try await WalletKit.instance.Pay.getRequiredPaymentActions(
+    paymentId: options.paymentId,
+    optionId: selectedOption.id
+)
+```
+
+</Step>
+
+<Step>
+### Sign Actions
+
+Each action contains a `walletRpc` describing the RPC call to execute. Your wallet must check the `method` field and dispatch accordingly — for example, a payment option may require an `eth_sendTransaction` to approve a token allowance followed by an `eth_signTypedData_v4` to sign Permit2 typed data:
+
+```swift
+// 3. Sign each action based on its RPC method
+var data: [String] = []
+for action in actions {
+    let rpc = action.walletRpc
+
+    let result: String
+    switch rpc.method {
+    case "eth_signTypedData_v4":
+        result = try await signTypedData(rpc)
+    case "eth_sendTransaction":
+        result = try await sendTransaction(rpc)
+    case "personal_sign":
+        result = try await personalSign(rpc)
+    default:
+        throw PaymentError.unsupportedMethod(rpc.method)
+    }
+    data.append(result)
+}
+```
+
+<Callout type="info">
+Payment options may include multiple actions with different RPC methods. For example, a Permit2 payment where the user lacks sufficient allowance returns two actions: an `eth_sendTransaction` to approve the token allowance, followed by an `eth_signTypedData_v4` to sign the Permit2 transfer. Your wallet must check `action.walletRpc.method` and dispatch to the appropriate handler. For full implementation guidance, see [USDT support](/payments/wallets/token-chain-support/usdt-support).
+</Callout>
+
+#### Signing Implementation
+
+```swift
+private func signAction(
+    action: Action,
+    walletAddress: String,
+    signer: YourSignerProtocol
+) async throws -> String {
+    let rpc = action.walletRpc
+
+    switch rpc.method {
+    case "eth_signTypedData_v4":
+        guard let paramsData = rpc.params.data(using: .utf8),
+              let params = try JSONSerialization.jsonObject(with: paramsData) as? [Any],
+              params.count >= 2,
+              let typedDataJson = params[1] as? String else {
+            throw PaymentError.invalidParams
+        }
+        return try await signer.signTypedData(
+            data: typedDataJson,
+            address: walletAddress
+        )
+    case "eth_sendTransaction":
+        return try await signer.sendTransaction(
+            params: rpc.params,
+            chainId: rpc.chainId
+        )
+    case "personal_sign":
+        return try await signer.personalSign(
+            params: rpc.params,
+            address: walletAddress
+        )
+    default:
+        throw PaymentError.unsupportedMethod(rpc.method)
+    }
+}
+```
+
+<Callout type="warning">
+Keep `data` in the same order as the actions array.
+</Callout>
+
+</Step>
+
+<Step>
+### Confirm Payment
+
+Submit the wallet RPC results (`data`) and finalize the payment. Each element of `data` is either a plain string (a signature or transaction hash) or, for chains like Tron, a JSON-encoded object; WalletConnect Pay forwards each element verbatim to the gateway. See [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
+<Callout type="info">
+When using the WebView approach for data collection, the WebView submits the captured data directly to the backend, so you do **not** pass `collectedData` to `confirmPayment`.
+</Callout>
+
+```swift
+// 4. Confirm payment
+let result = try await WalletKit.instance.Pay.confirmPayment(
+    paymentId: options.paymentId,
+    optionId: selectedOption.id,
+    data: data
+)
+
+switch result.status {
+case .succeeded:
+    print("Payment successful!")
+case .processing:
+    print("Payment is being processed...")
+case .failed:
+    print("Payment failed")
+case .expired:
+    print("Payment expired")
+case .requiresAction:
+    print("Additional action required")
+case .cancelled:
+    print("Payment cancelled")
+}
+```
+
+<Callout type="warning">
+The `signatures:` overload of `confirmPayment` is deprecated in favor of `data:` and will be removed in a future major version. Existing integrations that pass `signatures:` keep working; the overload forwards its value to `data`.
+</Callout>
+
+</Step>
+
+</Steps>
+
+## Data Collection Implementation
+
+When `selectedOption.collectData.url` is present, display the URL in a `WKWebView`. The WebView handles form rendering, validation, and T&C acceptance.
+
+<WebViewBestPractices  components={props.components} />
+
+```swift
+import WebKit
+import SwiftUI
+
+struct PayDataCollectionWebView: UIViewRepresentable {
+    let url: URL
+    let onComplete: () -> Void
+    let onError: (String) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onComplete: onComplete, onError: onError)
+    }
+
+    func makeUIView(context: Context) -> WKWebView {
+        let config = WKWebViewConfiguration()
+        config.userContentController.add(
+            context.coordinator,
+            name: "payDataCollectionComplete"
+        )
+
+        let webView = WKWebView(frame: .zero, configuration: config)
+        webView.navigationDelegate = context.coordinator
+        webView.load(URLRequest(url: url))
+        return webView
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
+
+    class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
+        let onComplete: () -> Void
+        let onError: (String) -> Void
+
+        init(onComplete: @escaping () -> Void, onError: @escaping (String) -> Void) {
+            self.onComplete = onComplete
+            self.onError = onError
+        }
+
+        func userContentController(
+            _ userContentController: WKUserContentController,
+            didReceive message: WKScriptMessage
+        ) {
+            guard let body = message.body as? String,
+                  let data = body.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let type = json["type"] as? String else { return }
+
+            DispatchQueue.main.async {
+                switch type {
+                case "IC_COMPLETE":
+                    self.onComplete()
+                case "IC_ERROR":
+                    let error = json["error"] as? String ?? "Unknown error"
+                    self.onError(error)
+                default:
+                    break
+                }
+            }
+        }
+
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationAction: WKNavigationAction,
+            decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+        ) {
+            guard let url = navigationAction.request.url else {
+                decisionHandler(.allow)
+                return
+            }
+            if let host = url.host, !host.contains("pay.walletconnect.com") {
+                UIApplication.shared.open(url)
+                decisionHandler(.cancel)
+                return
+            }
+            decisionHandler(.allow)
+        }
+    }
+}
+```
+
+## Complete Example
+
+Here's a complete implementation using WalletKit:
+
+```swift
+import ReownWalletKit
+
+class PaymentManager {
+    
+    func processPayment(
+        paymentLink: String,
+        walletAddress: String,
+        signer: YourSignerProtocol
+    ) async throws {
+        
+        // 1. Get payment options
+        let accounts = [
+            "eip155:1:\(walletAddress)",
+            "eip155:137:\(walletAddress)",
+            "eip155:8453:\(walletAddress)"
+        ]
+        
+        let optionsResponse = try await WalletKit.instance.Pay.getPaymentOptions(
+            paymentLink: paymentLink,
+            accounts: accounts
+        )
+        
+        guard !optionsResponse.options.isEmpty else {
+            throw PaymentError.noOptionsAvailable
+        }
+        
+        // 2. Let user select an option (simplified - use first option)
+        let selectedOption = optionsResponse.options[0]
+
+        // 3. Collect data via WebView if required (before fetching actions)
+        if let collectData = selectedOption.collectData, let url = collectData.url {
+            try await showDataCollectionWebView(url: url)
+        }
+
+        // 4. Get required actions
+        let actions = try await WalletKit.instance.Pay.getRequiredPaymentActions(
+            paymentId: optionsResponse.paymentId,
+            optionId: selectedOption.id
+        )
+        
+        // 5. Sign all actions
+        var data: [String] = []
+        for action in actions {
+            let signature = try await signAction(
+                action: action,
+                walletAddress: walletAddress,
+                signer: signer
+            )
+            data.append(signature)
+        }
+
+        // 6. Confirm payment
+        let result = try await WalletKit.instance.Pay.confirmPayment(
+            paymentId: optionsResponse.paymentId,
+            optionId: selectedOption.id,
+            data: data
+        )
+        
+        switch result.status {
+        case .succeeded:
+            break // Success
+        case .cancelled:
+            throw PaymentError.paymentCancelled
+        default:
+            throw PaymentError.paymentFailed(result.status)
+        }
+    }
+
+    private func signAction(
+        action: Action,
+        walletAddress: String,
+        signer: YourSignerProtocol
+    ) async throws -> String {
+        let rpc = action.walletRpc
+
+        switch rpc.method {
+        case "eth_signTypedData_v4":
+            guard let paramsData = rpc.params.data(using: .utf8),
+                  let params = try JSONSerialization.jsonObject(with: paramsData) as? [Any],
+                  params.count >= 2,
+                  let typedDataJson = params[1] as? String else {
+                throw PaymentError.invalidParams
+            }
+            return try await signer.signTypedData(
+                data: typedDataJson,
+                address: walletAddress
+            )
+        case "eth_sendTransaction":
+            return try await signer.sendTransaction(
+                params: rpc.params,
+                chainId: rpc.chainId
+            )
+        case "personal_sign":
+            return try await signer.personalSign(
+                params: rpc.params,
+                address: walletAddress
+            )
+        default:
+            throw PaymentError.unsupportedMethod(rpc.method)
+        }
+    }
+}
+```
+
+## API Reference
+
+**WalletKit Integration**
+
+When using WalletKit, Pay methods are accessed via `WalletKit.instance.Pay.*`.
+
+**Static Methods**
+
+| Method | Description |
+|--------|-------------|
+| `WalletKit.isPaymentLink(_:)` | Check if a string is a payment link (can call before `configure()`) |
+
+**Instance Methods (WalletKit.instance.Pay)**
+
+| Method | Description |
+|--------|-------------|
+| `isPaymentLink(_:)` | Check if a string is a payment link |
+| `getPaymentOptions(paymentLink:accounts:includePaymentInfo:)` | Fetch available payment options |
+| `getRequiredPaymentActions(paymentId:optionId:)` | Get signing actions for a payment option |
+| `confirmPayment(paymentId:optionId:data:collectedData:maxPollMs:)` | Confirm and execute the payment. `data: [String]` holds the wallet RPC results in action order (plain strings or JSON-encoded objects) |
+| `confirmPayment(paymentId:optionId:signatures:collectedData:maxPollMs:)` | Deprecated alias for the `data:` overload; still compiles and forwards to `data` |
+
+**Data Types**
+
+**PaymentOptionsResponse**
+
+```swift
+struct PaymentOptionsResponse {
+    let paymentId: String              // Unique payment identifier
+    let info: PaymentInfo?             // Merchant and amount details
+    let options: [PaymentOption]       // Available payment methods
+    let collectData: CollectDataAction? // Required user data fields (travel rule)
+    let resultInfo: PaymentResultInfo? // Transaction result details (present when payment already completed)
+}
+
+struct PaymentResultInfo {
+    let txId: String                   // Transaction ID
+    let optionAmount: PayAmount        // Token amount details
+}
+```
+
+**PaymentInfo**
+
+```swift
+struct PaymentInfo {
+    let status: PaymentStatus          // Current payment status
+    let amount: PayAmount              // Requested payment amount
+    let expiresAt: Int64               // Expiration timestamp
+    let merchant: MerchantInfo         // Merchant details
+    let buyer: BuyerInfo?              // Buyer info if available
+}
+```
+
+**PaymentOption**
+
+```swift
+struct PaymentOption {
+    let id: String                     // Option identifier
+    let amount: PayAmount              // Amount in this asset
+    let etaS: Int64                    // Estimated time to complete (seconds)
+    let actions: [Action]              // Required signing actions
+    let collectData: CollectDataAction? // Per-option data collection (nil if not required)
+}
+```
+
+**PayAmount**
+
+```swift
+struct PayAmount {
+    let unit: String                   // Asset unit (e.g., "USDC")
+    let value: String                  // Raw value in smallest unit
+    let display: AmountDisplay         // Human-readable display info
+}
+
+struct AmountDisplay {
+    let assetSymbol: String            // Token symbol (e.g., "USDC")
+    let assetName: String              // Token name (e.g., "USD Coin")
+    let decimals: Int64                // Token decimals
+    let iconUrl: String?               // Token icon URL
+    let networkName: String?           // Network name (e.g., "Base")
+}
+```
+
+**Action & WalletRpcAction**
+
+```swift
+struct Action {
+    let walletRpc: WalletRpcAction     // RPC call to sign
+}
+
+struct WalletRpcAction {
+    let chainId: String                // Chain ID (e.g., "eip155:8453")
+    let method: String                 // RPC method (e.g., "eth_signTypedData_v4", "eth_sendTransaction")
+    let params: String                 // JSON-encoded parameters
+}
+```
+
+**CollectDataAction**
+
+```swift
+struct CollectDataAction {
+    let url: String                    // WebView URL for data collection
+    let schema: String?                // JSON schema describing required fields
+}
+```
+
+**ConfirmPaymentResultResponse**
+
+```swift
+struct ConfirmPaymentResultResponse {
+    let status: PaymentStatus          // Final payment status
+    let isFinal: Bool                  // Whether status is final
+    let pollInMs: Int64?               // Suggested poll interval
+    let info: PaymentResultInfo?       // Transaction result details (present on success)
+}
+```
+
+**PaymentStatus**
+
+```swift
+enum PaymentStatus {
+    case requiresAction                // Additional action needed
+    case processing                    // Payment in progress
+    case succeeded                     // Payment completed
+    case failed                        // Payment failed
+    case expired                       // Payment expired
+    case cancelled                     // Payment cancelled by user
+}
+```
+
+## Error Handling
+
+The SDK throws specific error types for different failure scenarios:
+
+**GetPaymentOptionsError**
+
+| Error | Description |
+|-------|-------------|
+| `.paymentNotFound` | Payment ID doesn't exist |
+| `.paymentExpired` | Payment has expired |
+| `.invalidRequest` | Invalid request parameters |
+| `.invalidAccount` | Invalid account format |
+| `.complianceFailed` | Compliance check failed |
+| `.http` | Network error |
+| `.internalError` | Server error |
+
+**GetPaymentRequestError**
+
+| Error | Description |
+|-------|-------------|
+| `.optionNotFound` | Selected option doesn't exist |
+| `.paymentNotFound` | Payment ID doesn't exist |
+| `.invalidAccount` | Invalid account format |
+| `.http` | Network error |
+
+**ConfirmPaymentError**
+
+| Error | Description |
+|-------|-------------|
+| `.paymentNotFound` | Payment ID doesn't exist |
+| `.paymentExpired` | Payment has expired |
+| `.invalidOption` | Invalid option ID |
+| `.invalidSignature` | Signature verification failed |
+| `.routeExpired` | Payment route expired |
+| `.http` | Network error |
+
+## Best Practices
+
+1. **Use WalletKit Integration**: If your wallet already uses WalletKit, prefer the `WalletKit.instance.Pay.*` access pattern for automatic configuration
+
+2. **Use `isPaymentLink()` for Detection**: Use the utility method instead of manual URL parsing for reliable payment link detection
+
+3. **Account Format**: Always use CAIP-10 format for accounts: `eip155:{chainId}:{address}`
+
+4. **Multiple Chains**: Provide accounts for all supported chains to maximize payment options
+
+5. **Result Order**: Keep `data` in the same order as the actions array
+
+6. **Error Handling**: Always handle errors gracefully and show appropriate user feedback
+
+7. **Loading States**: Show loading indicators during API calls and signing operations
+
+8. **Expiration**: Check `paymentInfo.expiresAt` and warn users if time is running low
+
+9. **User Data**: Only collect data when `collectData` is present on the selected payment option and you don't already have the required user data. If you already have the required data, you can submit this without collecting from the user. You must make sure the user accepts WalletConnect Terms and Conditions and Privacy Policy before submitting user information to WalletConnect.
+
+10. **WebView Data Collection**: When `selectedOption.collectData?.url` is present, display the URL in a WKWebView rather than building native forms. The WebView handles form rendering, validation, and T&C acceptance.
+
+11. **Per-Option Data Collection**: When displaying payment options, check each option's `collectData` field. Show a visual indicator (e.g., "Info required" badge) on options that require data collection. Only open the WebView when the user selects an option with `collectData` present — use the option's `collectData.url` which is already scoped to that option's account.

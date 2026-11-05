@@ -1,0 +1,62 @@
+---
+title: Upgrade from Web3Wallet to WalletKit for .NET
+sidebarTitle: WalletKit - Unity
+---
+
+## Upgrade to WalletKit
+
+This document outlines the steps to migrate from the old `WalletConnect.Web3Wallet` package to the new `Reown.WalletKit` package in your .NET project.
+
+### Step 1. Replace the corresponding dependency in your project file
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- ... -->
+
+  <ItemGroup>
+/* highlight-delete-start */
+    <PackageReference Include="WalletConnect.Web3Wallet" Version="2.4.2" />
+/* highlight-delete-end */
+/* highlight-add-start */
+    <PackageReference Include="Reown.WalletKit" Version="1.0.0" />
+/* highlight-add-end */
+  </ItemGroup>
+
+</Project>
+```
+
+Alternatively, you can use the .NET CLI:
+
+```bash
+# Remove the old package
+dotnet remove package WalletConnect.Web3Wallet
+
+# Add the new package
+dotnet add package Reown.WalletKit
+```
+
+### Step 2. Update references to the namespaces
+
+| Old | New |
+| --- | --- |
+| `WalletConnectSharp.Web3Wallet` | `Reown.WalletKit` |
+| `WalletConnectSharp.Sign` | `Reown.Sign` |
+| `WalletConnectSharp.Core` | `Reown.Core` |
+| `WalletConnectSharp.Storage` | `Reown.Core.Storage` |
+| `WalletConnectSharp.Crypto` | `Reown.Core.Crypto` |
+| `WalletConnectSharp.Network` | `Reown.Core.Network` |
+
+### Step 3. Update references to the classes
+
+| Old | New |
+| --- | --- |
+| `WalletConnectCore` | `CoreClient` |
+| `WalletConnectSignClient` | `SignClient` |
+| `Web3WalletClient` | `WalletKitClient` |
+| `WCLogger` | `ReownLogger` |
+
+### Final notes
+
+- Ensure that you have updated all relevant configurations and imports in your project to reflect the changes from Web3Wallet to WalletKit.
+- Test your application thoroughly to ensure that the migration has been successful and that all functionality is working as expected.

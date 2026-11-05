@@ -1,0 +1,67 @@
+---
+title: "WalletConnect Pay for Ecommerce and Online Checkout"
+description: "Add crypto and stablecoin payments to your online checkout with a single API integration."
+sidebarTitle: "Overview"
+---
+
+WalletConnect Pay enables you to add crypto and stablecoin payments to your online checkout with a single integration, offering a familiar, wallet-based experience for customers worldwide.
+
+<Callout type="info">
+Before integrating, complete [merchant onboarding](/payments/merchant/onboarding) to obtain your API Key and Merchant ID.
+</Callout>
+
+## How It Works
+
+Your backend creates a payment via a single API call and redirects the buyer to the WalletConnect Pay checkout portal. The buyer connects their wallet, selects a payment option, and completes the transaction. After payment, the buyer is redirected back to your site and you verify the result server-side.
+
+1. Your backend calls `POST /v1/merchant/payment` with the order amount and redirect URLs
+2. You redirect the buyer to the checkout portal using the `gatewayUrl` from the response
+3. The buyer connects their wallet, picks a token and network, and signs the transaction
+4. The checkout portal redirects the buyer back to your `successUrl` or `errorUrl`
+5. Your backend verifies the payment status via `GET /v1/merchant/payment/{id}/status`
+
+## What does WalletConnect Pay offer for ecommerce?
+
+<Steps>
+  <Step>
+    ### Any wallet. Any asset. One checkout flow.
+    Let customers pay online using the wallets and assets they already use, all through a single, consistent checkout experience.
+  </Step>
+  <Step>
+    ### A checkout flow that fits existing stacks
+    WalletConnect Pay is designed to fit cleanly into existing checkout and operations workflows. It can align with PSP compliance requirements (like required information capture and screening steps) and follows payment patterns customers already recognize and trust.
+  </Step>
+  <Step>
+    ### Built-in incentives to encourage usage
+    WalletConnect Pay can provide rewards that give customers a reason to choose WalletConnect Pay at checkout—supporting adoption with no added effort from merchants or PSPs.
+  </Step>
+  <Step>
+    ### Smarter economics for online payments
+    Support higher-value online transactions, reduce acceptance costs, and settle faster with flexible crypto or fiat payouts.
+  </Step>
+  <Step>
+    ### Bring your wallet or pay product to everyday commerce
+    Integrate WalletConnect Pay to let your users pay across POS and ecommerce. You keep custody and control of the experience—while WalletConnect Pay handles PSP compatibility behind the scenes.
+  </Step>
+</Steps>
+
+## Get Started
+
+<Cards>
+  <Card title="Integration Guide" icon={<Icon icon="code" />} href="/payments/ecommerce/integration">
+    Step-by-step guide to integrate WalletConnect Pay checkout into your site.
+  </Card>
+  <Card title="API Reference" icon={<Icon icon="rectangle-terminal" />} href="/payments/ecommerce/api-reference">
+    Merchant API endpoint reference for creating and verifying payments.
+  </Card>
+  <Card title="Merchant Onboarding" icon={<Icon icon="user-plus" />} href="/payments/merchant/onboarding">
+    Set up your merchant account and obtain your API credentials.
+  </Card>
+  <Card title="React Example" icon={<Icon icon="react" />} href="https://github.com/WalletConnect/walletconnect-pay-examples/tree/main/gateway/headless-checkout">
+    Next.js reference checkout implementation.
+  </Card>
+  <Card title="JavaScript Example" icon={<Icon icon="js" />} href="https://github.com/WalletConnect/walletconnect-pay-examples/tree/main/gateway/headless-checkout-vanilla">
+    Framework-neutral vanilla TypeScript checkout.
+  </Card>
+</Cards>
+
