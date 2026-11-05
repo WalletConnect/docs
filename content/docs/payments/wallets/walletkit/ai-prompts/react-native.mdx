@@ -1,0 +1,926 @@
+---
+title: "AI Integration Prompt - React Native"
+description: "Comprehensive AI integration prompt for React Native wallet developers integrating WalletConnect Pay via WalletKit."
+sidebarTitle: "React Native AI Prompt"
+---
+
+# WalletConnect Pay Integration via WalletKit
+
+This guide provides all details needed to integrate WalletConnect Pay into a React Native wallet that **already has WalletKit integrated**. Pay is accessed through `walletKit.pay`.
+
+---
+
+## Agent Guidance: Adapt, Don't Copy
+
+**This plan is a reference, not a script.** Each wallet has its own architecture, conventions, and patterns. Follow these principles:
+
+### 1. Match the Target Wallet's Patterns
+
+- **Study the existing codebase first.** Look at how similar features are implemented (e.g., how session requests are handled, how modals work, how state is managed).
+- **Follow existing conventions** for file naming, folder structure, imports, and code style.
+- **Use the wallet's existing UI components** rather than creating new ones from scratch.
+- **Adapt the examples in this plan** to fit the wallet's architecture, not the other way around.
+
+### 2. When in Doubt, Ask
+
+If you're uncertain about:
+
+- Which pattern to follow when multiple exist in the codebase
+- Whether to create new infrastructure or extend existing
+- How a specific wallet feature works
+- The correct location for new files
+
+**Stop and ask the user** rather than guessing.
+
+### 3. Test Incrementally
+
+Don't implement everything at once. Verify each step:
+
+1. `walletKit.pay` is accessible
+2. Payment links are detected via `isPaymentLink`
+3. Modal/screen opens
+4. Payment options load
+5. Signing works
+6. Payment confirms
+
+### 4. Validate After Every Step (CRITICAL)
+
+**After completing each step in the implementation:**
+
+1. **Go back and review** - Re-read the plan to ensure all requirements for that step were implemented correctly
+2. **Check for linting errors** - Run the linter on all modified/created files and fix any errors before proceeding
+3. **Verify the code compiles** - Ensure there are no TypeScript or build errors
+4. **Test the functionality** - If possible, verify the step works as expected before moving on
+
+This prevents accumulating errors that become harder to debug later.
+
+---
+
+## Prerequisites
+
+The wallet must already have:
+
+- `@reown/walletkit` 1.6.0 or later integrated and working (bundles `@walletconnect/pay` 1.1.0)
+- `@walletconnect/react-native-compat` 2.25.0 or later installed (ships the native Yttrium module: yttrium-wcpay 0.10.60 on Android, YttriumWrapper 0.10.59 on iOS)
+- WalletKit initialization in place
+
+### Required Package Versions
+
+```json
+{
+  "@reown/walletkit": "1.6.0",
+  "@walletconnect/react-native-compat": "2.25.0"
+}
+```
+
+These are the minimum versions that include Pay support via `walletKit.pay` with the `data` parameter on `confirmPayment`.
+
+---
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      walletKit                              │
+│                                                             │
+│   walletKit.pair()              walletKit.pay               │
+│   walletKit.approveSession()        │                       │
+│   walletKit.respondSessionRequest() │                       │
+│                                     ▼                       │
+│                         ┌───────────────────┐               │
+│                         │  Pay Client API   │               │
+│                         │ getPaymentOptions │               │
+│                         │ getRequiredActions│               │
+│                         │ confirmPayment    │               │
+│                         └───────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Pay is automatically available on any WalletKit instance - no additional configuration required.
+
+---
+
+## Step 1: Import isPaymentLink from WalletKit
+
+WalletKit automatically provides pay functionality via `walletKit.pay`. No additional configuration is needed.
+
+Just add the `isPaymentLink` import to detect payment links:
+
+```typescript
+import { WalletKit, isPaymentLink } from '@reown/walletkit';
+
+export { isPaymentLink };
+
+// Your existing WalletKit initialization - no changes needed
+const walletKit = await WalletKit.init({
+  core,
+  metadata: getMetadata(),
+});
+
+// Pay is automatically available
+// walletKit.pay.getPaymentOptions(...)
+```
+
+---
+
+## Step 2: Add Payment Link Detection
+
+### Payment Link Detection
+
+**IMPORTANT**: Always use `isPaymentLink` from WalletKit to detect payment links. Do NOT implement custom URL parsing or regex matching.
+
+Current known formats (for reference only - may change):
+
+```
+# Direct payment link
+https://pay.walletconnect.com/?pid=xxx
+
+# WC URI with pay parameter
+wc:xxx?pay=https://pay.walletconnect.com/?pid=xxx
+```
+
+The `isPaymentLink` function handles all current and future formats internally, ensuring your integration remains compatible as the protocol evolves.
+
+### Use isPaymentLink from WalletKit
+
+```typescript
+import { isPaymentLink } from '@reown/walletkit';
+
+// In your URI handler
+const handleUri = async (uri: string) => {
+  if (isPaymentLink(uri)) {
+    // Handle as payment
+    handlePaymentLink(uri);
+    return;
+  }
+  
+  // Regular WalletConnect pairing
+  await walletKit.pair({ uri });
+};
+```
+
+### CRITICAL: Check ALL URI Entry Points
+
+Payment link detection must be added to ALL places where URIs are processed:
+
+1. **QR Scanner** - barcode scanning callback
+2. **URI Paste/Input Field** - text input with "Connect" button
+3. **Deep Link Handler** - `Linking.addEventListener` for app URLs
+4. **Clipboard Paste** - if the app supports paste-to-connect
+
+Search for all calls to `walletKit.pair()` and ensure each checks `isPaymentLink(uri)` first.
+
+**IMPORTANT**: Payment links are HTTPS URLs (e.g., `https://pay.walletconnect.com/?pid=xxx`). Ensure the `isPaymentLink()` check happens BEFORE any generic HTTP/HTTPS URL handling that might open a browser.
+
+---
+
+## Step 3: Implement Payment Flow
+
+### 3.1 Handle Payment Link
+
+```typescript
+const handlePaymentLink = async (paymentLink: string) => {
+  const payClient = walletKit?.pay;
+  
+  if (!payClient) {
+    showError('Pay SDK not initialized');
+    return;
+  }
+
+  // Show loading state
+  openPaymentModal({ loading: true });
+
+  try {
+    // Build accounts array in CAIP-10 format
+    const accounts = supportedChainIds.map(
+      chainId => `eip155:${chainId}:${walletAddress}`
+    );
+
+    const paymentOptions = await payClient.getPaymentOptions({
+      paymentLink,
+      accounts,
+      includePaymentInfo: true,
+    });
+
+    // Show payment modal with options
+    openPaymentModal({ paymentOptions });
+  } catch (error) {
+    openPaymentModal({ error: error.message });
+  }
+};
+```
+
+### 3.2 Collect User Data via WebView (Information Capture)
+
+**IMPORTANT - ORDERING**: After the user selects an option, check whether that option requires Information Capture. If `selectedOption.collectData?.url` is present, you MUST collect the data via the WebView **before** calling `getRequiredPaymentActions`. The WebView submits the captured data directly to the backend, and `getRequiredPaymentActions` (which triggers `POST /payment/{id}/fetch`) now requires any IC to already be submitted. Do not fetch actions or sign until the WebView signals completion.
+
+If the selected option has no `collectData?.url`, skip this step and go straight to fetching the required actions.
+
+```typescript
+// Called when the user selects a payment option.
+// Runs the WebView IC step (if needed) BEFORE fetching the required actions.
+const onOptionSelected = async (option: PaymentOption) => {
+  setSelectedOption(option);
+
+  if (option.collectData?.url) {
+    // Step into the WebView; fetchPaymentActions runs in its onComplete.
+    setWebViewUrl(option.collectData.url);
+    setStep('webviewDataCollection');
+    return;
+  }
+
+  // No Information Capture needed - fetch actions directly.
+  await fetchPaymentActions(option);
+};
+
+// Called by the WebView's onComplete callback once IC is submitted to the backend.
+const onDataCollectionComplete = async () => {
+  if (selectedOption) {
+    await fetchPaymentActions(selectedOption);
+  }
+};
+```
+
+See [section 3.6](#3-6-webview-data-collection) for the `PayDataCollectionWebView` component implementation.
+
+### 3.3 Get Required Actions for Selected Option
+
+Only call this AFTER the WebView Information Capture step has completed (when the selected option requires it).
+
+```typescript
+const fetchPaymentActions = async (option: PaymentOption) => {
+  const payClient = walletKit?.pay;
+  if (!payClient || !paymentData) return;
+
+  // Triggers POST /payment/{id}/fetch on the backend.
+  // Any required Information Capture must already be submitted via the WebView.
+  const actions = await payClient.getRequiredPaymentActions({
+    paymentId: paymentData.paymentId,
+    optionId: option.id,
+  });
+
+  setPaymentActions(actions);
+  setStep('confirming');
+  return actions;
+};
+```
+
+### 3.4 Sign and Confirm Payment
+
+**IMPORTANT**: Always try passing the raw JSON string first. This is the safest approach.
+
+Collect each wallet RPC result into `data`, in the same order as the actions. Each element is a plain string (a signature or transaction hash) or, for chains like Tron, a JSON object that the SDK forwards verbatim — see [Tron support](/payments/wallets/token-chain-support/tron-support) for the Tron payload.
+
+```typescript
+const confirmPayment = async () => {
+  const payClient = walletKit?.pay;
+  const data: (string | object)[] = [];
+
+  for (const action of paymentActions) {
+    if (!action.walletRpc) continue;
+
+    const { method, params } = action.walletRpc;
+    const parsedParams = JSON.parse(params);
+
+    if (
+      method === 'eth_signTypedData_v4' ||
+      method === 'eth_signTypedData_v3' ||
+      method === 'eth_signTypedData'
+    ) {
+      const fromAddress = parsedParams[0];
+      const typedDataString = parsedParams[1]; // Already a JSON string
+      
+      // RECOMMENDED: Pass the raw JSON string directly
+      const signature = await wallet.signTypedMessage(
+        { from: fromAddress, data: typedDataString },
+        SignTypedDataVersion.V4
+      );
+
+      data.push(signature);
+    } else if (method === 'eth_sendTransaction') {
+      const txHash = await wallet.sendTransaction(parsedParams[0]);
+      data.push(txHash);
+    } else if (method === 'personal_sign') {
+      const sig = await wallet.personalSign(parsedParams);
+      data.push(sig);
+    }
+  }
+
+  // Confirm the payment (no collectedData - WebView handles submission)
+  const result = await payClient.confirmPayment({
+    paymentId: paymentData.paymentId,
+    optionId: selectedOption.id,
+    data,
+  });
+
+  return result;
+};
+```
+
+<Callout type="warning">
+The `signatures` parameter is deprecated in favor of `data` and will be removed in a future major version. Existing integrations that pass `signatures` keep working; the SDK uses it as a fallback when `data` is omitted.
+</Callout>
+
+### 3.5 Signing API Variations
+
+Different wallet libraries have different signing APIs. The key insight is that `parsedParams[1]` is already a complete, correctly-formatted JSON string. **Try the simplest approach first.**
+
+#### Approach 1: Pass Raw JSON String (RECOMMENDED - Try This First)
+
+**This is the recommended approach.** Many wallet signing APIs accept the typed data as a JSON string directly:
+
+```typescript
+const fromAddress = parsedParams[0];
+const typedDataString = parsedParams[1]; // Already a JSON string
+
+// Pass directly without parsing - let the wallet handle it
+const signature = await wallet.signTypedMessage(
+  { from: fromAddress, data: typedDataString },
+  SignTypedDataVersion.V4
+);
+```
+
+**Always try this first.** If your wallet's signing API accepts a string, this avoids potential data transformation issues that can cause signature verification failures.
+
+#### Approach 2: Parse for APIs Requiring Objects (Fallback Only)
+
+**Only use this if Approach 1 fails.** If your wallet API requires parsed objects (like ethers.js `_signTypedData`):
+
+```typescript
+const typedData = JSON.parse(parsedParams[1]);
+const { domain, types, message } = typedData;
+delete types.EIP712Domain;
+
+const signature = await wallet._signTypedData(domain, types, message);
+```
+
+#### Common Pitfalls When Parsing
+
+If you must parse the typed data, be aware of these issues:
+
+1. **chainId as hex string**: The domain may contain `chainId: "0x2105"` (hex string) instead of `chainId: 8453` (number). Some signing implementations require the number:
+   ```typescript
+   if (typeof domain.chainId === 'string') {
+     domain.chainId = parseInt(domain.chainId, 16);
+   }
+   ```
+
+2. **Don't guess primaryType**: If your API needs `primaryType`, extract it from the original data—don't use `Object.keys(types)[0]` which returns the alphabetically first key (often wrong):
+   ```typescript
+   // WRONG - may return wrong type
+   const primaryType = Object.keys(types)[0];
+   
+   // CORRECT - use the actual primaryType from the data
+   const { primaryType } = typedData;
+   ```
+
+3. **String vs Object format**: Test whether your signing API expects:
+   - `data: "{...}"` (JSON string)
+   - `data: {...}` (parsed object)
+   
+   The wrong format may sign successfully but produce an invalid signature.
+
+---
+
+## Step 4: Payment Modal/Screen UI
+
+### State Machine
+
+The WebView data-collection step (Information Capture) runs AFTER the user selects an option but BEFORE fetching the required actions. `getRequiredPaymentActions` triggers the backend `POST /payment/{id}/fetch`, which now expects any required IC to already be submitted by the WebView.
+
+```
+LOADING → ERROR (if failed)
+        → CONFIRM (show options) → WEBVIEW (if selected option needs IC) → GET ACTIONS (getRequiredPaymentActions) → CONFIRMING (sign + confirmPayment) → SUCCESS
+        → CONFIRM (show options) → GET ACTIONS (getRequiredPaymentActions) → CONFIRMING (sign + confirmPayment) → SUCCESS
+```
+
+### State Definition
+
+```typescript
+type Step = 'loading' | 'confirm' | 'webviewDataCollection' | 'confirming' | 'result';
+
+interface PaymentModalState {
+  step: Step;
+  resultStatus: 'success' | 'error';
+  resultMessage: string;
+  selectedOption: PaymentOption | null;
+  paymentActions: Action[] | null;
+  isLoadingActions: boolean;
+  actionsError: string | null;
+  webViewUrl: string | null;
+}
+```
+
+### Required UI Components
+
+1. **Loading View** - Spinner with message
+2. **Confirm View** - Payment options list (with "Info required" badge on options with `collectData`), selected option details, approve button
+3. **WebView Data Collection View** - WebView form (if `selectedOption.collectData?.url` exists)
+4. **Confirming View** - Spinner while signing and confirming
+5. **Result View** - Success or error message with close button
+
+### Display Elements
+
+- Merchant name and icon from `paymentOptions.info.merchant`
+- Payment amount from `option.amount.display`
+- Network name and asset symbol
+- ETA in seconds
+
+---
+
+## Step 5: Utility Functions
+
+### Format Amount
+
+```typescript
+function formatAmount(value: string, decimals: number, minDecimals = 0): string {
+  const num = BigInt(value);
+  const divisor = BigInt(10 ** decimals);
+  const integerPart = num / divisor;
+  const fractionalPart = num % divisor;
+
+  if (fractionalPart === BigInt(0)) {
+    return minDecimals > 0 
+      ? `${integerPart}.${'0'.repeat(minDecimals)}`
+      : integerPart.toString();
+  }
+
+  const fractionalStr = fractionalPart.toString().padStart(decimals, '0');
+  let trimmedFractional = fractionalStr.replace(/0+$/, '');
+  if (trimmedFractional.length < minDecimals) {
+    trimmedFractional = trimmedFractional.padEnd(minDecimals, '0');
+  }
+  return `${integerPart}.${trimmedFractional}`;
+}
+```
+
+### Format Date Input (for collectData)
+
+```typescript
+function formatDateInput(value: string): string {
+  const cleaned = value.replace(/[^0-9]/g, '');
+  if (cleaned.length <= 4) return cleaned;
+  if (cleaned.length <= 6) return `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+  return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 8)}`;
+}
+```
+
+### Validate Date
+
+```typescript
+function isValidDateOfBirth(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  const now = new Date();
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day &&
+    date < now &&
+    year >= 1900
+  );
+}
+```
+
+---
+
+## Core API Reference
+
+### Pay Client Methods (via walletKit.pay)
+
+```typescript
+// Get payment options
+await walletKit.pay.getPaymentOptions({
+  paymentLink: string,       // Full pay.walletconnect.com URL
+  accounts: string[],        // CAIP-10 format: 'eip155:chainId:address'
+  includePaymentInfo: true,  // Always include for merchant info
+});
+
+// Get required actions
+await walletKit.pay.getRequiredPaymentActions({
+  paymentId: string,  // From PaymentOptionsResponse
+  optionId: string,   // From selected PaymentOption
+});
+
+// Confirm payment
+await walletKit.pay.confirmPayment({
+  paymentId: string,
+  optionId: string,
+  data: (string | object)[],       // Wallet RPC results in action order: strings or JSON objects (e.g. Tron)
+  // signatures: string[]          // Deprecated alias for `data`, still accepted
+});
+```
+
+The SDK types `data` as `(string | Record<string, unknown> | unknown[])[]`. A value typed with a TypeScript `interface` does not satisfy `Record<string, unknown>`; declare it as a `type` alias or spread it into an object literal.
+
+### Account Format (CAIP-10)
+
+```
+eip155:{chainId}:{address}
+// Example: eip155:8453:0x1234...
+```
+
+### Key Types
+
+```typescript
+interface PaymentOptionsResponse {
+  paymentId: string;
+  options: PaymentOption[];
+  collectData?: CollectDataAction;
+  info?: PaymentInfo;
+  resultInfo?: PaymentResultInfo;  // present when payment already completed
+}
+
+interface PaymentResultInfo {
+  txId: string;
+  optionAmount: PayAmount;
+}
+
+interface PaymentOption {
+  id: string;
+  amount: PayAmount;
+  etaS: number;
+  actions: Action[];
+  collectData?: CollectDataAction;  // Per-option data collection
+}
+
+interface PayAmount {
+  unit: string;
+  value: string;
+  display: {
+    assetSymbol: string;
+    assetName: string;
+    decimals: number;
+    iconUrl?: string;
+    networkName?: string;
+  };
+}
+
+interface CollectDataAction {
+  url: string;                  // WebView URL for data collection
+  schema?: string;              // JSON schema describing required fields
+}
+
+interface Action {
+  walletRpc?: {
+    chainId: string;
+    method: string;
+    params: string; // JSON string - must parse before use
+  };
+}
+```
+
+---
+
+## Architecture Adaptation Examples
+
+### Modal System Variations
+
+**React Native Modal (overlay):**
+```typescript
+// Use existing modal manager if available
+ModalStore.open('PaymentOptionsModal', { paymentOptions });
+```
+
+**React Navigation (screen):**
+```typescript
+navigation.navigate('PaymentOptions', { paymentOptions });
+```
+
+**Expo Router:**
+```typescript
+router.push({ pathname: '/payment-options', params: { paymentLink } });
+```
+
+**Bottom Sheet:**
+```typescript
+bottomSheetRef.current?.present();
+setPaymentData(paymentOptions);
+```
+
+### Wallet Library Variations
+
+**MetaMask KeyringController (recommended for MetaMask-based wallets):**
+```typescript
+import { SignTypedDataVersion } from '@metamask/keyring-controller';
+
+// Pass raw JSON string - this is the recommended approach
+const signature = await keyringController.signTypedMessage(
+  { from: fromAddress, data: typedDataString },
+  SignTypedDataVersion.V4
+);
+```
+
+**ethers.js v5:**
+```typescript
+const signature = await wallet._signTypedData(domain, types, message);
+```
+
+**viem:**
+```typescript
+const primaryType = Object.keys(types).find(k => k !== 'EIP712Domain');
+const signature = await wallet.signTypedData({ domain, types, primaryType, message });
+```
+
+**web3.js:**
+```typescript
+const signature = await web3.eth.signTypedData(address, typedData);
+```
+
+### 3.6 WebView Data Collection
+
+When `selectedOption.collectData?.url` is present, display the URL in a WebView. This happens immediately after the user selects an option and **before** `getRequiredPaymentActions` is called (see [section 3.2](#3-2-collect-user-data-via-webview-information-capture)). The URL comes from the selected option's `collectData.url`, which is already scoped to that option's account. The hosted form handles rendering, validation, and T&C acceptance.
+
+Wire `onComplete` to your `onDataCollectionComplete` handler (which then calls `fetchPaymentActions`), so action fetching only happens once the WebView has submitted the Information Capture data to the backend.
+
+The form URL accepts optional query parameters — append them to `selectedOption.collectData.url` before loading, preserving existing query parameters:
+- `prefill` — base64url-encoded JSON of known user fields. Keys must match the `required` fields from `collectData.schema` (e.g. `fullName`, `dob`, `pobAddress`).
+- `theme` — `light` or `dark`, to match your wallet's color mode.
+- `themeVariables` — a base64url string exported from the [WalletConnect Pay Dashboard](https://dashboard.walletconnect.com) that overrides design tokens (font, font size, some colors, button/input border radius). Append it verbatim.
+
+```typescript
+function buildFormUrl(baseUrl, options = {}) {
+  const params = [];
+  if (options.prefill && Object.keys(options.prefill).length > 0) {
+    // base64url: URL-safe, no padding
+    const prefill = btoa(JSON.stringify(options.prefill))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    params.push(`prefill=${prefill}`);
+  }
+  if (options.theme) params.push(`theme=${options.theme}`);
+  if (options.themeVariables) params.push(`themeVariables=${options.themeVariables}`);
+  if (params.length === 0) return baseUrl;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}${params.join("&")}`;
+}
+```
+
+Install `react-native-webview`:
+
+```bash
+npm install react-native-webview@13.16.0
+```
+
+```tsx
+import React, { useCallback } from "react";
+import { WebView, WebViewMessageEvent } from "react-native-webview";
+import { Linking, View, ActivityIndicator } from "react-native";
+
+interface PayDataCollectionWebViewProps {
+  url: string;
+  onComplete: () => void;
+  onError: (error: string) => void;
+}
+
+function PayDataCollectionWebView({
+  url,
+  onComplete,
+  onError,
+}: PayDataCollectionWebViewProps) {
+  const handleMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+        switch (data.type) {
+          case "IC_COMPLETE":
+            onComplete();
+            break;
+          case "IC_ERROR":
+            onError(data.error || "Unknown error");
+            break;
+        }
+      } catch {
+        // Ignore non-JSON messages
+      }
+    },
+    [onComplete, onError]
+  );
+
+  const handleNavigationRequest = useCallback((request: { url: string }) => {
+    if (!request.url.includes("pay.walletconnect.com")) {
+      Linking.openURL(request.url);
+      return false;
+    }
+    return true;
+  }, []);
+
+  return (
+    <WebView
+      source={{ uri: url }}
+      onMessage={handleMessage}
+      onShouldStartLoadWithRequest={handleNavigationRequest}
+      javaScriptEnabled
+      domStorageEnabled
+      startInLoadingState
+      renderLoading={() => (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
+    />
+  );
+}
+```
+
+> **Important:** When using the WebView approach, do **not** pass `collectedData` to `confirmPayment()`. The WebView submits data directly to the backend.
+
+---
+
+## Expo Considerations
+
+### Development Build Required
+
+The Pay SDK uses native modules. Expo Go will NOT work.
+
+```bash
+npx expo prebuild
+npx expo run:ios  # or run:android
+```
+
+---
+
+## Troubleshooting
+
+### walletKit.pay is undefined
+
+**Cause**: Native module not available.
+
+**Solutions**:
+1. Verify `@walletconnect/react-native-compat` is installed
+2. iOS: Run `cd ios && pod install --repo-update`
+3. Android: Sync gradle and rebuild
+4. For Expo: Ensure using development build, not Expo Go
+
+### Payment Options Empty
+
+**Check**:
+1. Accounts array format is correct: `['eip155:chainId:address']`
+2. Payment link URL is valid with `pid` parameter
+3. Wallet has supported chains configured
+
+### Signing Fails
+
+**Check**:
+1. Are you passing the raw JSON string? Try that first
+2. If parsing: `EIP712Domain` is removed from types before signing
+3. Params are parsed correctly (double-encoded JSON)
+4. Wallet address matches account used in `getPaymentOptions`
+
+### "Recovered address does not match from address"
+
+**Cause**: The signature was created with different data than the verifier expects.
+
+**Debug steps**:
+1. **Try passing raw string first**: Use `parsedParams[1]` directly without parsing/reconstructing
+2. **Check chainId format**: Domain may have hex string (`"0x2105"`) instead of number (`8453`)
+3. **Check primaryType**: Ensure it's extracted from data, not guessed via `Object.keys(types)[0]`
+4. **Check data format**: Does your signing API expect a JSON string or parsed object?
+
+**Quick fix**: Start with the simplest approach (pass raw `parsedParams[1]` string directly), only parse if your API specifically requires it.
+
+### "Missing or invalid. pair() uri#relay-protocol" Error
+
+**Cause**: Payment link was passed to `walletKit.pair()` instead of being handled as payment.
+
+**Solution**: Ensure `isPaymentLink(uri)` check happens BEFORE calling `pair()`.
+
+### Payment Link Opens Browser Instead of Pay Modal
+
+**Cause**: Payment links are HTTPS URLs, and your URI handling may have a generic HTTP/HTTPS handler that opens a browser before checking for payment links.
+
+**Solution**: Move the `isPaymentLink(uri)` check BEFORE any HTTP/HTTPS URL handling in your QR scanner, deep link handler, and paste handler.
+
+---
+
+## File Checklist
+
+When implementation is complete, verify:
+
+**Modified Files:**
+
+- [ ] WalletKit exports (re-export `isPaymentLink`)
+- [ ] QR scanner handler (detect payment links BEFORE http/https handling)
+- [ ] URI paste handler (detect payment links BEFORE http/https handling)
+- [ ] Deep link handler (detect payment links)
+- [ ] Modal/navigation system (register payment modal/screen)
+
+**New Files:**
+
+- [ ] Payment modal/screen component
+- [ ] Payment sub-components (IntroView, ConfirmView, etc.)
+- [ ] Payment utility functions
+- [ ] Payment state reducer (if using reducer pattern)
+- [ ] WebView data collection component (using react-native-webview)
+
+**Native Build:**
+
+- [ ] iOS: `pod install` completed
+- [ ] Android: Gradle sync completed
+
+**Validation (after each step):**
+
+- [ ] No linting errors in modified files
+- [ ] No TypeScript errors
+- [ ] Code compiles successfully
+- [ ] Functionality works as expected
+
+---
+
+## Common Pitfalls
+
+### 1. Double-Encoded JSON in Action Params
+
+```typescript
+// WRONG
+const typedData = JSON.parse(action.walletRpc.params)[1];
+
+// CORRECT - parse twice
+const parsedParams = JSON.parse(action.walletRpc.params);
+const typedDataString = parsedParams[1]; // This is still a JSON string
+```
+
+### 2. Parsing When You Don't Need To
+
+```typescript
+// RISKY - parsing and reconstructing can introduce issues
+const typedData = JSON.parse(parsedParams[1]);
+const { domain, types, message, primaryType } = typedData;
+delete types.EIP712Domain;
+const signature = await sign({ data: { domain, types, message, primaryType }, from });
+
+// SAFER - pass the original string if your API supports it
+const signature = await sign({ data: parsedParams[1], from: parsedParams[0] });
+```
+
+**Always try the raw string approach first.** Only parse and transform if your wallet's signing API specifically requires it.
+
+### 3. viem Requires primaryType
+
+```typescript
+// ethers.js - no primaryType needed
+await wallet._signTypedData(domain, types, message);
+
+// viem - MUST include primaryType
+const primaryType = Object.keys(types).find(k => k !== 'EIP712Domain');
+await wallet.signTypedData({ domain, types, primaryType, message });
+```
+
+### 4. walletRpc May Be Undefined
+
+```typescript
+for (const action of actions) {
+  if (!action.walletRpc) continue; // Skip actions without walletRpc
+  // ... process
+}
+```
+
+### 5. QR Scanner Fires Multiple Times
+
+```typescript
+const hasScanned = useRef(false);
+const onCodeScanned = (result) => {
+  if (hasScanned.current) return;
+  hasScanned.current = true;
+  // Process...
+};
+```
+
+### 6. Payment Link Handled as Browser URL
+
+```typescript
+// WRONG ORDER - payment link opens browser
+if (isHttpUrl(uri)) {
+  openBrowser(uri);
+} else if (isPaymentLink(uri)) {
+  // Never reached for https://pay.walletconnect.com links!
+  openPaymentModal(uri);
+}
+
+// CORRECT ORDER - check payment link first
+if (isPaymentLink(uri)) {
+  openPaymentModal(uri);
+} else if (isHttpUrl(uri)) {
+  openBrowser(uri);
+}
+```
+
+---
+
+## Testing
+
+### Test Payment Links
+
+Create test payment links from the WalletConnect Pay dashboard using a test-mode API key:
+
+```
+https://pay.walletconnect.com/?pid=<payment-id>
+```
+
+### Supported Chains
+
+Currently Base (chainId: 8453) is the primary test chain:
+
+```typescript
+const accounts = [`eip155:8453:${walletAddress}`];
+```
