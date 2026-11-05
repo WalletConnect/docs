@@ -481,7 +481,8 @@
                 "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-confirm",
                 "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-fetch",
                 "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-options",
-                "payments/api-reference/2026-02-18/get-v1-gateway-payment-id-status"
+                "payments/api-reference/2026-02-18/get-v1-gateway-payment-id-status",
+                "payments/api-reference/2026-02-18/post-v1-gateway-payment-id-transition"
               ]
             },
             {
@@ -491,29 +492,16 @@
                 "payments/api-reference/2026-02-18/get-v1-payments",
                 "payments/api-reference/2026-02-18/get-v1-payments-id",
                 "payments/api-reference/2026-02-18/post-v1-payments-id-cancel",
-                "payments/api-reference/2026-02-18/get-v1-payments-id-status"
+                "payments/api-reference/2026-02-18/get-v1-payments-id-status",
+                "payments/api-reference/2026-02-18/post-v1-payments-id-transition"
               ]
             },
             {
-              "group": "Refunds",
+              "group": "Webhooks",
               "pages": [
-                "payments/api-reference/2026-02-18/post-v1-refunds"
-              ]
-            },
-            {
-              "group": "Merchants",
-              "pages": [
-                "payments/api-reference/2026-02-18/get-v1-merchants-payments",
-                "payments/api-reference/2026-02-18/post-v1-merchants",
-                "payments/api-reference/2026-02-18/get-v1-merchants",
-                "payments/api-reference/2026-02-18/get-v1-merchants-merchantid",
-                "payments/api-reference/2026-02-18/patch-v1-merchants-merchantid",
-                "payments/api-reference/2026-02-18/delete-v1-merchants-merchantid",
-                "payments/api-reference/2026-02-18/get-v1-merchants-merchantid-settlements",
-                "payments/api-reference/2026-02-18/post-v1-merchants-merchantid-settlements-crypto",
-                "payments/api-reference/2026-02-18/put-v1-merchants-merchantid-settlements-crypto-id",
-                "payments/api-reference/2026-02-18/delete-v1-merchants-merchantid-settlements-crypto-id",
-                "payments/api-reference/2026-02-18/get-v1-merchants-merchant-id-payments"
+                "payments/api-reference/2026-02-18/post-v1-webhooks-binance-pay",
+                "payments/api-reference/2026-02-18/post-v1-webhooks-binance-pay-onchain",
+                "payments/api-reference/2026-02-18/post-v1-webhooks-bybit-pay"
               ]
             }
           ]
@@ -534,7 +522,8 @@
                 "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-confirm",
                 "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-fetch",
                 "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-options",
-                "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status"
+                "payments/api-reference/2026-02-19.preview/get-v1-gateway-payment-id-status",
+                "payments/api-reference/2026-02-19.preview/post-v1-gateway-payment-id-transition"
               ]
             },
             {
@@ -544,29 +533,16 @@
                 "payments/api-reference/2026-02-19.preview/get-v1-payments",
                 "payments/api-reference/2026-02-19.preview/get-v1-payments-id",
                 "payments/api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
-                "payments/api-reference/2026-02-19.preview/get-v1-payments-id-status"
+                "payments/api-reference/2026-02-19.preview/get-v1-payments-id-status",
+                "payments/api-reference/2026-02-19.preview/post-v1-payments-id-transition"
               ]
             },
             {
-              "group": "Refunds",
+              "group": "Webhooks",
               "pages": [
-                "payments/api-reference/2026-02-19.preview/post-v1-refunds"
-              ]
-            },
-            {
-              "group": "Merchants",
-              "pages": [
-                "payments/api-reference/2026-02-19.preview/get-v1-merchants-payments",
-                "payments/api-reference/2026-02-19.preview/post-v1-merchants",
-                "payments/api-reference/2026-02-19.preview/get-v1-merchants",
-                "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid",
-                "payments/api-reference/2026-02-19.preview/patch-v1-merchants-merchantid",
-                "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid",
-                "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchantid-settlements",
-                "payments/api-reference/2026-02-19.preview/post-v1-merchants-merchantid-settlements-crypto",
-                "payments/api-reference/2026-02-19.preview/put-v1-merchants-merchantid-settlements-crypto-id",
-                "payments/api-reference/2026-02-19.preview/delete-v1-merchants-merchantid-settlements-crypto-id",
-                "payments/api-reference/2026-02-19.preview/get-v1-merchants-merchant-id-payments"
+                "payments/api-reference/2026-02-19.preview/post-v1-webhooks-binance-pay",
+                "payments/api-reference/2026-02-19.preview/post-v1-webhooks-binance-pay-onchain",
+                "payments/api-reference/2026-02-19.preview/post-v1-webhooks-bybit-pay"
               ]
             }
           ]
