@@ -53,7 +53,12 @@ Before finishing a change, run `pnpm build` for content changes, and `pnpm lint`
 - Create the `.mdx` file under `content/docs/`, then add its path (no extension, e.g. `"wallets/features/verify"`) to `content/navigation.json`. A page missing from the navigation still builds and has a URL, but no sidebar entry; `lib/navigation.tsx` warns about navigation entries that point to missing pages.
 - Moving or renaming a page changes its URL. Add a redirect from the old path to `redirects.json` and update links to it across `content/`.
 - Use folder names in lowercase kebab-case, matching the existing tree (`wallets/react-native/cloud/relay.mdx`).
-- A navbar tab links to its first page, so make that page the tab folder's `index.mdx` and list it first in the tab's navigation: the Wallet Verification tab opens `/wallet-verification`, not `/wallet-verification/overview`. Label it in the sidebar with `sidebarTitle: "Overview"` if needed. Every tab follows this (`/wallets`, `/apps`, `/network`, `/payments`, `/wallet-verification`).
+- A navbar tab links to its first page, so make that page the tab folder's `index.mdx` and list it first in the tab's navigation: the Compliance tab opens `/wallet-verification`, not `/wallet-verification/overview`. Label it in the sidebar with `sidebarTitle: "Overview"` if needed. Every tab follows this (`/wallets`, `/apps`, `/network`, `/payments`, `/wallet-verification`).
+
+## Navigation changes need sign-off
+
+- The navbar tabs are fixed: **Apps · Wallets · Payments · Compliance** (plus API Reference on the right, and Network, a hidden tab linked from the top-right of the navbar). Don't add a new tab. If a change adds one anyway, open the PR description with a warning that it adds a new navbar tab, and recommend posting the change in the `#project-docs` Slack channel before merging.
+- A PR that adds a new page to the sidebar or the navbar (any new entry in `content/navigation.json` or `links` in `lib/layout.shared.tsx`) needs `@rtomas` and `@Jem-reown` as reviewers: `gh pr create --reviewer rtomas,Jem-reown`, or `gh pr edit --add-reviewer rtomas,Jem-reown` on an existing PR.
 
 ## Frontmatter
 
