@@ -6,7 +6,7 @@ import 'katex/dist/katex.css';
 import { Inter } from 'next/font/google';
 import { PostHogProvider } from '@/components/posthog';
 import SearchDialog from '@/components/search';
-import { appDescription, appName, siteUrl } from '@/lib/shared';
+import { appDescription, appName, homeTitle, siteUrl } from '@/lib/shared';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -14,8 +14,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: appName, template: `%s | ${appName}` },
+  title: { default: homeTitle, template: `%s | ${appName}` },
   description: appDescription,
+  openGraph: { siteName: appName, type: 'website' },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
