@@ -75,7 +75,10 @@ export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promis
   const { metatags } = page.data;
   const isHome = page.slugs.length === 0;
   const title = isHome ? homeTitle : `${page.data.title} | ${appName}`;
-  const description = metatags?.description ?? page.data.description ?? appDescription;
+  // No site-wide fallback: one sentence repeated on every page reads as duplicate content to search engines,
+  // and without a meta description they write a snippet from the page text, which is more relevant.
+  // `null` (not `undefined`) stops the page inheriting the root layout's description.
+  const description = metatags?.description ?? page.data.description ?? (isHome ? appDescription : null);
   const image = getPageImageUrl(page).url;
   return {
     metadataBase: new URL(siteUrl),
@@ -89,13 +92,13 @@ export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promis
       siteName: appName,
       url: page.url,
       title,
-      description,
+      description: description ?? undefined,
       images: image,
     },
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
+      description: description ?? undefined,
       images: image,
     },
   };
