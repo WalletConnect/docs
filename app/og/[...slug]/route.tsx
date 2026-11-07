@@ -13,13 +13,18 @@ export const revalidate = false;
 const assets = Promise.all([
   readFile(join(process.cwd(), 'assets/fonts/Inter-400.ttf')),
   readFile(join(process.cwd(), 'assets/fonts/Inter-600.ttf')),
-  readFile(join(process.cwd(), 'public/logo/dark.svg')),
+  // walletconnect.com's header logo, filled white
+  readFile(join(process.cwd(), 'assets/og/walletconnect-logo.svg')),
 ]);
 
 // Chat apps (WhatsApp, iMessage) crop link previews to a centred square, so everything is centred
 // and kept narrow enough that short titles survive the crop.
 const MAX_DESCRIPTION = 140;
-const LOGO_WIDTH = 370;
+// walletconnect.com's brand blue (`--p-color-blue-500`), the same as `--color-fd-primary` in app/global.css
+const BRAND_BLUE = '#0666ff';
+// The logo's viewBox is 249×27
+const LOGO_HEIGHT = 40;
+const LOGO_WIDTH = Math.round((249 / 27) * LOGO_HEIGHT);
 
 function truncate(text: string, max: number) {
   if (text.length <= max) return text;
@@ -31,11 +36,7 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/[...slug]
   const page = source.getPage(slug.slice(0, -1));
   if (!page) notFound();
 
-  const [inter400, inter600, logoSvg] = await assets;
-  // The logo's viewBox leaves empty space to the right of "Docs", which pushes it off centre; crop it here.
-  const logo = logoSvg
-    .toString()
-    .replace('viewBox="0 0 554 146" width="554" height="146"', `viewBox="0 0 ${LOGO_WIDTH} 146"`);
+  const [inter400, inter600, logo] = await assets;
   const { title, description } = page.data;
 
   return new ImageResponse(
@@ -49,19 +50,21 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/[...slug]
         height: '100%',
         padding: '64px 120px',
         backgroundColor: '#141414',
-        backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(9,136,240,0.28), rgba(9,136,240,0) 60%)',
-        borderBottom: '12px solid #0988f0',
+        backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(6,102,255,0.3), rgba(6,102,255,0) 60%)',
+        borderBottom: `12px solid ${BRAND_BLUE}`,
         fontFamily: 'Inter',
         textAlign: 'center',
       }}
     >
-      <img
-        src={`data:image/svg+xml;base64,${Buffer.from(logo).toString('base64')}`}
-        width={Math.round((LOGO_WIDTH / 146) * 70)}
-        height={70}
-        alt=""
-        style={{ marginBottom: 48 }}
-      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 56 }}>
+        <img
+          src={`data:image/svg+xml;base64,${logo.toString('base64')}`}
+          width={LOGO_WIDTH}
+          height={LOGO_HEIGHT}
+          alt=""
+        />
+        <div style={{ fontSize: 44, fontWeight: 600, lineHeight: 1, color: BRAND_BLUE }}>Docs</div>
+      </div>
       <div
         style={{
           fontSize: title.length > 32 ? 60 : 76,
