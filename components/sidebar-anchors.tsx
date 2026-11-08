@@ -9,7 +9,7 @@
 import { SidebarItem } from 'fumadocs-ui/components/sidebar/base';
 import { useTreePath } from 'fumadocs-ui/contexts/tree';
 import { usePathname } from 'next/navigation';
-import { Icon } from '@/components/icon';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import type { NavAnchor, TabFolder } from '@/lib/navigation';
 
@@ -22,7 +22,17 @@ const itemClassName = cn(
   'data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors',
 );
 
-export function SidebarAnchors({ anchors: globalAnchors }: { anchors: NavAnchor[] }) {
+/**
+ * `icons` maps each anchor's icon name to the icon rendered on the server. Importing `Icon` here
+ * would ship every react-icons set it resolves names against (megabytes) to the browser.
+ */
+export function SidebarAnchors({
+  anchors: globalAnchors,
+  icons,
+}: {
+  anchors: NavAnchor[];
+  icons: Record<string, ReactNode>;
+}) {
   const pathname = usePathname();
   const tab = useTreePath().find((node): node is TabFolder => node.type === 'folder' && node.root === true);
   const anchors = tab?.anchors ?? globalAnchors;
@@ -39,7 +49,7 @@ export function SidebarAnchors({ anchors: globalAnchors }: { anchors: NavAnchor[
             href={anchor.href}
             external={external}
             active={!external && pathname === anchor.href}
-            icon={anchor.icon ? <Icon icon={anchor.icon} /> : undefined}
+            icon={anchor.icon ? icons[anchor.icon] : undefined}
             className={itemClassName}
           >
             {anchor.anchor}

@@ -5,15 +5,21 @@ export function Container({ children }: { children: ReactNode }) {
   return <div className="px-4 py-14 lg:px-10">{children}</div>;
 }
 
-export function Title({ children }: { children: ReactNode }) {
+/**
+ * A section heading on a landing page. `mode: frame` pages render no title of their own, so the
+ * first `<Title>` on the page must be `as="h1"` to give the page its single H1.
+ */
+export function Title({ children, as: Heading = 'h2' }: { children: ReactNode; as?: 'h1' | 'h2' }) {
   // `not-prose`: MDX wraps text written on its own line in a <p>, and prose's margins on it
   // would offset the heading. Same reason as ProductCard below.
-  return <div className="not-prose text-2xl tracking-tight text-fd-foreground">{children}</div>;
+  return <Heading className="not-prose text-2xl font-normal tracking-tight text-fd-foreground">{children}</Heading>;
 }
 
 interface ProductCardProps {
   img: string;
   imgDark?: string;
+  /** Alt text for the image; defaults to "<title> illustration". */
+  imgAlt?: string;
   href: string;
   title: ReactNode;
   description?: ReactNode;
@@ -21,20 +27,22 @@ interface ProductCardProps {
   type?: string;
 }
 
-export function ProductCard({ img, imgDark, href, title, description, model, type }: ProductCardProps) {
+export function ProductCard({ img, imgDark, imgAlt, href, title, description, model, type }: ProductCardProps) {
+  // SEO audits flag empty alt text, so describe the image rather than mark it decorative
+  const alt = imgAlt ?? (typeof title === 'string' ? `${title} illustration` : '');
   return (
     <a href={href} className="group not-prose mb-5 block">
       <div className="flex flex-col rounded-xl md:p-1">
         <div className="h-32 w-full overflow-hidden rounded-xl bg-fd-muted">
           <img
             src={img}
-            alt=""
+            alt={alt}
             loading="lazy"
             className="m-0 block h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105 dark:hidden"
           />
           <img
             src={imgDark ?? img}
-            alt=""
+            alt={alt}
             loading="lazy"
             className="m-0 hidden h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105 dark:block"
           />

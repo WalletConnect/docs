@@ -1,6 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import './global.css';
 import 'katex/dist/katex.css';
 import { Inter } from 'next/font/google';
@@ -27,8 +26,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         <PostHogProvider>
           <RootProvider search={{ SearchDialog }}>{children}</RootProvider>
         </PostHogProvider>
-        {/* Powers the "Copy prompt" button on /payments/webhooks (ported from Mintlify) */}
-        <Script src="/copy-agent-prompt.js" strategy="lazyOnload" />
       </body>
     </html>
   );
