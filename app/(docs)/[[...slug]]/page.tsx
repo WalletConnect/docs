@@ -3,7 +3,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
-import { appName, getPageImageUrl, getPageMarkdownUrl, siteUrl } from '@/lib/shared';
+import { appDescription, appName, getPageImageUrl, getPageMarkdownUrl, homeTitle, siteUrl } from '@/lib/shared';
 import { source } from '@/lib/source';
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -73,12 +73,33 @@ export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promis
   if (!page) notFound();
 
   const { metatags } = page.data;
+  const isHome = page.slugs.length === 0;
+  const title = isHome ? homeTitle : `${page.data.title} | ${appName}`;
+  // No site-wide fallback: one sentence repeated on every page reads as duplicate content to search engines,
+  // and without a meta description they write a snippet from the page text, which is more relevant.
+  // `null` (not `undefined`) stops the page inheriting the root layout's description.
+  const description = metatags?.description ?? page.data.description ?? (isHome ? appDescription : null);
+  const image = getPageImageUrl(page).url;
   return {
     metadataBase: new URL(siteUrl),
-    title: page.slugs.length === 0 ? appName : `${page.data.title} | ${appName}`,
-    description: metatags?.description ?? page.data.description,
+    // `absolute` skips the root layout's `%s | WalletConnect Docs` template, which `title` already includes
+    title: { absolute: title },
+    description,
+    // Redirected Mintlify URLs and `.md` variants all point search engines at this one URL
+    alternates: { canonical: page.url },
     openGraph: {
-      images: getPageImageUrl(page).url,
+      type: isHome ? 'website' : 'article',
+      siteName: appName,
+      url: page.url,
+      title,
+      description: description ?? undefined,
+      images: image,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: description ?? undefined,
+      images: image,
     },
   };
 }

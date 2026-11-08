@@ -6,16 +6,17 @@
 /* Tailwind classes used directly in MDX content */
 @source "../content";
 
-/* WalletConnect brand (docs.json → colors.primary) */
+/* WalletConnect brand blue, matching walletconnect.com (`--p-color-blue-500`; blue-400 in dark mode).
+   Mintlify's docs.json used the legacy #0988f0 / #3ba1f5. */
 :root {
-  --color-fd-primary: #0988f0;
+  --color-fd-primary: #0666ff;
   --color-fd-primary-foreground: #ffffff;
-  --color-fd-ring: #0988f0;
+  --color-fd-ring: #0666ff;
 }
 .dark {
-  --color-fd-primary: #3ba1f5;
+  --color-fd-primary: #3389ff;
   --color-fd-primary-foreground: #ffffff;
-  --color-fd-ring: #3ba1f5;
+  --color-fd-ring: #3389ff;
 }
 
 /*
