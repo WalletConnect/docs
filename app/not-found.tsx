@@ -18,7 +18,7 @@ export default function NotFound() {
         <DocsBody className="px-5">
           <Container>
             <div className="not-prose mb-8 flex flex-col items-center text-center">
-              <Title>Page not found</Title>
+              <Title as="h1">Page not found</Title>
               <p className="mt-3 text-fd-muted-foreground">The page you're looking for doesn't exist or has moved.</p>
             </div>
             <ProductCards />

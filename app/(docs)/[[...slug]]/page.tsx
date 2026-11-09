@@ -2,6 +2,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle, MarkdownCopyButton } fr
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { JsonLd } from '@/components/json-ld';
 import { getMDXComponents } from '@/components/mdx';
 import { appDescription, appName, getPageImageUrl, getPageMarkdownUrl, homeTitle, siteUrl } from '@/lib/shared';
 import { source } from '@/lib/source';
@@ -33,6 +34,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         footer={{ enabled: false }}
         tableOfContent={{ enabled: false }}
       >
+        <JsonLd page={page} />
         <DocsBody>
           <MDX components={components} />
         </DocsBody>
@@ -42,6 +44,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full ?? page.data.mode === 'wide'}>
+      <JsonLd page={page} />
       <div className="flex items-start justify-between gap-4">
         <DocsTitle>{page.data.title}</DocsTitle>
         {/* Mintlify's "Copy page" button as an icon only, without its dropdown of AI and Markdown links.
