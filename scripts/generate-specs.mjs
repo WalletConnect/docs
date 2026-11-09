@@ -12,10 +12,9 @@ const NAVIGATION_PATH = join(ROOT, 'content', 'navigation.json');
 const REDIRECTS_PATH = join(ROOT, 'redirects.json');
 
 const VERSIONS_URL = 'https://api.pay.walletconnect.com/versions';
-const SERVICES = [
-  { name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' },
-  { name: 'MX', baseUrl: 'https://api.merchant.pay.walletconnect.com' },
-];
+// Only the Core API is documented. The merchant service (api.merchant.pay.walletconnect.com) is
+// left out on purpose: its spec isn't part of the public API reference.
+const SERVICES = [{ name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' }];
 
 const VERSION_RE = /^\d{4}-\d{2}-\d{2}(\.preview)?$/;
 
