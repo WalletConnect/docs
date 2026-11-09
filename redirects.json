@@ -8,10 +8,6 @@
     "destination": "/payments/api-reference/:slug*"
   },
   {
-    "source": "/payments/api-reference/latest/:slug*",
-    "destination": "/payments/api-reference/2026-02-18/:slug*"
-  },
-  {
     "source": "/wallet-sdk/chain-support/:slug*",
     "destination": "/wallets/chains/:slug*"
   },
@@ -154,5 +150,9 @@
   {
     "source": "/wallets/guides/tonconnect-walletconnect",
     "destination": "/apps/guides/tonconnect-walletconnect"
+  },
+  {
+    "source": "/payments/api-reference/latest/:slug*",
+    "destination": "/payments/api-reference/2026-02-18/:slug*"
   }
 ]
