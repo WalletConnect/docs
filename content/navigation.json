@@ -9,19 +9,45 @@
       "hidden": true
     },
     {
+      "tab": "Apps",
+      "icon": "layer-group",
+      "pages": [
+        "apps/index"
+      ],
+      "groups": [
+        {
+          "group": "Installation",
+          "pages": [
+            "apps/react/installation",
+            "apps/next/installation",
+            "apps/vue/installation",
+            "apps/javascript/installation"
+          ]
+        },
+        {
+          "group": "Guides",
+          "pages": [
+            "apps/guides/tonconnect-walletconnect"
+          ]
+        }
+      ]
+    },
+    {
       "tab": "Wallets",
       "icon": "wallet",
+      "anchors": [
+        {
+          "anchor": "WalletGuide",
+          "href": "https://walletguide.walletconnect.network/",
+          "icon": "compass"
+        }
+      ],
       "dropdowns": [
         {
           "dropdown": "Wallet SDK - Overview",
           "icon": "wallet",
           "pages": [
-            {
-              "group": "Getting Started",
-              "pages": [
-                "wallets/index"
-              ]
-            },
+            "wallets/index",
             {
               "group": "Features",
               "pages": [
@@ -245,42 +271,12 @@
       ]
     },
     {
-      "tab": "Apps",
-      "icon": "layer-group",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "apps/index"
-          ]
-        },
-        {
-          "group": "Installation",
-          "pages": [
-            "apps/react/installation",
-            "apps/next/installation",
-            "apps/vue/installation",
-            "apps/javascript/installation"
-          ]
-        },
-        {
-          "group": "Guides",
-          "pages": [
-            "apps/guides/tonconnect-walletconnect"
-          ]
-        }
-      ]
-    },
-    {
       "tab": "Network",
       "icon": "globe",
+      "pages": [
+        "network/index"
+      ],
       "groups": [
-        {
-          "group": "Getting started",
-          "pages": [
-            "network/index"
-          ]
-        },
         {
           "group": "Participants",
           "pages": [
@@ -306,7 +302,8 @@
             "network/specs"
           ]
         }
-      ]
+      ],
+      "hidden": true
     },
     {
       "tab": "Payments",
@@ -316,6 +313,10 @@
           "anchor": "Report an Issue",
           "href": "/payments/report-an-issue",
           "icon": "bug"
+        },
+        {
+          "anchor": "Whitepaper",
+          "hidden": true
         }
       ],
       "groups": [
@@ -438,22 +439,29 @@
       ]
     },
     {
-      "tab": "Wallet Verification",
+      "tab": "Compliance",
       "icon": "shield-check",
+      "anchors": [
+        {
+          "anchor": "Whitepaper",
+          "hidden": true
+        }
+      ],
       "groups": [
         {
-          "group": "Get Started",
+          "group": "Wallet Verification",
           "pages": [
             "wallet-verification/index",
-            "wallet-verification/quickstart"
-          ]
-        },
-        {
-          "group": "Integration",
-          "pages": [
-            "wallet-verification/dashboard",
-            "wallet-verification/hosted-page",
-            "wallet-verification/attestations"
+            {
+              "group": "Integration",
+              "expanded": true,
+              "pages": [
+                "wallet-verification/quickstart",
+                "wallet-verification/dashboard",
+                "wallet-verification/hosted-page",
+                "wallet-verification/attestations"
+              ]
+            }
           ]
         }
       ]
@@ -579,12 +587,7 @@
       {
         "anchor": "WalletConnect",
         "href": "https://walletconnect.com",
-        "icon": "globe"
-      },
-      {
-        "anchor": "Blog",
-        "href": "https://walletconnect.com/blog",
-        "icon": "newspaper"
+        "icon": "walletconnect"
       },
       {
         "anchor": "Whitepaper",
