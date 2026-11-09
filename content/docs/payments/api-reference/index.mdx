@@ -16,10 +16,8 @@ If you're looking for the integration overview, start with **[API-first integrat
 
 Merchant-facing endpoints for creating and managing payments.
 
-## Merchants
+## Webhooks
 
-Endpoints for merchant configuration and management.
+Endpoints that payment providers (Binance Pay, Binance Pay Onchain and Bybit Pay) call to report order status. Each request is verified with the provider's signature instead of an API key.
 
-## Settlement
-
-Endpoints for managing settlement accounts and configurations.
+To receive payment events in your own backend, see **[Webhooks](/payments/webhooks)**.
