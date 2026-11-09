@@ -32,6 +32,15 @@
 }
 
 /*
+ * Fumadocs animates the sidebar column width (`--fd-sidebar-col`), so navigating from the start
+ * page to a tab slides the sidebar in from 0px. The sidebar isn't collapsible here and there's no
+ * AI chat panel, so the layout has nothing else to animate: switch it off.
+ */
+#nd-notebook-layout {
+  transition: none;
+}
+
+/*
  * A full page caps its content at 1285px and aligns it left, which leaves the start page off-centre
  * under the wider navbar. `width` keeps the content stretched: an auto margin alone would shrink a
  * flex item to fit its content.
