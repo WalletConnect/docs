@@ -45,6 +45,7 @@ Before finishing a change, run `pnpm build` for content changes, and `pnpm lint`
 | `lib/navigation.tsx` | Turns `navigation.json` into the Fumadocs page tree. |
 | `components/mdx.tsx` | Every component available in MDX without an import. |
 | `components/docs-layout.tsx` | `DocsShell`: the navbar, tabs and sidebar, shared by `app/(docs)/layout.tsx` and `app/not-found.tsx`. |
+| `components/json-ld.tsx` | Schema.org JSON-LD on every page: `WebSite` and `Organization`, plus `TechArticle` and `BreadcrumbList` on every page but the home page. |
 | `components/search.tsx` | The ⌘K dialog, searching the static index at `/api/search.json` in the browser. |
 | `worker/index.ts`, `wrangler.jsonc` | The Cloudflare Worker and its config. See [Hosting](#hosting-cloudflare-workers-and-wrangler). |
 
@@ -73,11 +74,11 @@ description: "Get notified in real time as payments move through their lifecycle
 - `title` (required) is the page's H1. Don't add a `# Heading` in the body; start sections at `##`.
 - `description` is one sentence ending in a period. It shows under the title and in search, OG images and `llms.txt`, so add one to every new page.
 - `sidebarTitle` is the sidebar label when it should be shorter than `title`.
-- `mode: frame` renders a landing page with no title, TOC or page actions (`index.mdx`, `payments/index.mdx`). Don't use it on regular pages. `mode: wide` renders a full-width page.
+- `mode: frame` renders a landing page with no title, TOC or page actions (`index.mdx`, `payments/index.mdx`). Don't use it on regular pages. Because no title is rendered, the page must supply its own single H1: make its first heading `<Title as="h1">` (or an `<h1>`). `mode: wide` renders a full-width page.
 
 ## MDX components
 
-Use Fumadocs components. The Mintlify ones (`<Note>`, `<Info>`, `<Tip>`, `<Warning>`, `<CardGroup>`, `<CodeGroup>`, `<Frame>`, `<AccordionGroup>`, `<Expandable>`) no longer exist and break the build. Everything below is registered in `components/mdx.tsx` and needs no import.
+Use only the components documented in this section, with only the props shown. They're Fumadocs components (or our own, built on Fumadocs), registered in `components/mdx.tsx`, and need no import. Don't use syntax from Mintlify, Docusaurus, Nextra, GitBook or other docs frameworks, even when porting older content: unknown components (`<Note>`, `<CardGroup>`, `:::tip`) break the build, and unknown props (`<Card horizontal>`) build fine but end up as invalid HTML attributes. Convert them to the equivalents below. If something can't be expressed with them, add a component (see [Code style](#code-style)) instead of borrowing another framework's.
 
 ### Callouts
 
@@ -167,7 +168,7 @@ Always wrap `<Accordion>` in `<Accordions>`. Use them for FAQs and optional deta
 ### Images, diagrams and math
 
 - Prefer Markdown images, `![Copy the Project ID from the dashboard](/images/cloud/1.png)`: they get dimensions at build time and click-to-zoom. A raw `<img>` has neither, so use it only when you need attributes Markdown can't express.
-- Always write alt text that describes what the image shows.
+- Every image needs alt text that describes what it shows, in context: `![](...)` and `<img>` without `alt` fail SEO and accessibility audits. One short phrase, sentence case, no "Screenshot of" prefix. When the same image appears on sibling platform pages, use the same alt text on each. In components, derive alt from a prop (see `ProductCard`) rather than leaving `alt=""`.
 - Put every image and video in `public/images/` and reference it as `/images/...`. Don't link to Mintlify's CDN (`mintcdn.com`, `mintlify.s3...`): those files are going away.
 - Videos go in `public/images/videos/`, each under 25 MiB (Cloudflare's per-file limit). Use a `<video>` tag with `controls`.
 - Diagrams: a ` ```mermaid ` code block.
@@ -177,7 +178,8 @@ Always wrap `<Accordion>` in `<Accordions>`. Use them for FAQs and optional deta
 
 - `<APIPage document="..." operations={[...]} />`: API reference pages (generated, see below).
 - `<ChainList />`, `<WalletList />`: live lists from the WalletConnect Explorer.
-- `<Container>`, `<Title>`, `<ProductCard>`, `<ProductCards>`: landing pages only (`mode: frame`). `<ProductCards>` is the product cards shared by the home page and the 404 page.
+- `<CopyPromptButton prompt="webhook">Copy prompt</CopyPromptButton>`: copies an AI agent prompt kept in `components/copy-prompt-button.tsx`. Add new prompts to its `prompts` map.
+- `<Container>`, `<Title>`, `<ProductCard>`, `<ProductCards>`: landing pages only (`mode: frame`). `<Title>` renders an `<h2>`; pass `as="h1"` for the page's main heading. `<ProductCards>` is the product cards shared by the home page and the 404 page.
 
 ### Headings and links
 
@@ -260,6 +262,8 @@ Deploys run in the `Deploy` GitHub Actions workflow (`.github/workflows/deploy.y
 
 - TypeScript and React, formatted by Biome: 2-space indent, single quotes, 120-column lines, organized imports.
 - New MDX components go in `components/` and get registered in `components/mdx.tsx`. Prefer an existing Fumadocs component over a new one.
+- Never import `components/icon.tsx` from a `'use client'` file. `Icon` resolves names at runtime against all of react-icons' Font Awesome, Lucide and Simple Icons sets, so a client import ships megabytes of icons to every page. Render the icon in a server component and pass it down as a `ReactNode` (see `SidebarAnchors` in `components/docs-layout.tsx`).
+- Don't add scripts to `public/`. They're served unminified and, from the root layout, load on every page. Write a client component and use it only where it's needed.
 - Comments explain why, not what. Many reference the Mintlify behaviour they preserve; keep that context when you edit them.
 - Commit subjects are short and imperative ("Reword Verify API disclaimer to drop bulletproof wording").
 

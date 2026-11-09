@@ -209,21 +209,7 @@ Every delivery is signed so you can confirm it came from WalletConnect Pay and w
 
 The fastest path: an AI coding agent (Claude Code, Cursor, Codex, and the like) can implement and verify the handler in one shot. The prompt contains the complete spec plus a test vector to validate the implementation against, so paste it into your agent as-is:
 
-<button
-  type="button"
-  data-wcp-copy-prompt
-  style={{
-    padding: "0.5rem 1.25rem",
-    background: "var(--color-fd-primary)",
-    color: "#ffffff",
-    fontWeight: 600,
-    border: "none",
-    borderRadius: "0.5rem",
-    cursor: "pointer"
-  }}
->
-  Copy prompt
-</button>
+<CopyPromptButton prompt="webhook">Copy prompt</CopyPromptButton>
 
 ### Or implement it by hand
 

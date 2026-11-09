@@ -28,8 +28,7 @@
       "!/logo/*",
       "!/*.txt",
       "!/sitemap.xml",
-      "!/favicon.ico",
-      "!/copy-agent-prompt.js"
+      "!/favicon.ico"
     ]
   }
 }

@@ -4,6 +4,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { APIPage } from '@/components/api-page';
+import { CopyPromptButton } from '@/components/copy-prompt-button';
 import { Icon } from '@/components/icon';
 import { Img } from '@/components/img';
 import { Mermaid } from '@/components/mermaid';
@@ -24,6 +25,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Icon,
     Mermaid,
     APIPage,
+    CopyPromptButton,
     // Formerly Mintlify snippets exporting components; available globally, no import needed.
     ChainList,
     WalletList,
