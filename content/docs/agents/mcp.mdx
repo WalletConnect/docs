@@ -103,9 +103,11 @@ A plan that doesn't match is refused and written to the audit log, and the agent
 
 While a step waits for your signature, the action carries `approveLinks`: links that open your wallet app on that exact request. On a phone, the agent shows you the link; on a desktop client, it can open your wallet directly.
 
-## Safety and limits
+## Security
 
 Two layers protect you. The server's policy blocks anything outside its limits before it reaches your wallet, and anything that passes still needs your signature.
+
+### Limits
 
 | Guardrail | Value |
 | --- | --- |
@@ -115,6 +117,47 @@ Two layers protect you. The server's policy blocks anything outside its limits b
 | Swap slippage | 0.5% by default, 1% at most |
 | Swap pre-check | Every swap runs against the chain as you before it is prepared, so a token that refuses to move (a blocklisted holder, a restricted tokenized asset) is refused before it reaches your wallet. |
 | Expiry | Plans expire 5 minutes after they are prepared; wallet requests 5 minutes after they are sent. |
+
+### Transaction checks
+
+The server runs these checks in code on every transaction. Each one refuses the action before it reaches your wallet, except the receipt check, which runs after the wallet answers.
+
+**When an action is prepared**
+
+| Check | What the server does |
+| --- | --- |
+| Input validation | Addresses must be valid `0x` addresses and are checksummed. Amounts must be positive decimal strings in whole units, parsed with the token's own decimals. Every argument is checked against the tool's schema. |
+| Chain and session | The chain must be one of the enabled chains, and a wallet must be connected on that chain. |
+| Listed tokens only | A transfer, approval or swap must use a token listed for that chain. An unlisted token address is refused. |
+| Per-transaction caps | Native value and token amounts are checked against the caps, in base units. A token with no configured cap can't be moved at all. |
+| Approval spender | An approval can only name a contract from the protocol's manifest for that chain as the spender, and only for the exact amount of the trade. |
+| Contract call target | A contract call must go to the exact address the manifest lists under that contract's name, such as the Uniswap router or the Aave pool. |
+| Balance | Swaps and lending deposits check your on-chain balance first; withdrawals check your lent position. |
+| Market state | Lending deposits are refused when the Aave USDC reserve is inactive, paused or frozen. |
+| Slippage and deadline | Swaps set a minimum output of the quote minus slippage (default 0.5%, at most 1%) and a 10-minute deadline. The output always goes to your own address. |
+| Dry run | Swaps are simulated against the chain as your address before the plan is prepared. The token being sold is also asked whether it will move, so a blocklisted holder or a restricted tokenized asset is refused here rather than in your wallet. |
+| One action at a time | A new action is refused while another is waiting for your wallet. An unconfirmed plan is replaced by the next one. |
+
+**When an action is confirmed**
+
+| Check | What the server does |
+| --- | --- |
+| Plan hash | `plan_hash` must equal the SHA-256 the server computed over every step's chain, `to`, `data`, `value` and skip condition. |
+| Restatement | Every fact in `plan.expectKeys` must match the agent's `expect`. Numbers are compared without leading or trailing zeros, and everything else is case-insensitive. A missing or different field is refused and logged. |
+| Plan expiry | A plan not confirmed within 5 minutes expires, and nothing is sent. |
+| Exact bytes | The wallet receives the bytes that were hashed, not a re-encoding. |
+
+**While an action runs**
+
+| Check | What the server does |
+| --- | --- |
+| Allowance skip | An approval step is skipped only if the on-chain allowance already covers the exact amount. |
+| Settle delay | The next step waits 8 seconds after the previous one confirms, so your wallet reads an up-to-date nonce. |
+| Wallet answer | The wallet's reply must be a valid transaction hash, or the step fails. A nonce error is re-sent once, after 10 seconds. |
+| Receipt | Each transaction is followed to its receipt. A revert marks the step `failed` and stops the action. |
+| Request expiry | A wallet request with no answer after 5 minutes is marked `expired`. |
+
+Each user has an audit log on the server. It records every action prepared, confirmed, refused for a mismatch, cancelled, replaced or expired, and every step sent, submitted, confirmed, reverted or retried.
 
 ## Supported chains and assets
 
