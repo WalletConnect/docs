@@ -1,10 +1,28 @@
 name: Update OpenAPI Specs
 
+# The WalletConnect Pay specs live on the API (api.pay.walletconnect.com), not in this repo, so a change
+# can't trigger this workflow by itself. It polls on a schedule, can be run by hand, and can be triggered
+# straight after an API deploy with a repository_dispatch event of type `openapi-spec-updated`.
 on:
+  schedule:
+    - cron: '0 */6 * * *'
   workflow_dispatch:
+  repository_dispatch:
+    types: [openapi-spec-updated]
 
 permissions:
   contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-openapi-specs
+  cancel-in-progress: false
+
+env:
+  BRANCH: automation/update-openapi-specs
+  REVIEWERS: rtomas
+  # The paths scripts/generate-specs.mjs writes or deletes
+  GENERATED_PATHS: openapi/ content/docs/payments/api-reference/ content/navigation.json redirects.json
 
 jobs:
   update:
@@ -12,28 +30,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: pnpm
 
-      - run: node scripts/generate-specs.mjs
+      - run: pnpm generate
 
       - name: Check for changes
         id: diff
-        # The paths scripts/generate-specs.mjs writes or deletes. git status, not git diff:
-        # a new API version adds untracked files, which git diff doesn't see.
+        # git status, not git diff: a new API version adds untracked files, which git diff doesn't see.
         run: |
-          if [ -n "$(git status --porcelain -- openapi/ content/docs/payments/api-reference/ content/navigation.json redirects.json)" ]; then
+          if [ -n "$(git status --porcelain -- $GENERATED_PATHS)" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit and push
+      # Don't open a PR the docs can't build. PRs opened with GITHUB_TOKEN don't trigger the Deploy workflow,
+      # so this is the only build check the PR gets until someone pushes to it.
+      - name: Build
         if: steps.diff.outputs.changed == 'true'
         run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Open or update the pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A openapi/ content/docs/payments/api-reference/ content/navigation.json redirects.json
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add -A $GENERATED_PATHS
           git commit -m "chore: update OpenAPI specs"
-          git push
+          # One long-lived branch: each run replaces it, so an open PR is updated instead of a new one opened.
+          git push --force origin "$BRANCH"
+
+          pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -z "$pr" ]; then
+            gh pr create \
+              --base "${{ github.event.repository.default_branch }}" \
+              --head "$BRANCH" \
+              --title "chore: update OpenAPI specs" \
+              --reviewer "$REVIEWERS" \
+              --body "The WalletConnect Pay OpenAPI specs changed. This PR is the output of \`pnpm generate\`, opened by the [Update OpenAPI Specs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow.
+
+          Later spec changes are pushed to this same PR until it is merged or closed."
+          else
+            echo "Updated existing PR #$pr"
+          fi
