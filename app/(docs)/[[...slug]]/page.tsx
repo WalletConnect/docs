@@ -90,6 +90,8 @@ export async function generateMetadata(props: PageProps<'/[[...slug]]'>): Promis
     description,
     // Redirected Mintlify URLs and `.md` variants all point search engines at this one URL
     alternates: { canonical: page.url },
+    // `noindex` pages are shared by link only (see lib/source.ts)
+    robots: page.data.noindex ? { index: false, follow: false } : undefined,
     openGraph: {
       type: isHome ? 'website' : 'article',
       siteName: appName,
