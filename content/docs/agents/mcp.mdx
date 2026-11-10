@@ -4,12 +4,12 @@ description: "Let any AI agent act on your own wallet through WalletConnect, wit
 noindex: true
 ---
 
-The WalletConnect MCP is a hosted [Model Context Protocol](https://modelcontextprotocol.io) server. It lets any MCP client, such as Claude, Claude Code, Cursor or ChatGPT, read your balances and prepare transfers, swaps and lending deposits on your own wallet over WalletConnect. The same tools are served as an [HTTP API](#http-api) for agents and backends that don't speak MCP.
+The WalletConnect MCP is a hosted [Model Context Protocol](https://modelcontextprotocol.io) server. It lets any MCP client, such as Claude, Claude Code, Cursor or ChatGPT, read your balances and prepare transfers and swaps on your own wallet over WalletConnect. The same tools are served as an [HTTP API](#http-api) for agents and backends that don't speak MCP.
 
 The server is the app side of a WalletConnect session. It never holds signing keys: it can only ask your wallet to sign, and you approve every transaction in your wallet app.
 
 <Callout type="warning">
-The MCP runs on **mainnet with real funds**. Every transfer, swap and lending deposit moves real money. Start with small amounts.
+The MCP runs on **mainnet with real funds**. Every transfer and swap moves real money. Start with small amounts.
 </Callout>
 
 ## What you can do
@@ -17,7 +17,6 @@ The MCP runs on **mainnet with real funds**. Every transfer, swap and lending de
 - **Check your portfolio.** "What's in my wallet on Base? Give me the USD total." Every token the wallet holds, with USD prices and values. Reads never reach your wallet, so there is nothing to approve.
 - **Send money.** "Send 10 USDC to `0x…` on Arbitrum." The server builds the transfer, the agent restates it, and you approve it in your wallet.
 - **Swap tokens.** "How much ETH would I get for 25 USDC?" then "Do it." A live Uniswap V3 quote, then an exact-amount approval and the swap, prepared as one action.
-- **Earn yield on USDC.** "What does lending USDC earn on Optimism?" then "Lend 20 USDC." The current supply rate and APY on Aave V3, a deposit, and a withdrawal whenever you want it back.
 - **Build agents that pay.** Backends and agent frameworks call the [HTTP API](#http-api) with the same tools, so an agent can propose a payment and the user signs it on their phone.
 
 ## Connect a client
@@ -113,7 +112,7 @@ Two layers protect you. The server's policy blocks anything outside its limits b
 | --- | --- |
 | Max per transaction | 0.05 ETH · 50 USDC · 0.0005 WBTC · 0.5 SPCXON |
 | Tokens | Only the listed assets below. A token without a cap can't be moved. |
-| Approvals | Exact amount only, and only to contracts in the protocol's manifest (Uniswap router, Aave pool). Never unlimited. |
+| Approvals | Exact amount only, and only to contracts in the protocol's manifest (the Uniswap router). Never unlimited. |
 | Swap slippage | 0.5% by default, 1% at most |
 | Swap pre-check | Every swap runs against the chain as you before it is prepared, so a token that refuses to move (a blocklisted holder, a restricted tokenized asset) is refused before it reaches your wallet. |
 | Expiry | Plans expire 5 minutes after they are prepared; wallet requests 5 minutes after they are sent. |
@@ -131,9 +130,8 @@ The server runs these checks in code on every transaction. Each one refuses the 
 | Listed tokens only | A transfer, approval or swap must use a token listed for that chain. An unlisted token address is refused. |
 | Per-transaction caps | Native value and token amounts are checked against the caps, in base units. A token with no configured cap can't be moved at all. |
 | Approval spender | An approval can only name a contract from the protocol's manifest for that chain as the spender, and only for the exact amount of the trade. |
-| Contract call target | A contract call must go to the exact address the manifest lists under that contract's name, such as the Uniswap router or the Aave pool. |
-| Balance | Swaps and lending deposits check your on-chain balance first; withdrawals check your lent position. |
-| Market state | Lending deposits are refused when the Aave USDC reserve is inactive, paused or frozen. |
+| Contract call target | A contract call must go to the exact address the manifest lists under that contract's name, such as the Uniswap router. |
+| Balance | Swaps check your on-chain balance of the asset being sold first. |
 | Slippage and deadline | Swaps set a minimum output of the quote minus slippage (default 0.5%, at most 1%) and a 10-minute deadline. The output always goes to your own address. |
 | Dry run | Swaps are simulated against the chain as your address before the plan is prepared. The token being sold is also asked whether it will move, so a blocklisted holder or a restricted tokenized asset is refused here rather than in your wallet. |
 | One action at a time | A new action is refused while another is waiting for your wallet. An unconfirmed plan is replaced by the next one. |
@@ -161,12 +159,12 @@ Each user has an audit log on the server. It records every action prepared, conf
 
 ## Supported chains and assets
 
-| Chain | CAIP-2 | Swaps (Uniswap V3) | Lending (Aave V3) |
-| --- | --- | --- | --- |
-| Base (default) | `eip155:8453` | ETH, USDC | USDC |
-| Ethereum | `eip155:1` | ETH, USDC, WBTC, SPCXON | USDC |
-| Optimism | `eip155:10` | ETH, USDC, WBTC | USDC |
-| Arbitrum | `eip155:42161` | ETH, USDC, WBTC | Not available |
+| Chain | CAIP-2 | Swaps (Uniswap V3) |
+| --- | --- | --- |
+| Base (default) | `eip155:8453` | ETH, USDC |
+| Ethereum | `eip155:1` | ETH, USDC, WBTC, SPCXON |
+| Optimism | `eip155:10` | ETH, USDC, WBTC |
+| Arbitrum | `eip155:42161` | ETH, USDC, WBTC |
 
 Tools called without a `chain` use Base. SPCXON is Ondo's tokenized SpaceX, available on Ethereum only. Swaps quote all four Uniswap fee tiers and use the best one for each trade.
 
@@ -184,10 +182,6 @@ Any WalletConnect-compatible wallet works. Balances, prices and quotes come from
 | `swap_assets` | Which assets can be swapped on which chains | No |
 | `swap_quote` | Uniswap V3 quote between two listed assets | No |
 | `swap_execute` | Prepares an exact-amount approval and the swap as one action, checked against the chain first | Yes |
-| `lend_rates` | USDC supply rate, APR and compounded APY, and whether the market takes deposits | No |
-| `lend_position` | How much USDC the wallet has lent, and what it earns | No |
-| `lend_supply` | Prepares an exact-amount approval and the USDC deposit as one action | Yes |
-| `lend_withdraw` | Prepares a withdrawal of lent USDC back to the wallet | Yes |
 | `confirm_action` | Sends a prepared action to the wallet once the plan hash and the agent's restatement match | Yes |
 | `get_action_status` | Waits up to 55 seconds for a change and returns every step's state | No |
 | `cancel_action` | Cancels a prepared action, or steps not yet sent, with a reason for the audit log | No |
@@ -247,12 +241,8 @@ curl "https://mcp.walletconnect.com/api/v1/actions/ACTION_ID?wait_seconds=55" \
 | `GET /api/v1/portfolio?chain=` | `get_portfolio` |
 | `GET /api/v1/swaps/assets?chain=` | `swap_assets` |
 | `GET /api/v1/swaps/quote?from=&to=&amount=&chain=` | `swap_quote` |
-| `GET /api/v1/lending/rates?chain=` | `lend_rates` |
-| `GET /api/v1/lending/position?chain=` | `lend_position` |
 | `POST /api/v1/actions/transfers` | `send_transfer` |
 | `POST /api/v1/actions/swaps` | `swap_execute` |
-| `POST /api/v1/actions/lending-supplies` | `lend_supply` |
-| `POST /api/v1/actions/lending-withdrawals` | `lend_withdraw` |
 | `GET /api/v1/actions` | Open actions |
 | `GET /api/v1/actions/{id}?wait_seconds=` | `get_action_status` |
 | `POST /api/v1/actions/{id}/confirm` | `confirm_action` |
@@ -276,7 +266,7 @@ Errors are `{ error: { code, message, issues? } }`.
 
 ## Not supported yet
 
-Sign-in with Ethereum (SIWE), per-user enablement of protocols, limits in USD, borrowing against an Aave position, bridging, a local stdio server, and Solana.
+Lending, sign-in with Ethereum (SIWE), per-user enablement of protocols, limits in USD, bridging, a local stdio server, and Solana.
 
 ## FAQ
 
@@ -288,7 +278,7 @@ Sign-in with Ethereum (SIWE), per-user enablement of protocols, limits in USD, b
     A prompt would have to get past the per-transaction caps, the token list and the contract allowlist, then match the plan hash and the restatement, and then still needs your signature in your wallet.
   </Accordion>
   <Accordion title="Why don't reads ask me to approve anything?">
-    Balances, prices, quotes and lending rates come from the WalletConnect Blockchain API. Your wallet is only asked to sign transactions.
+    Balances, prices and quotes come from the WalletConnect Blockchain API. Your wallet is only asked to sign transactions.
   </Accordion>
   <Accordion title="My wallet showed an error but the agent keeps waiting.">
     Wallets don't send broadcast errors back over WalletConnect, so the server can't tell a failed broadcast from a request you haven't looked at yet. Reject the request in your wallet, and the action turns `rejected`. Then try again.
