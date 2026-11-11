@@ -433,7 +433,7 @@
         {
           "group": "AI Agents",
           "pages": [
-            "agents/overview",
+            "agents/sdk",
             "agents/mcp"
           ]
         }
