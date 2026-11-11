@@ -1,8 +1,11 @@
 ---
 title: "WalletConnect MCP"
 description: "Let any AI agent act on your own wallet through WalletConnect, with every transaction approved in your wallet app."
-noindex: true
 ---
+
+import McpWaitlist from "@/content/snippets/mcp-waitlist.mdx";
+
+<McpWaitlist components={props.components} />
 
 The WalletConnect MCP is a hosted [Model Context Protocol](https://modelcontextprotocol.io) server. It lets any MCP client, such as Claude, Claude Code, Cursor or ChatGPT, read your balances and prepare transfers and swaps on your own wallet over WalletConnect. The same tools are served as an [HTTP API](#http-api) for agents and backends that don't speak MCP.
 
