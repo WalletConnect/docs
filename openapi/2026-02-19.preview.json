@@ -2671,7 +2671,7 @@
           "expiresAt": 1718236800,
           "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
           "isFinal": false,
-          "paymentId": "pay_26a2ecc101M716ZCYANRQW0E7PV1XETCQT",
+          "paymentId": "pay_40a2ecc101M7B8SA4N0SSWARABF1V8KSC4",
           "pollInMs": 1000,
           "status": "requires_action"
         }
@@ -2818,7 +2818,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_cea2ecc101M716ZCYB5MRWKKJ918JVHRHK",
+          "paymentId": "pay_9aa2ecc101M7B8SA4QZ59VGJW2KP0PA624",
           "status": "cancelled"
         }
       },
@@ -3718,7 +3718,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_0ea2ecc101M716ZCYA9XZ10D2X32G4ZE4N",
+          "paymentId": "pay_28a2ecc101M7B8SA4N4B86WDRXNRZ5T40H",
           "status": "cancelled"
         }
       },
