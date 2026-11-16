@@ -431,6 +431,18 @@
           ]
         },
         {
+          "group": "For Payouts",
+          "pages": [
+            "payments/payouts/index",
+            "payments/payouts/fund-your-account",
+            "payments/payouts/create-a-payout",
+            "payments/payouts/statuses",
+            "payments/payouts/webhooks",
+            "payments/payouts/reconcile",
+            "payments/payouts/errors"
+          ]
+        },
+        {
           "group": "AI Agents",
           "pages": [
             "agents/overview"

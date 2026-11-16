@@ -1,0 +1,70 @@
+---
+title: "Fund your payout account"
+sidebarTitle: "Fund your account"
+description: "Find your payout account's address and balances, and send it the USDC your payouts are paid from."
+---
+
+Your payout account holds the USDC your payouts are paid from. It has one address, the same on every EVM chain payouts run on.
+
+## Get your payout account
+
+We create your payout account when we enable payouts for you; there is no API call to create one. Until then, `data` is empty.
+
+```bash
+curl https://api.merchant.pay.walletconnect.com/v1/payout-accounts \
+  -H "Api-Key: YOUR_PAYOUT_API_KEY"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "poa_…",
+      "namespace": "eip155",
+      "chains": [
+        {
+          "caip2ChainId": "eip155:8453",
+          "address": "0x1111…1111",
+          "balances": [
+            {
+              "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6,
+              "available": "48500000",
+              "reserved": "1003000",
+              "awaitingFunding": "0",
+              "awaitingFundingCount": 0,
+              "shortfall": "0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+`chains` lists every chain payouts run on. Each chain carries its `address` and its `balances`: one entry per asset, zeros included.
+
+Funds on one chain can't pay a payout on another, so balances are never summed across chains. Amounts are in the asset's smallest unit: divide by `10^decimals` for whole units.
+
+## Balances
+
+| Balance | Meaning |
+| --- | --- |
+| `available` | What the next payout can use. |
+| `reserved` | Held by `processing` payouts: their amount plus fee. |
+| `awaitingFunding` | Amount plus fee of the payouts waiting for funds. |
+| `awaitingFundingCount` | How many payouts are waiting for funds. |
+| `shortfall` | `awaitingFunding` minus `available`, at least `0`: what to send so every waiting payout goes out. |
+
+## Send funds
+
+To fund the account, send USDC to `address` on a chain from `chains`. The balance is checked every minute, and whatever arrived since the last check is credited as one deposit.
+
+When a deposit is credited, you receive the [`payout_account.deposit_confirmed`](/payments/payouts/webhooks#events) webhook, and the waiting payouts the balance now covers start, oldest first. A payout the balance can't cover doesn't hold back newer ones it covers.
+
+Each payout takes `amount + feeAmount` from the balance. The recipient receives exactly `amount`. You can fund in two ways and mix them:
+
+- **Keep a balance.** Payouts the balance covers start at once.
+- **Fund each payout.** Create the payout, then send what its [`fundingInstructions.shortfall`](/payments/payouts/create-a-payout#handle-requires_action) asks for, or the balance's `shortfall` for the whole queue.
