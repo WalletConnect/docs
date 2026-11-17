@@ -110,6 +110,22 @@ Regardless of which integration approach you choose, the payment flow follows th
 5. **Sign Actions**: Sign the required permits/transactions using your wallet's signing infrastructure
 6. **Confirm Payment**: Submit the wallet RPC results (`data`) and complete the payment
 
+## Where the funds go [#merchant-transit-account]
+
+The payment doesn't go straight to the merchant's settlement address. The recipient in the actions your wallet signs is the merchant's transit account (MTA), so that's the address your review screen shows.
+
+How it works:
+
+1. The user signs the payment, and the funds move from their wallet to the merchant transit account.
+2. WalletConnect Pay screens the payment.
+3. Once screening passes, WalletConnect Pay settles the funds from the transit account to the merchant: to their settlement wallet for crypto payouts, or through an offramp provider for fiat payouts. Fees are deducted at settlement, not at payment time.
+
+The merchant transit account is non-custodial and owned by the merchant. WalletConnect Pay holds limited permissions on it, restricted by policy to initiating settlement and collecting fees. Some PSPs use one transit account shared by all their merchants instead of one per merchant.
+
+<Callout type="idea">
+On the review screen, show the merchant's name and label the recipient address as the merchant's transit account, so users don't expect to see the merchant's settlement address. Always take the recipient from the actions WalletConnect Pay returns. Don't hardcode or cache it.
+</Callout>
+
 ## Recommended Implementation
 
 For best user experience, follow the recommended implementation below.
