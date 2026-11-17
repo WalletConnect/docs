@@ -1,10 +1,10 @@
 ---
-title: "Payout webhooks"
-sidebarTitle: "Webhooks"
-description: "Get notified as payouts change status and as deposits to your payout account are credited."
+title: "Payout webhook events"
+sidebarTitle: "Payout events"
+description: "Payload reference for the payout.* and payout_account.deposit_confirmed webhook events."
 ---
 
-Webhooks tell you a payout changed. Payouts use the same endpoints, signing and retries as payment webhooks: set up and verify them as described in [Webhooks](/payments/webhooks).
+Payout events use the same endpoints, signing and retries as payment events. Set up and verify your endpoint as described in [Webhooks](/payments/webhooks), then subscribe it to the payout event types.
 
 ## Subscribe to payout events
 
@@ -27,9 +27,9 @@ Subscribe before your first payout: events from before you subscribe are not del
 | `payout.cancelled` | You cancelled a payout. |
 | `payout_account.deposit_confirmed` | A deposit to your payout account was credited. |
 
-## Payout events
+## Payout events [#payout-events]
 
-`data` in a payout event is the payout as `GET /v1/payouts/{payoutId}` returned it when the event happened. `substatus` and `fundingInstructions` are from that moment; read the payout for their current values.
+`data` in a payout event is the payout as `GET /v1/payouts/{payoutId}` returned it when the event happened. `substatus` and `fundingInstructions` are from that moment; read the payout for their current values. See the [Payouts reference](/payments/payouts/reference) for statuses and failure reasons.
 
 ```json
 {
@@ -60,7 +60,7 @@ Subscribe before your first payout: events from before you subscribe are not del
 
 The envelope is snake_case; `data` is camelCase. Fields may be added within an `api_version`, never removed or renamed. Payout events have no `live` field: payouts are live only.
 
-## Deposit events
+## Deposit events [#deposit-events]
 
 `data` in `payout_account.deposit_confirmed`:
 
@@ -84,4 +84,4 @@ Events can arrive late, twice, or out of order, and versions can skip numbers.
 - Keep the highest `payoutStateVersion` you have processed per payout, and ignore an event whose version is lower or equal.
 - `payout.created` and the first status event carry the same version and the same payout, so branch on `data.status`, not on the event type.
 
-Webhooks can be missed too, so back them with a [reconciliation job](/payments/payouts/reconcile).
+Webhooks can be missed too, so back them with a [reconciliation job](/payments/payouts/integration/reconcile).

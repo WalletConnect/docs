@@ -1,14 +1,12 @@
 ---
 title: "Fund your payout account"
 sidebarTitle: "Fund your account"
-description: "Find your payout account's address and balances, and send it the USDC your payouts are paid from."
+description: "Find your account's address and balances, and send it the USDC your transfers are paid from."
 ---
 
-Your payout account holds the USDC your payouts are paid from. It has one address, the same on every EVM chain payouts run on.
+Your payout account holds the USDC you send to recipients. It has one address, the same on every supported EVM chain.
 
-## Get your payout account
-
-We create your payout account when we enable payouts for you; there is no API call to create one. Until then, `data` is empty.
+We create the account when we enable payouts for you; there is no API call to create one. Until then, `data` is empty.
 
 ```bash
 curl https://api.merchant.pay.walletconnect.com/v1/payout-accounts \
@@ -48,7 +46,7 @@ curl https://api.merchant.pay.walletconnect.com/v1/payout-accounts \
 
 Funds on one chain can't pay a payout on another, so balances are never summed across chains. Amounts are in the asset's smallest unit: divide by `10^decimals` for whole units.
 
-## Balances
+## Balances [#balances]
 
 | Balance | Meaning |
 | --- | --- |
@@ -62,9 +60,9 @@ Funds on one chain can't pay a payout on another, so balances are never summed a
 
 To fund the account, send USDC to `address` on a chain from `chains`. The balance is checked every minute, and whatever arrived since the last check is credited as one deposit.
 
-When a deposit is credited, you receive the [`payout_account.deposit_confirmed`](/payments/payouts/webhooks#events) webhook, and the waiting payouts the balance now covers start, oldest first. A payout the balance can't cover doesn't hold back newer ones it covers.
+When a deposit is credited, you receive the [`payout_account.deposit_confirmed`](/payments/webhook-events/payouts#deposit-events) webhook, and the waiting payouts the balance now covers start, oldest first. A payout the balance can't cover doesn't hold back newer ones it covers.
 
 Each payout takes `amount + feeAmount` from the balance. The recipient receives exactly `amount`. You can fund in two ways and mix them:
 
 - **Keep a balance.** Payouts the balance covers start at once.
-- **Fund each payout.** Create the payout, then send what its [`fundingInstructions.shortfall`](/payments/payouts/create-a-payout#handle-requires_action) asks for, or the balance's `shortfall` for the whole queue.
+- **Fund each payout.** Create the payout, then send what its [`fundingInstructions.shortfall`](/payments/payouts/integration/create-a-payout#handle-requires_action) asks for, or the balance's `shortfall` for the whole queue.
