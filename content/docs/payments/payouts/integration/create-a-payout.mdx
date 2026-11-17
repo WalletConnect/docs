@@ -1,9 +1,9 @@
 ---
 title: "Create a payout"
-description: "Send USDC to a recipient's wallet, handle payouts waiting for funds, and cancel them."
+description: "Send USDC to a recipient's wallet, handle transfers waiting for funds, and cancel them."
 ---
 
-## Create a payout [#create]
+Call `POST /v1/payouts` from your backend with the recipient, the asset and the amount.
 
 ```bash
 curl -X POST https://api.merchant.pay.walletconnect.com/v1/payouts \
@@ -24,7 +24,7 @@ curl -X POST https://api.merchant.pay.walletconnect.com/v1/payouts \
 | `destination` | Yes | EVM CAIP-10 account. A mixed-case address must be checksummed. |
 | `asset` | Yes | CAIP-19 USDC on the same chain as `destination`. |
 | `amount` | Yes | Positive integer string in the asset's smallest unit. |
-| `referenceId` | No | Your reference, 3–35 characters: letters, digits, space and `/ : . , + -`. You can [filter the list](/payments/payouts/reconcile#list-filters) by it. |
+| `referenceId` | No | Your reference, 3–35 characters: letters, digits, space and `/ : . , + -`. You can [filter the list](/payments/payouts/integration/reconcile#list-filters) by it. |
 | `metadata` | No | Up to 50 string pairs; keys up to 40 characters, values up to 500, 4 KiB in all. Not for personal data. |
 
 The response is `201` with the payout:
@@ -61,7 +61,7 @@ The destination is screened against the OFAC SDN, UK, EU and UN sanctions lists 
 - **Clear, and the balance is short:** the payout starts `requires_action`. A payout the balance covers starts `processing`, even while an earlier, larger payout still waits for funds.
 - **Screening unavailable:** `503 screening_unavailable`, and no payout is created. Retry with the same `Idempotency-Key`.
 
-See [Statuses](/payments/payouts/statuses) for where a payout goes from there.
+See [Statuses](/payments/payouts/reference#statuses) for where a payout goes from there.
 
 ## Idempotency-Key [#idempotency-key]
 
