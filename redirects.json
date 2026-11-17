@@ -1,5 +1,13 @@
 [
   {
+    "source": "/agents",
+    "destination": "/agents/sdk"
+  },
+  {
+    "source": "/agents/overview",
+    "destination": "/agents/sdk"
+  },
+  {
     "source": "/payments/merchant/onboarding",
     "destination": "/payments/merchant/quickstart"
   },
