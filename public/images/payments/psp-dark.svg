@@ -1,0 +1,32 @@
+<svg width="280" height="146" viewBox="0 0 280 146" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_pay_1_d)">
+<mask id="mask0_pay_1_d" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="280" height="146">
+<path d="M0 16C0 7.16344 7.16344 0 16 0H264C272.837 0 280 7.16344 280 16V130C280 138.837 272.837 146 264 146H16C7.16344 146 0 138.837 0 130V16Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_pay_1_d)">
+<path d="M0 16C0 7.16344 7.16344 0 16 0H264C272.837 0 280 7.16344 280 16V130C280 138.837 272.837 146 264 146H16C7.16344 146 0 138.837 0 130V16Z" fill="#181817"/>
+<path d="M-26.354 18.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 45.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 72.5H140H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 99.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M-26.354 126.5H306.354" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M26.5 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M83 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M139.5 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M196 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+<path d="M252.5 239V-93" stroke="#1F2228" stroke-dasharray="5 5"/>
+</g>
+<g transform="translate(117 52.5) scale(0.17578)">
+<g transform="rotate(-25 128 128) translate(128 128) scale(1.15) translate(-128 -128)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M76 0H180A28 28 0 0 1 208 28V168A28 28 0 0 1 180 196H76A28 28 0 0 1 48 168V28A28 28 0 0 1 76 0ZM80 22H176A10 10 0 0 1 186 32V70A10 10 0 0 1 176 80H80A10 10 0 0 1 70 70V32A10 10 0 0 1 80 22ZM78 98H92A8 8 0 0 1 100 106V106A8 8 0 0 1 92 114H78A8 8 0 0 1 70 106V106A8 8 0 0 1 78 98ZM121 98H135A8 8 0 0 1 143 106V106A8 8 0 0 1 135 114H121A8 8 0 0 1 113 106V106A8 8 0 0 1 121 98ZM164 98H178A8 8 0 0 1 186 106V106A8 8 0 0 1 178 114H164A8 8 0 0 1 156 106V106A8 8 0 0 1 164 98ZM78 124H92A8 8 0 0 1 100 132V132A8 8 0 0 1 92 140H78A8 8 0 0 1 70 132V132A8 8 0 0 1 78 124ZM121 124H135A8 8 0 0 1 143 132V132A8 8 0 0 1 135 140H121A8 8 0 0 1 113 132V132A8 8 0 0 1 121 124ZM164 124H178A8 8 0 0 1 186 132V132A8 8 0 0 1 178 140H164A8 8 0 0 1 156 132V132A8 8 0 0 1 164 124ZM78 150H92A8 8 0 0 1 100 158V158A8 8 0 0 1 92 166H78A8 8 0 0 1 70 158V158A8 8 0 0 1 78 150ZM121 150H135A8 8 0 0 1 143 158V158A8 8 0 0 1 135 166H121A8 8 0 0 1 113 158V158A8 8 0 0 1 121 150ZM164 150H178A8 8 0 0 1 186 158V158A8 8 0 0 1 178 166H164A8 8 0 0 1 156 158V158A8 8 0 0 1 164 150ZM75 174H181A5 5 0 0 1 186 179V179A5 5 0 0 1 181 184H75A5 5 0 0 1 70 179V179A5 5 0 0 1 75 174Z" fill="white"/>
+<path d="M86 192V246A8 8 0 0 0 94 254H162A8 8 0 0 0 170 246V192" stroke="white" stroke-width="14" stroke-linejoin="round" fill="none"/>
+<path d="M112 212V236M144 212V236" stroke="white" stroke-width="12" stroke-linecap="round"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_pay_1_d">
+<rect width="280" height="146" fill="white"/>
+</clipPath>
+</defs>
+</svg>

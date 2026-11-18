@@ -97,7 +97,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
@@ -111,4 +110,5 @@ temp/
 .mintlify/
 
 
-pnpm-lock.yaml
+# cloudflare
+.wrangler

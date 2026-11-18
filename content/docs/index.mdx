@@ -1,0 +1,59 @@
+---
+mode: "frame"
+title: "WalletConnect Documentation"
+sidebarTitle: "Home"
+description: "Developer docs for WalletConnect. Crypto and stablecoin infrastructure on the world's largest wallet network, for apps, wallets, fintechs & institutions."
+---
+
+<div className="px-5 divide-y divide-gray-100 dark:divide-white/10">
+  <Container>
+    <div className="flex flex-col w-full mb-8">
+      <Title as="h1">
+        WalletConnect Ecosystem Quickstart
+      </Title>
+      <p className="text-[#5B616E] dark:text-gray-300 text-md mb-1 mt-3">
+        WalletConnect powers apps, wallets and end-users via the WalletConnect network.
+      </p>
+    </div>
+    <ProductCards />
+    <ul className="not-prose pb-[1px] h-1 min-w-full mt-3 overflow-auto" />
+  </Container>
+
+  <Container>
+    <div className="flex flex-col w-full mb-5">
+      <Title>
+        Resources
+      </Title>
+    </div>
+    <Cards className="grid-cols-2 lg:grid-cols-4">
+      <Card
+        title="Twitter"
+        icon={<Icon icon="twitter" />}
+        href="https://x.com/WalletConnect"
+      >
+        Follow WalletConnect on X (Twitter) to stay updated on the announcements
+      </Card>
+      <Card
+        title="WalletConnect Blog"
+        icon={<Icon icon="newspaper" />}
+        href="https://walletconnect.com/blog"
+      >
+        Read the latest news and updates from the WalletConnect team
+      </Card>
+      <Card
+        title="Join our Community"
+        icon={<Icon icon="discord" />}
+        href="https://discord.walletconnect.network/"
+      >
+        Discord community for WalletConnect Network and WCT Token
+      </Card>
+      <Card
+        title="Security"
+        icon={<Icon icon="shield-halved" />}
+        href="/security"
+      >
+        Audits, SOC2 Type II certification and how to report a vulnerability
+      </Card>
+    </Cards>
+  </Container>
+</div>

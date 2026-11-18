@@ -1,0 +1,23 @@
+---
+title: "API Reference"
+sidebarTitle: "Overview"
+description: "Reference for the WalletConnect Pay API."
+---
+
+This section contains the full WalletConnect Pay API reference, organized by service area.
+
+## Gateway
+
+Endpoints for wallets to fulfill payments (API-first / non-SDK flow): get payment options, fetch actions, confirm payments, check status, and cancel.
+
+If you're looking for the integration overview, start with **[API-first integration (Non-SDK wallets)](/payments/wallets/api-first)**.
+
+## Payments
+
+Merchant-facing endpoints for creating and managing payments.
+
+## Webhooks
+
+Endpoints that payment providers (Binance Pay, Binance Pay Onchain and Bybit Pay) call to report order status. Each request is verified with the provider's signature instead of an API key.
+
+To receive payment events in your own backend, see **[Webhooks](/payments/webhooks)**.
