@@ -1,6 +1,6 @@
 ---
-title: "WalletConnect MCP"
-description: "Let any AI agent act on your own wallet through WalletConnect, with every transaction approved in your wallet app."
+title: "WalletConnect for Agents"
+description: "Let your AI agent check balances, send and swap from the wallet with our MCP. Your keys stay in your wallet, and nothing moves until you approve it."
 ---
 
 import McpWaitlist from "@/content/snippets/mcp-waitlist.mdx";
@@ -73,6 +73,26 @@ You can also connect from the chat: ask "Connect my wallet" and the agent calls 
 
 <Callout type="info">
 The pairing link works like a password: anyone who scans it pairs their wallet to your account. Only share it with yourself. It expires after 5 minutes.
+</Callout>
+
+## Check the URL to ensure a safe connection
+
+Until the WalletConnect for Agents MCP appears in AI app directories, you need to add it manually by pasting an endpoint into your AI client.
+
+**Only use the official endpoint: `https://mcp.walletconnect.com/mcp`.** The safest way to get it is directly from WalletConnect's documentation, rather than from social replies, DMs or ads.
+
+**How to verify your connection:**
+
+1. Check the complete address, character by character: `https://mcp.walletconnect.com/mcp`. It must use HTTPS, the exact `walletconnect.com` domain and the `/mcp` path, with no extra domains, characters or parameters.
+2. Watch for lookalikes. For example, `mcp-walletconnect[.]com` and `mcp.walletconnect.com.secure-app[.]io` are **not** WalletConnect domains.
+3. On first connection, check that the browser's consent page is on a genuine `walletconnect.com` domain. If it isn't, close it.
+4. Never share your seed phrase or private key. WalletConnect will never DM you a connection link or ask you to install a separate "verification" connector.
+5. Review each wallet request. Reject any transaction whose amount, recipient or contract you didn't intend to approve.
+
+If anything looks suspicious, don't connect. Contact [support@walletconnect.com](mailto:support@walletconnect.com).
+
+<Callout type="warning">
+Your wallet approval is essential, but it doesn't make a malicious URL safe. Always verify the connection _before_ authorizing it.
 </Callout>
 
 ## How a transaction works
