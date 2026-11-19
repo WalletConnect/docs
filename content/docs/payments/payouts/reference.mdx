@@ -1,0 +1,81 @@
+---
+title: "Payouts reference"
+sidebarTitle: "Reference"
+description: "The statuses, substatuses, failure reasons and error codes of the Payouts API."
+---
+
+## Statuses [#statuses]
+
+A payout starts `processing`, or `requires_action` while it waits for funds, and ends `succeeded`, `failed`, `expired` or `cancelled`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> processing: screened clear, balance covers
+    [*] --> requires_action: screened clear, balance short
+    [*] --> failed: screening hit
+    requires_action --> processing: funded, screened clear again
+    requires_action --> failed: screening hit at funding
+    requires_action --> expired: unfunded for 30 days
+    requires_action --> cancelled: cancelled by you
+    processing --> succeeded
+    processing --> failed
+```
+
+| Status | Final | Meaning |
+| --- | --- | --- |
+| `requires_action` | No | Waiting for funds. `fundingInstructions` says what to send. See [Handle requires_action](/payments/payouts/integration/create-a-payout#handle-requires_action). |
+| `processing` | No | Funds are held and the transfer is under way. |
+| `succeeded` | Yes | The recipient received `amount`. |
+| `failed` | Yes | Nothing reached the recipient. `failureReason` says why. Any held `amount + feeAmount` returns to your balance. |
+| `expired` | Yes | Not funded within 30 days of creation. |
+| `cancelled` | Yes | You cancelled it while it waited for funds. Nothing was held or sent. |
+
+`txHash` is set on `succeeded`. In rare cases the transfer is relayed without a hash we can report, and `txHash` stays `null`; the payout still succeeded.
+
+## Substatuses
+
+`substatus` says where a payout is within its status. It is computed on read and can change without a webhook.
+
+| Status | Substatus | Meaning |
+| --- | --- | --- |
+| `requires_action` | `awaiting_funding` | Waiting for a deposit. |
+| `processing` | `executing` | The transfer is being prepared. |
+| `processing` | `submitted_onchain` | The transfer was sent to the chain and is confirming. |
+| `processing` | `stalled` | The transfer is taking longer than expected (over 10 minutes) or is being retried. No action needed. |
+| `succeeded` | `settled` | Delivered. |
+| `failed` | Same as `failureReason` | See [Failure reasons](#failure-reasons). |
+| `expired` | `expired` | Not funded in time. |
+| `cancelled` | `cancelled` | Cancelled by you. |
+
+## Failure reasons [#failure-reasons]
+
+`failureReason` is set on `failed` and `expired` payouts and is `null` otherwise. Its values are fixed, so you can branch on them.
+
+| Value | Status | Meaning |
+| --- | --- | --- |
+| `screening_rejected` | `failed` | The destination failed sanctions screening, at creation or at funding. Nothing was held or sent. |
+| `transfer_rejected` | `failed` | The transfer was refused before it was sent. Nothing moved. |
+| `transfer_failed` | `failed` | The transfer failed on chain, or kept failing after five attempts. Nothing reached the recipient. |
+| `insufficient_balance_expired` | `expired` | The payout wasn't funded within 30 days. |
+
+New values may be added. Treat an unknown value as a failure in your support flow.
+
+## Errors [#errors]
+
+Errors return `{ "code", "message" }`, plus `issues: [{ field, message }]` for validation errors. Branch on `code`.
+
+| HTTP | `code` | What to do |
+| --- | --- | --- |
+| `400` | `params_validation`, `invalid_params` | Fix the request; `issues` names the field. |
+| `400` | `missing_idempotency_key` | Send an [`Idempotency-Key`](/payments/payouts/integration/create-a-payout#idempotency-key). |
+| `400` | `unsupported_asset` | Use USDC on a chain from `GET /v1/payout-accounts`. |
+| `401` | `missing_api_key`, `invalid_api_key` | Send a valid, unrevoked `wcpo_` key. |
+| `403` | `payouts_disabled` | Payouts are off for your account. Reads keep working. |
+| `404` | `not_found` | No payout with this ID on your account. |
+| `409` | `idempotency_conflict` | This key was used for a different payout. |
+| `409` | `payout_not_cancellable` | The payout isn't `requires_action`, so it can't be cancelled. Read it for its current status. |
+| `409` | `payout_account_unavailable` | Your payout account isn't set up yet. |
+| `503` | `screening_unavailable` | Retry with the same `Idempotency-Key`. |
+| `503` | `payout_account_busy` | Retry with the same `Idempotency-Key`. |
+| `503` | `payouts_unavailable` | Payouts aren't available. Don't retry. |
+| `500` | `internal_error` | Retry; for a payout, with the same `Idempotency-Key`. |

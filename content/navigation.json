@@ -352,7 +352,8 @@
                         "payments/webhook-events/payment-failed",
                         "payments/webhook-events/payment-expired",
                         "payments/webhook-events/payment-cancelled",
-                        "payments/webhook-events/payment-settled"
+                        "payments/webhook-events/payment-settled",
+                        "payments/webhook-events/payouts"
                       ]
                     }
                   ]
@@ -362,7 +363,7 @@
           ]
         },
         {
-          "group": "For PSPs",
+          "group": "PSPs",
           "pages": [
             "payments/psps/overview",
             {
@@ -377,14 +378,14 @@
           ]
         },
         {
-          "group": "For Merchants",
+          "group": "Merchants",
           "pages": [
             "payments/merchant/quickstart",
             "payments/merchant-api/logo-specification"
           ]
         },
         {
-          "group": "For Wallets",
+          "group": "Wallets",
           "pages": [
             "payments/wallets/overview",
             {
@@ -423,11 +424,27 @@
           ]
         },
         {
-          "group": "For Checkout",
+          "group": "Checkout",
           "pages": [
             "payments/ecommerce/overview",
             "payments/ecommerce/integration",
             "payments/ecommerce/api-reference"
+          ]
+        },
+        {
+          "group": "Payouts",
+          "pages": [
+            "payments/payouts/index",
+            {
+              "group": "Integration guide",
+              "pages": [
+                "payments/payouts/integration/index",
+                "payments/payouts/integration/fund-your-account",
+                "payments/payouts/integration/create-a-payout",
+                "payments/payouts/integration/reconcile"
+              ]
+            },
+            "payments/payouts/reference"
           ]
         },
         {

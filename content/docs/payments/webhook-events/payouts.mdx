@@ -1,0 +1,87 @@
+---
+title: "Payout webhook events"
+sidebarTitle: "Payout events"
+description: "Payload reference for the payout.* and payout_account.deposit_confirmed webhook events."
+---
+
+Payout events use the same endpoints, signing and retries as payment events. Set up and verify your endpoint as described in [Webhooks](/payments/webhooks), then subscribe it to the payout event types.
+
+## Subscribe to payout events
+
+In the WalletConnect Dashboard's **Webhooks** page, subscribe your live endpoint to the payout event types. They're offered once payouts are enabled for your account, and are off by default.
+
+<Callout type="warning">
+Subscribe before your first payout: events from before you subscribe are not delivered. Test events are available for payment event types only.
+</Callout>
+
+## Events
+
+| Event | Sent when |
+| --- | --- |
+| `payout.created` | A payout is created. Its first status event carries the same version and can arrive before it. |
+| `payout.requires_action` | A payout is waiting for funds. Sent when it is created. |
+| `payout.processing` | A payout started processing, at creation or once funded. |
+| `payout.succeeded` | A payout succeeded. |
+| `payout.failed` | A payout failed. |
+| `payout.expired` | A payout expired unfunded. |
+| `payout.cancelled` | You cancelled a payout. |
+| `payout_account.deposit_confirmed` | A deposit to your payout account was credited. |
+
+## Payout events [#payout-events]
+
+`data` in a payout event is the payout as `GET /v1/payouts/{payoutId}` returned it when the event happened. `substatus` and `fundingInstructions` are from that moment; read the payout for their current values. See the [Payouts reference](/payments/payouts/reference) for statuses and failure reasons.
+
+```json
+{
+  "id": "1c0f5a7b-4d3e-4f2a-b6c7-8d9e0f1a2b3c",
+  "type": "payout.succeeded",
+  "api_version": "2026-05-18",
+  "created_at": "2026-10-20T09:05:30.000Z",
+  "data": {
+    "id": "po_…",
+    "status": "succeeded",
+    "payoutStateVersion": 4,
+    "substatus": "settled",
+    "destination": "eip155:8453:0x000000000000000000000000000000000000dEaD",
+    "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "amount": "1000000",
+    "feeAmount": "3000",
+    "fundingInstructions": null,
+    "expiresAt": null,
+    "failureReason": null,
+    "txHash": "0x8f1e5c1b9a4a1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c",
+    "referenceId": "order_1042",
+    "metadata": { "orderId": "1042" },
+    "createdAt": "2026-10-20T09:00:00.000Z",
+    "updatedAt": "2026-10-20T09:05:30.000Z"
+  }
+}
+```
+
+The envelope is snake_case; `data` is camelCase. Fields may be added within an `api_version`, never removed or renamed. Payout events have no `live` field: payouts are live only.
+
+## Deposit events [#deposit-events]
+
+`data` in `payout_account.deposit_confirmed`:
+
+```json
+{
+  "payoutAccountId": "poa_…",
+  "caip2ChainId": "eip155:8453",
+  "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "amount": "5000000",
+  "createdAt": "2026-10-20T08:55:00.000Z"
+}
+```
+
+`amount` is what one balance check credited: it can combine several transfers, and the event has no transaction hash.
+
+## Order and duplicates
+
+Events can arrive late, twice, or out of order, and versions can skip numbers.
+
+- Deduplicate by the envelope `id`.
+- Keep the highest `payoutStateVersion` you have processed per payout, and ignore an event whose version is lower or equal.
+- `payout.created` and the first status event carry the same version and the same payout, so branch on `data.status`, not on the event type.
+
+Webhooks can be missed too, so back them with a [reconciliation job](/payments/payouts/integration/reconcile).

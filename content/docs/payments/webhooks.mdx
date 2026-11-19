@@ -1,10 +1,15 @@
 ---
 title: "Webhooks"
 sidebarTitle: "Overview"
-description: "Get notified in real time as payments move through their lifecycle."
+description: "Get notified in real time as payments and payouts move through their lifecycle."
 ---
 
-Webhooks push payment lifecycle events to an HTTPS endpoint you control, as they happen. Enhance your integration by registering an endpoint once: we `POST` an event to it whenever a payment is created, starts processing, succeeds, fails, expires, is cancelled, or settles.
+Webhooks push lifecycle events to an HTTPS endpoint you control, as they happen. Register an endpoint once, and we `POST` an event to it whenever a payment or a [payout](/payments/payouts) changes status.
+
+- **Payment events** (`payment.*`): a payment is created, starts processing, succeeds, fails, expires, is cancelled, or settles.
+- **Payout events** (`payout.*`, `payout_account.deposit_confirmed`): a payout changes status, or a deposit to your payout account is credited.
+
+Both use the same endpoints, signing and retries described on this page. The rest of this page uses payment events in its examples; see [Payout events](#payout-events) for how payout events differ.
 
 ## Webhooks vs. polling
 
@@ -16,7 +21,9 @@ Webhook delivery is **at-least-once** and **not guaranteed to be in order** (see
 
 ## Events
 
-Every event is named `payment.<stage>`:
+### Payment events
+
+Every payment event is named `payment.<stage>`:
 
 | Event type | Sent when |
 |---|---|
@@ -39,12 +46,33 @@ flowchart LR
     C --> X["payment.cancelled"]
 ```
 
-When you register an endpoint you choose which event types it receives; by default it receives all seven.
+When you register an endpoint you choose which event types it receives; by default it receives all seven payment event types.
 
 <Callout type="info">
 `payment.settled` carries `status: "succeeded"`. Settlement is a stage of a succeeded payment, not a seventh status, so don't look for a `settled` value in the `status` field.
 </Callout>
 
+### Payout events [#payout-events]
+
+| Event type | Sent when |
+|---|---|
+| `payout.created` | A payout was created. |
+| `payout.requires_action` | A payout is waiting for funds. |
+| `payout.processing` | A payout started processing. |
+| `payout.succeeded` | A payout succeeded. |
+| `payout.failed` | A payout failed. |
+| `payout.expired` | A payout expired unfunded. |
+| `payout.cancelled` | You cancelled a payout. |
+| `payout_account.deposit_confirmed` | A deposit to your payout account was credited. |
+
+Payout events follow the same rules as payment events, with these differences:
+
+- **Live only.** Payouts have no test mode, so subscribe your live endpoint. Payout event types are off by default and offered once payouts are enabled for your account, and test events cover payment event types only.
+- **No `live` field.** Every payout event is live.
+- **camelCase `data`.** The envelope is snake_case like payment events, but `data` is the payout as `GET /v1/payouts/{payoutId}` returns it.
+- **`payoutStateVersion` is the ordering key**, in place of `payment_state_version`. Versions can skip numbers.
+
+Full payloads and examples: [Payout webhook events](/payments/webhook-events/payouts).
 ## The event payload
 
 Every event carries the same envelope, and `data` is always a **full snapshot of the payment at the moment the event occurred**, never a delta. You never need a previous event to interpret the current one.
@@ -189,7 +217,7 @@ Process later, acknowledge fast. Verify the signature, durably persist or enqueu
 ### Register the endpoint
 
 1. In the [dashboard](https://merchant.pay.walletconnect.com), make sure the **Test / Live** selector matches the mode you're setting up, since endpoints are configured separately per mode.
-2. Open **Webhooks** and add your endpoint: a publicly reachable **HTTPS** URL, and the event types you want (all seven by default).
+2. Open **Webhooks** and add your endpoint: a publicly reachable **HTTPS** URL, and the event types you want (all seven payment event types by default; payout event types are opt-in).
 3. Copy the **signing secret** (`whsec_…`) and store it in a secret manager. You'll use it to verify every delivery.
 
 You can reveal the secret again later, and rotate it from the same page. After a rotation, the old secret stays valid for 24 hours so you can roll over without dropping deliveries.
@@ -522,7 +550,7 @@ Webhook configuration does **not** carry over from test to live; they are separa
 
 1. Flip the dashboard to **Live** and register your production endpoint URL and event types again.
 2. Store the **live signing secret**, which is different from your test secret, and make sure your handler uses the secret matching the environment.
-3. Confirm your handler checks `data.live === true` before triggering real fulfillment. Test events and test-mode payments always carry `live: false`.
+3. Confirm your handler checks `data.live === true` before triggering real fulfillment. Test events and test-mode payments always carry `live: false`. Payout events have no `live` field and are always live.
 4. Re-verify the safety rails: dedupe by `id`, ordering by `payment_state_version`.
 
 ## Next steps
@@ -530,6 +558,9 @@ Webhook configuration does **not** carry over from test to live; they are separa
 <Cards>
   <Card title="Webhook event reference" icon={<Icon icon="list" />} href="/payments/webhook-event-reference">
     Every field of every event type, with types, nullability, and examples.
+  </Card>
+  <Card title="Payout webhook events" icon={<Icon icon="money-bill-transfer" />} href="/payments/webhook-events/payouts">
+    Payloads for payout status changes and payout account deposits.
   </Card>
   <Card title="Test mode" icon={<Icon icon="flask" />} href="/payments/test-mode">
     Simulate every payment status transition and watch the webhooks arrive.

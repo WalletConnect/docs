@@ -1,0 +1,115 @@
+---
+title: "Create a payout"
+description: "Send USDC to a recipient's wallet, handle transfers waiting for funds, and cancel them."
+---
+
+Call `POST /v1/payouts` from your backend with the recipient, the asset and the amount.
+
+```bash
+curl -X POST https://api.merchant.pay.walletconnect.com/v1/payouts \
+  -H "Api-Key: YOUR_PAYOUT_API_KEY" \
+  -H "Idempotency-Key: withdrawal-1042" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "destination": "eip155:8453:0xabCDeF0123456789AbcdEf0123456789aBCDEF01",
+    "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "amount": "1000000",
+    "referenceId": "withdrawal-1042",
+    "metadata": { "playerId": "8812" }
+  }'
+```
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `destination` | Yes | EVM CAIP-10 account. A mixed-case address must be checksummed. |
+| `asset` | Yes | CAIP-19 USDC on the same chain as `destination`. |
+| `amount` | Yes | Positive integer string in the asset's smallest unit. |
+| `referenceId` | No | Your reference, 3–35 characters: letters, digits, space and `/ : . , + -`. You can [filter the list](/payments/payouts/integration/reconcile#list-filters) by it. |
+| `metadata` | No | Up to 50 string pairs; keys up to 40 characters, values up to 500, 4 KiB in all. Not for personal data. |
+
+The response is `201` with the payout:
+
+```json
+{
+  "id": "po_…",
+  "status": "processing",
+  "payoutStateVersion": 1,
+  "substatus": "executing",
+  "destination": "eip155:8453:0xabCDeF0123456789AbcdEf0123456789aBCDEF01",
+  "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "amount": "1000000",
+  "feeAmount": "3000",
+  "fundingInstructions": null,
+  "expiresAt": null,
+  "failureReason": null,
+  "txHash": null,
+  "referenceId": "withdrawal-1042",
+  "metadata": { "playerId": "8812" },
+  "createdAt": "2026-10-30T09:00:00.000Z",
+  "updatedAt": "2026-10-30T09:00:00.000Z"
+}
+```
+
+`feeAmount` is set when the payout is created and never changes.
+
+## Sanctions screening
+
+The destination is screened against the OFAC SDN, UK, EU and UN sanctions lists first, whatever the balance:
+
+- **Hit:** the payout is created as `failed` with `failureReason: screening_rejected`. Nothing is held.
+- **Clear, and the balance covers `amount + feeAmount`:** the funds are held and the payout starts `processing`.
+- **Clear, and the balance is short:** the payout starts `requires_action`. A payout the balance covers starts `processing`, even while an earlier, larger payout still waits for funds.
+- **Screening unavailable:** `503 screening_unavailable`, and no payout is created. Retry with the same `Idempotency-Key`.
+
+See [Statuses](/payments/payouts/reference#statuses) for where a payout goes from there.
+
+## Idempotency-Key [#idempotency-key]
+
+Every `POST /v1/payouts` needs an `Idempotency-Key` header of up to 255 characters. Use one key per payout you intend to make, such as your withdrawal ID.
+
+- **Same key, same body:** `201` with the original payout, in its current state. No second payout is made. Retry with the same key after a timeout, a `500`, or a `503` other than `payouts_unavailable`.
+- **Same key, different body:** `409 idempotency_conflict`.
+
+Keys are kept with the payout and don't expire.
+
+## Handle requires_action [#handle-requires_action]
+
+While a payout is `requires_action`, it carries `fundingInstructions` and `expiresAt`:
+
+```json
+"fundingInstructions": {
+  "address": "0x1111…1111",
+  "chainId": "eip155:8453",
+  "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "shortfall": "1003000"
+},
+"expiresAt": "2026-11-29T09:00:00.000Z"
+```
+
+`shortfall` is what the balance still lacks for this payout and the waiting payouts ahead of it, in the asset's smallest unit. Send it to `address` on `chainId`.
+
+<Callout type="warning">
+`shortfall` is recomputed on every read. It drops as deposits land, and it can rise when a newer payout the balance covers takes funds first. Read `GET /v1/payouts/{payoutId}` just before you send funds: the `payout.requires_action` webhook carries the value from when the payout was created.
+</Callout>
+
+When a deposit covers the payout, its destination is screened again:
+
+- **Clear:** the payout moves to `processing`, and you receive `payout.processing`.
+- **Hit:** the payout moves to `failed` with `screening_rejected`.
+
+If it isn't funded by `expiresAt`, it moves to `expired` with `failureReason: insufficient_balance_expired`, and `fundingInstructions` becomes `null`. Funds that arrive for a payout that has ended stay in your balance for later payouts. To stop waiting for funds, cancel the payout.
+
+## Cancel a payout [#cancel]
+
+You can cancel a payout only while it is `requires_action`. Once it is `processing`, the transfer is signed and handed off, and it can't be stopped.
+
+```bash
+curl -X POST https://api.merchant.pay.walletconnect.com/v1/payouts/PAYOUT_ID/cancel \
+  -H "Api-Key: YOUR_PAYOUT_API_KEY"
+```
+
+The response is `200` with the payout in `cancelled`; `fundingInstructions`, `expiresAt` and `failureReason` are `null`. You receive `payout.cancelled`. Cancelling a cancelled payout returns it as it is, so a retry is safe and needs no `Idempotency-Key`.
+
+A waiting payout holds no funds, so cancelling moves no money: its `amount + feeAmount` leaves `awaitingFunding` and `shortfall`, and funds you already sent stay in your balance for later payouts.
+
+A payout in any other status returns `409 payout_not_cancellable` and is left as it is. That includes a payout a deposit funded just before your cancel arrived: read it to see where it stands.
