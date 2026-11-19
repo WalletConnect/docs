@@ -22,6 +22,24 @@ The MCP runs on **mainnet with real funds**. Every transfer and swap moves real 
 - **Swap tokens.** "How much ETH would I get for 25 USDC?" then "Do it." A live Uniswap V3 quote, then an exact-amount approval and the swap, prepared as one action.
 - **Build agents that pay.** Backends and agent frameworks call the [HTTP API](#http-api) with the same tools, so an agent can propose a payment and the user signs it on their phone.
 
+## Stay safe: check the URL before connecting [#check-the-url]
+
+Until the WalletConnect MCP appears in AI app directories, you add it to your AI client by pasting its endpoint. Only use the official endpoint, `https://mcp.walletconnect.com/mcp`, and copy it from this page rather than from social replies, DMs or ads.
+
+Before you connect:
+
+1. **Check the whole address, character by character.** It must be exactly `https://mcp.walletconnect.com/mcp`: HTTPS, the `walletconnect.com` domain and the `/mcp` path, with no extra domains, characters or parameters.
+2. **Watch for lookalikes.** Addresses such as `mcp-walletconnect[.]com` or `mcp.walletconnect.com.secure-app[.]io` are not WalletConnect domains.
+3. **Check the consent page.** The first time you connect, the page that opens in your browser must be on `walletconnect.com`. If it isn't, close it.
+4. **Never share your seed phrase or private key.** WalletConnect never sends connection links by DM, and never asks you to install a separate "verification" connector.
+5. **Review every wallet request.** Reject any transaction whose amount, recipient or contract you didn't intend to approve.
+
+If anything looks suspicious, don't connect, and contact [support@walletconnect.com](mailto:support@walletconnect.com).
+
+<Callout type="warning">
+Approving in your wallet protects each transaction, but it doesn't make a malicious URL safe. Check the connection before you authorize it.
+</Callout>
+
 ## Connect a client
 
 The MCP endpoint is:
