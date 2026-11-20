@@ -521,6 +521,7 @@
               "group": "Payments",
               "pages": [
                 "payments/api-reference/2026-02-18/post-v1-payments",
+                "payments/api-reference/2026-02-18/get-v1-payments",
                 "payments/api-reference/2026-02-18/get-v1-payments-id",
                 "payments/api-reference/2026-02-18/post-v1-payments-id-cancel",
                 "payments/api-reference/2026-02-18/get-v1-payments-id-status",
@@ -562,6 +563,7 @@
               "group": "Payments",
               "pages": [
                 "payments/api-reference/2026-02-19.preview/post-v1-payments",
+                "payments/api-reference/2026-02-19.preview/get-v1-payments",
                 "payments/api-reference/2026-02-19.preview/get-v1-payments-id",
                 "payments/api-reference/2026-02-19.preview/post-v1-payments-id-cancel",
                 "payments/api-reference/2026-02-19.preview/get-v1-payments-id-status",

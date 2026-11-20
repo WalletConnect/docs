@@ -12,9 +12,13 @@ const NAVIGATION_PATH = join(ROOT, 'content', 'navigation.json');
 const REDIRECTS_PATH = join(ROOT, 'redirects.json');
 
 const VERSIONS_URL = 'https://api.pay.walletconnect.com/versions';
-// Only the Core API is documented. The merchant service (api.merchant.pay.walletconnect.com) is
-// left out on purpose: its spec isn't part of the public API reference.
-const SERVICES = [{ name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' }];
+// The API reference documents the Core API only. The merchant service
+// (api.merchant.pay.walletconnect.com) is left out on purpose: it isn't part of the public API.
+const CORE_BASE_URL = 'https://api.pay.walletconnect.com';
+// `GET /v1/payments` (list payments) is served at api.pay.walletconnect.com, but the Core spec doesn't
+// describe it yet, so its definition is kept here, one entry per API version. Update it by hand when
+// the endpoint changes, and delete the file once the Core spec includes the operation.
+const EXTRA_OPERATIONS_PATH = join(ROOT, 'scripts', 'payments-list-operation.json');
 
 const VERSION_RE = /^\d{4}-\d{2}-\d{2}(\.preview)?$/;
 
@@ -34,7 +38,7 @@ function mergeSpecs(specs, version) {
   const merged = {
     openapi: '3.1.0',
     info: { title: 'WalletConnect Pay API', version },
-    servers: [{ url: SERVICES[0].baseUrl }],
+    servers: [{ url: CORE_BASE_URL }],
     paths: {},
     tags: [],
     components: { schemas: {}, securitySchemes: {} },
@@ -77,6 +81,35 @@ function mergeSpecs(specs, version) {
 
   merged.security = specs[0]?.security || [];
   return merged;
+}
+
+// Returns the operations from EXTRA_OPERATIONS_PATH for `version`, as a spec to merge after the Core
+// one, leaving out any the Core spec now describes itself.
+function extraOperations(extras, version, coreSpec) {
+  const extra = extras[version];
+  // Fail rather than silently drop the page when a new API version ships.
+  if (!extra) throw new Error(`${EXTRA_OPERATIONS_PATH} has no entry for ${version}: add one`);
+
+  const paths = {};
+  for (const [path, methods] of Object.entries(extra.paths)) {
+    for (const [method, op] of Object.entries(methods)) {
+      if (coreSpec.paths?.[path]?.[method]) {
+        console.warn(`${method.toUpperCase()} ${path} is in the Core spec now: delete ${EXTRA_OPERATIONS_PATH}`);
+        continue;
+      }
+      paths[path] = { ...(paths[path] || {}), [method]: op };
+    }
+  }
+  if (!Object.keys(paths).length) return { paths };
+
+  // A same-named Core schema would be overwritten in the merged spec, changing Core pages.
+  for (const [name, schema] of Object.entries(extra.components?.schemas || {})) {
+    const coreSchema = coreSpec.components?.schemas?.[name];
+    if (coreSchema && JSON.stringify(coreSchema) !== JSON.stringify(schema)) {
+      throw new Error(`Schema ${name} differs between the Core spec and ${EXTRA_OPERATIONS_PATH}`);
+    }
+  }
+  return { paths, components: extra.components };
 }
 
 function slugify(method, path) {
@@ -135,8 +168,10 @@ async function generatePages(version, spec) {
 }
 
 async function generateSpec(version) {
-  const specs = await Promise.all(SERVICES.map(({ baseUrl }) => fetchJson(`${baseUrl}/spec/${version}/openapi.json`)));
-  const merged = mergeSpecs(specs, version);
+  const coreSpec = await fetchJson(`${CORE_BASE_URL}/spec/${version}/openapi.json`);
+  const extras = JSON.parse(await readFile(EXTRA_OPERATIONS_PATH, 'utf-8'));
+  // Core first: it sets the merged spec's top-level security and the sidebar order.
+  const merged = mergeSpecs([coreSpec, extraOperations(extras, version, coreSpec)], version);
   const outPath = join(ROOT, 'openapi', `${version}.json`);
   await mkdir(dirname(outPath), { recursive: true });
   await writeFile(outPath, JSON.stringify(merged, null, 2) + '\n');

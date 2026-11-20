@@ -1277,6 +1277,496 @@
             }
           }
         }
+      },
+      "get": {
+        "operationId": "PartnerPayments_list",
+        "parameters": [
+          {
+            "name": "WCP-Version",
+            "in": "header",
+            "required": false,
+            "description": "Optional WalletConnect Pay API version override. If omitted, the partner's pinned version is used.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "2026-02-18",
+                "2026-02-19.preview"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "startTs",
+            "schema": {
+              "examples": [
+                "2026-01-06T00:00:00Z"
+              ],
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "description": "RFC3339 timestamp, inclusive"
+          },
+          {
+            "in": "query",
+            "name": "endTs",
+            "schema": {
+              "examples": [
+                "2026-01-07T00:00:00Z"
+              ],
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "description": "RFC3339 timestamp, exclusive"
+          },
+          {
+            "in": "query",
+            "name": "token_symbol",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "description": "Filter by token symbol (e.g. `USDC`). CAIP-19 identifiers are not supported. Accepts a single value or multiple repeated params:\n\n- Single: `?token_symbol=USDC`\n- Multiple: `?token_symbol=USDC&token_symbol=EURC`"
+          },
+          {
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "examples": [
+                "eip155:8453",
+                "eip155:8453,eip155:1"
+              ],
+              "type": "string"
+            },
+            "description": "Filter by [CAIP-2](https://standards.chainagnostic.org/CAIPs/caip-2) chain ID. Comma-separated for multiple."
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "date",
+                "amount"
+              ]
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortDir",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort direction"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor — use the value from `nextCursor` in the previous response."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "description": "Page size (default 50, max 200)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "requires_action",
+                  "processing",
+                  "succeeded",
+                  "failed",
+                  "expired"
+                ]
+              }
+            },
+            "description": "Filter by payment status. Accepts a single value or multiple repeated params:\n\n- Single: `?status=succeeded`\n- Multiple: `?status=succeeded&status=processing`"
+          },
+          {
+            "in": "query",
+            "name": "referenceId",
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 35,
+              "pattern": "^[A-Za-z0-9 /:.,+-]+$",
+              "examples": [
+                "order-42"
+              ]
+            },
+            "description": "Substring search on the merchant-provided reference ID. Between 3 and 35 characters. Allowed characters: ASCII letters, digits, and ` /-:.,+`."
+          },
+          {
+            "in": "query",
+            "name": "merchantId",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "examples": [
+                [
+                  "acme-store-1"
+                ],
+                [
+                  "acme-store-1",
+                  "widget_co"
+                ]
+              ]
+            },
+            "description": "Filter by merchant ID. Accepts a single value or multiple repeated params:\n\n- Single: `?merchantId=acme-store-1`\n- Multiple: `?merchantId=acme-store-1&merchantId=widget_co`"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments with statistics",
+            "headers": {
+              "WCP-Version": {
+                "description": "WalletConnect Pay API version resolved for this request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantPaymentsResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "paymentId": "pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ",
+                      "merchant": {
+                        "id": "acme-store-1",
+                        "name": "Acme Store",
+                        "iconUrl": "https://imagedelivery.net/example/icon.png"
+                      },
+                      "referenceId": "a1b2cad4e5f2783012345678axcdea90",
+                      "status": "succeeded",
+                      "isTerminal": true,
+                      "paymentUrl": "https://pay.walletconnect.com/?pid=pay_a1a2ecc101KGF210FP7PN3BK08PZARS1CZ",
+                      "fiatAmount": {
+                        "unit": "iso4217/USD",
+                        "value": "500",
+                        "display": {
+                          "assetSymbol": "USD",
+                          "assetName": "US Dollar",
+                          "decimals": 2
+                        }
+                      },
+                      "tokenAmount": {
+                        "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                        "value": "5000000",
+                        "display": {
+                          "assetSymbol": "USDC",
+                          "assetName": "USD Coin",
+                          "decimals": 6,
+                          "networkName": "Base",
+                          "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                          "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                        }
+                      },
+                      "buyer": {
+                        "accountCaip10": "eip155:8453:0x0000000000000000000000000000000000000000",
+                        "accountProviderName": "MetaMask",
+                        "accountProviderIcon": "https://api.walletconnect.com/assets/v1/image/wallet/metamask/md"
+                      },
+                      "transaction": {
+                        "networkId": "8453",
+                        "hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+                      "settlement": {
+                        "amount": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "4840000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "settled": true,
+                        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+                      "fees": {
+                        "total": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "160000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "fixed": {
+                          "unit": "caip19/eip155:8453/erc20:0x0000000000000000000000000000000000000000",
+                          "value": "140000",
+                          "display": {
+                            "assetSymbol": "USDC",
+                            "assetName": "USD Coin",
+                            "decimals": 6,
+                            "iconUrl": "https://api.walletconnect.com/assets/v1/image/token/USDC/md",
+                            "networkName": "Base",
+                            "networkIconUrl": "https://api.walletconnect.com/assets/v1/image/network/eip155%3A8453/md"
+                          }
+                        },
+                        "percentage": "0.4"
+                      },
+                      "refund": {
+                        "status": "fully_refunded",
+                        "fullyRefundedAt": "2024-01-02T08:30:00.000Z"
+                      },
+                      "createdAt": "2024-01-01T12:00:00.000Z",
+                      "expiresAt": "2024-01-01T12:15:00.000Z",
+                      "lastUpdatedAt": "2024-01-01T12:00:00.000Z",
+                      "settledAt": "2024-01-01T12:00:00.000Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "stats": {
+                    "totalRevenue": [
+                      {
+                        "amount": 1000,
+                        "currency": "USD"
+                      }
+                    ],
+                    "totalTransactions": 100,
+                    "totalCustomers": 25
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — invalid parameters or API version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_params",
+                        "params_validation",
+                        "invalid_api_version",
+                        "unknown_api_version",
+                        "api_version_downgrade"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "issues": {
+                      "description": "Field-level validation issues (present on validation errors)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "invalid_params": {
+                    "summary": "Invalid request parameters",
+                    "value": {
+                      "code": "invalid_params",
+                      "message": "Invalid request parameters"
+                    }
+                  },
+                  "params_validation": {
+                    "summary": "Validation failed",
+                    "value": {
+                      "code": "params_validation",
+                      "message": "Validation failed"
+                    }
+                  },
+                  "invalid_api_version": {
+                    "summary": "Invalid API version",
+                    "value": {
+                      "code": "invalid_api_version",
+                      "message": "Invalid API version"
+                    }
+                  },
+                  "unknown_api_version": {
+                    "summary": "Unknown API version",
+                    "value": {
+                      "code": "unknown_api_version",
+                      "message": "Unknown API version"
+                    }
+                  },
+                  "api_version_downgrade": {
+                    "summary": "Requested API version is older than the partner pin",
+                    "value": {
+                      "code": "api_version_downgrade",
+                      "message": "Requested API version is older than the partner pin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid partner API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "missing_api_key",
+                        "invalid_api_key"
+                      ],
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "missing_api_key": {
+                    "summary": "Missing API key",
+                    "value": {
+                      "code": "missing_api_key",
+                      "message": "Missing API key"
+                    }
+                  },
+                  "invalid_api_key": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "code": "invalid_api_key",
+                      "message": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable error message"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "internal_error",
+                      "description": "Machine-readable error code"
+                    },
+                    "details": {
+                      "description": "Additional structured error details",
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ]
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Internal Server Error",
+                    "value": {
+                      "code": "internal_error",
+                      "message": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Payments"
+        ],
+        "summary": "List payments",
+        "description": "Retrieve paginated payments with optional filters.",
+        "security": [
+          {
+            "API Key": []
+          }
+        ]
       }
     },
     "/v1/payments/{id}": {
@@ -2667,7 +3157,7 @@
           "expiresAt": 1718236800,
           "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
           "isFinal": false,
-          "paymentId": "pay_23a2ecc101M7W4JSEM0EW14VJJTN3H1DW6",
+          "paymentId": "pay_78a2ecc101M7WG10HBZEA7GEKBQAYVY39R",
           "pollInMs": 1000,
           "status": "requires_action"
         }
@@ -2814,7 +3304,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_34a2ecc101M7W4JSEP1H78P1HT49GMNMTT",
+          "paymentId": "pay_8ba2ecc101M7WG10HDS0VAKCFANFZ6TKXD",
           "status": "cancelled"
         }
       },
@@ -3714,7 +4204,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_88a2ecc101M7W4JSEMEY9C69PYKACFTAXB",
+          "paymentId": "pay_eda2ecc101M7WG10HC6HE6NF47W5XY9JSG",
           "status": "cancelled"
         }
       },
@@ -4259,6 +4749,446 @@
             "{\"domain\":{\"name\":\"USD Coin\",\"version\":\"2\",\"chainId\":\"0x2105\",\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"types\":{\"EIP712Domain\":[{\"type\":\"string\",\"name\":\"name\"},{\"type\":\"string\",\"name\":\"version\"},{\"type\":\"uint256\",\"name\":\"chainId\"},{\"type\":\"address\",\"name\":\"verifyingContract\"}],\"ReceiveWithAuthorization\":[{\"type\":\"address\",\"name\":\"from\"},{\"type\":\"address\",\"name\":\"to\"},{\"type\":\"uint256\",\"name\":\"value\"},{\"type\":\"uint256\",\"name\":\"validAfter\"},{\"type\":\"uint256\",\"name\":\"validBefore\"},{\"type\":\"bytes32\",\"name\":\"nonce\"}]},\"primaryType\":\"ReceiveWithAuthorization\",\"message\":{\"from\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0000000000000000000000000000000000000000\",\"validAfter\":\"0x0\",\"validBefore\":\"0x0\",\"value\":\"0x0\"}}"
           ]
         }
+      },
+      "MerchantPaymentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "paymentId": {
+                  "type": "string",
+                  "description": "Unique payment identifier"
+                },
+                "merchant": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Partner-provided merchant ID"
+                    },
+                    "name": {
+                      "description": "Merchant display name",
+                      "type": "string"
+                    },
+                    "iconUrl": {
+                      "description": "Merchant logo URL",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                },
+                "referenceId": {
+                  "type": "string",
+                  "description": "Idempotency / reference ID provided at payment creation"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "requires_action",
+                    "processing",
+                    "succeeded",
+                    "failed",
+                    "expired"
+                  ]
+                },
+                "isTerminal": {
+                  "type": "boolean",
+                  "description": "Whether the payment has reached a final state"
+                },
+                "fiatAmount": {
+                  "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+                },
+                "tokenAmount": {
+                  "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+                },
+                "buyer": {
+                  "description": "Buyer wallet information",
+                  "type": "object",
+                  "properties": {
+                    "accountCaip10": {
+                      "type": "string",
+                      "description": "Buyer address as a [CAIP-10](https://standards.chainagnostic.org/CAIPs/caip-10) account ID",
+                      "examples": [
+                        "eip155:8453:0x1234567890abcdef1234567890abcdef12345678"
+                      ]
+                    },
+                    "accountProviderName": {
+                      "description": "Wallet provider name",
+                      "examples": [
+                        "MetaMask"
+                      ],
+                      "type": "string"
+                    },
+                    "accountProviderIcon": {
+                      "description": "Wallet provider logo URL",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "accountCaip10"
+                  ]
+                },
+                "transaction": {
+                  "description": "On-chain transaction details",
+                  "type": "object",
+                  "properties": {
+                    "networkId": {
+                      "type": "string",
+                      "description": "Numeric chain ID",
+                      "examples": [
+                        "8453"
+                      ]
+                    },
+                    "hash": {
+                      "description": "On-chain transaction hash",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "networkId"
+                  ]
+                },
+                "fees": {
+                  "description": "Fee breakdown derived from payment option data. Omitted when total fee data is unavailable.",
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+                        },
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+                        }
+                      ],
+                      "description": "Total fee amount."
+                    },
+                    "fixed": {
+                      "description": "Fixed fee component.",
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+                        },
+                        {
+                          "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+                        }
+                      ]
+                    },
+                    "percentage": {
+                      "description": "Percentage fee component as a decimal percentage string, not a ratio. For example, \"0.4\" means 0.4%.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "total"
+                  ]
+                },
+                "settlement": {
+                  "$ref": "#/components/schemas/MerchantPaymentSettlement"
+                },
+                "exchangeRate": {
+                  "$ref": "#/components/schemas/MerchantPaymentExchangeRate"
+                },
+                "refund": {
+                  "$ref": "#/components/schemas/MerchantPaymentRefund"
+                },
+                "paymentUrl": {
+                  "description": "Hosted payment page URL for this payment. The hosted page reflects the payment's current state.",
+                  "type": "string",
+                  "format": "uri"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 timestamp"
+                },
+                "expiresAt": {
+                  "description": "ISO 8601 timestamp of the payment deadline, present only when the payment has an expiration",
+                  "type": "string"
+                },
+                "lastUpdatedAt": {
+                  "type": "string",
+                  "description": "ISO 8601 timestamp"
+                },
+                "settledAt": {
+                  "description": "ISO 8601 timestamp, present only when `settlement.settled` is `true` and a timestamp is available",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "paymentId",
+                "merchant",
+                "referenceId",
+                "status",
+                "isTerminal",
+                "createdAt",
+                "lastUpdatedAt"
+              ]
+            }
+          },
+          "nextCursor": {
+            "description": "Cursor for the next page, or null if no more results",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "totalRevenue": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "description": "Revenue amount in currency's standard unit"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "description": "ISO 4217 currency code",
+                      "examples": [
+                        "USD"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "currency"
+                  ]
+                },
+                "description": "Total revenue over succeeded payments, converted to USD. Always exactly one element — a merchant with no volume gets a zero rather than an empty array. Kept as an array for backwards compatibility."
+              },
+              "totalTransactions": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Total payments matching the query"
+              },
+              "totalCustomers": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Unique buyers matching the query"
+              }
+            },
+            "required": [
+              "totalRevenue",
+              "totalTransactions",
+              "totalCustomers"
+            ],
+            "description": "Aggregate statistics for the query"
+          }
+        },
+        "required": [
+          "data",
+          "nextCursor",
+          "stats"
+        ]
+      },
+      "MerchantPaymentFiatAmount": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "string",
+            "pattern": "^iso4217\\/",
+            "description": "Fiat unit, for example \"iso4217/USD\""
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount in minor units for the fiat currency"
+          },
+          "display": {
+            "type": "object",
+            "properties": {
+              "assetSymbol": {
+                "type": "string"
+              },
+              "assetName": {
+                "type": "string"
+              },
+              "decimals": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "assetSymbol",
+              "assetName",
+              "decimals"
+            ],
+            "description": "Display metadata for fiat-denominated amounts"
+          }
+        },
+        "required": [
+          "unit",
+          "value",
+          "display"
+        ],
+        "description": "Fiat-denominated amount"
+      },
+      "MerchantPaymentTokenAmount": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "string",
+            "pattern": "^caip19\\/",
+            "description": "Token unit, for example \"caip19/...\""
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount in minor units for the token asset"
+          },
+          "display": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "assetSymbol": {
+                    "type": "string"
+                  },
+                  "assetName": {
+                    "type": "string"
+                  },
+                  "decimals": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "iconUrl": {
+                    "type": "string"
+                  },
+                  "networkName": {
+                    "type": "string"
+                  },
+                  "networkIconUrl": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "assetSymbol",
+                  "assetName",
+                  "decimals"
+                ],
+                "description": "Display metadata for token-denominated amounts"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "unit",
+          "value",
+          "display"
+        ],
+        "description": "Token-denominated amount"
+      },
+      "MerchantPaymentSettlement": {
+        "description": "Settlement details. Omitted when settlement details cannot be reported yet. When present, `settled` is always included. When `settled` is `false`, no additional settlement fields are returned. When `settled` is `true`, `amount` is included and `txHash` is included when available.",
+        "type": "object",
+        "properties": {
+          "settled": {
+            "type": "boolean",
+            "description": "Whether settlement is complete."
+          },
+          "amount": {
+            "description": "Net settlement amount after fees in the settlement unit. Present when `settled` is `true`.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MerchantPaymentFiatAmount"
+              },
+              {
+                "$ref": "#/components/schemas/MerchantPaymentTokenAmount"
+              }
+            ]
+          },
+          "txHash": {
+            "description": "Settlement transaction hash. Present when `settled` is `true` and an upstream settlement transaction hash is available.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "settled"
+        ]
+      },
+      "MerchantPaymentExchangeRate": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Unit the payment was priced in",
+            "examples": [
+              "iso4217/EUR"
+            ]
+          },
+          "fromSymbol": {
+            "type": "string",
+            "description": "Display symbol for `from`",
+            "examples": [
+              "EUR"
+            ]
+          },
+          "to": {
+            "type": "string",
+            "description": "Unit the payment settles in",
+            "examples": [
+              "caip19/eip155:8453/erc20:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+            ]
+          },
+          "toSymbol": {
+            "type": "string",
+            "description": "Display symbol for `to`",
+            "examples": [
+              "USDC"
+            ]
+          },
+          "rate": {
+            "type": "string",
+            "description": "How many whole `to` units one whole `from` unit converted into, as a decimal string",
+            "examples": [
+              "1.085"
+            ]
+          }
+        },
+        "required": [
+          "from",
+          "fromSymbol",
+          "to",
+          "toSymbol",
+          "rate"
+        ],
+        "description": "Conversion applied between the payment unit and the settlement unit. Derived from the payment amount and the gross settlement amount (settlement plus fees), so it is the effective rate for this payment rather than a rate quoted independently. Omitted when the payment does not convert, or when the amounts needed to derive it are unavailable."
+      },
+      "MerchantPaymentRefund": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Refund state. \"fully_refunded\" is the only value this API emits.",
+            "examples": [
+              "fully_refunded"
+            ]
+          },
+          "fullyRefundedAt": {
+            "description": "ISO 8601 timestamp when the payment was fully refunded. Present only for fully refunded payments.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "description": "Refund details. Not currently populated: refund state is not yet projected into the payment read model, so this field is always omitted today. Reserved for a future release."
       }
     },
     "securitySchemes": {
