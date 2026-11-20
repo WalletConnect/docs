@@ -12,9 +12,19 @@ const NAVIGATION_PATH = join(ROOT, 'content', 'navigation.json');
 const REDIRECTS_PATH = join(ROOT, 'redirects.json');
 
 const VERSIONS_URL = 'https://api.pay.walletconnect.com/versions';
-// Only the Core API is documented. The merchant service (api.merchant.pay.walletconnect.com) is
-// left out on purpose: its spec isn't part of the public API reference.
-const SERVICES = [{ name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' }];
+// Every operation is documented under the Core base URL, the only host integrators call. The API
+// gateway on api.pay.walletconnect.com forwards some routes to the merchant service
+// (api.merchant.pay.walletconnect.com), so only those are taken from its spec: the rest of it isn't
+// reachable through the gateway and isn't part of the public API reference.
+const SERVICES = [
+  { name: 'Core', baseUrl: 'https://api.pay.walletconnect.com' },
+  {
+    name: 'Merchant',
+    baseUrl: 'https://api.merchant.pay.walletconnect.com',
+    isForwarded: (method, path) =>
+      /^\/v1\/(merchants|refunds)(\/|$)/.test(path) || (method === 'get' && path === '/v1/payments'),
+  },
+];
 
 const VERSION_RE = /^\d{4}-\d{2}-\d{2}(\.preview)?$/;
 
@@ -43,8 +53,17 @@ function mergeSpecs(specs, version) {
 
   const seenTags = new Set();
 
-  for (const spec of specs) {
-    for (const [path, methods] of Object.entries(spec.paths || {})) {
+  for (const [i, spec] of specs.entries()) {
+    const { isForwarded } = SERVICES[i];
+    for (const [path, allMethods] of Object.entries(spec.paths || {})) {
+      const methods = {};
+      for (const [method, op] of Object.entries(allMethods)) {
+        if (isForwarded && !isForwarded(method, path)) continue;
+        if (merged.paths[path]?.[method]) throw new Error(`${method.toUpperCase()} ${path} is in more than one spec`);
+        // Only the first spec's top-level security survives the merge, so each operation keeps its own.
+        methods[method] = op.security || !spec.security ? op : { ...op, security: spec.security };
+      }
+      if (Object.keys(methods).length === 0) continue;
       merged.paths[path] = { ...(merged.paths[path] || {}), ...methods };
       for (const op of Object.values(methods)) {
         for (const tagName of op.tags || []) {
@@ -57,7 +76,8 @@ function mergeSpecs(specs, version) {
     }
 
     for (const tag of spec.tags || []) {
-      if (!seenTags.has(tag.name)) {
+      // A filtered spec's other tags belong to operations that were left out.
+      if (!seenTags.has(tag.name) && !isForwarded) {
         seenTags.add(tag.name);
         merged.tags.push(tag);
       }
