@@ -1990,6 +1990,49 @@
           }
         }
       }
+    },
+    "/v1/webhooks/crypto_com_pay": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Crypto.com Pay payment webhook",
+        "description": "Payment events for Crypto.com Pay checkouts made with a merchant's own keys. Authenticated by the `Pay-Signature: t=<unix seconds>,v1=<hex>` header, an HMAC-SHA256 over `{t}.{raw body}` keyed by the merchant's webhook signing secret. A missing, malformed or stale header is refused before anything is looked up; the secret is chosen by the order the body names, so a delivery that names no order, or one pay-core does not hold, is acknowledged without its HMAC checked and ignored. A verified delivery is a trigger only: the payment is re-read from Crypto.com with the merchant's key and driven from that answer (succeeded → the payment succeeds; cancelled, voided or failed → the order is closed and the payment stays payable by another method).",
+        "operationId": "cryptoComPayWebhook",
+        "requestBody": {
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Acknowledged, including deliveries that name no order or one pay-core does not hold"
+          },
+          "400": {
+            "description": "The body is not a Crypto.com event"
+          },
+          "401": {
+            "description": "Signature missing or mismatched, or its timestamp is outside the accepted window"
+          },
+          "413": {
+            "description": "Body larger than 64 KiB"
+          },
+          "500": {
+            "description": "Storage, KMS or write-contention failure (Crypto.com redelivers)"
+          },
+          "502": {
+            "description": "The payment re-read from Crypto.com failed (Crypto.com redelivers)"
+          },
+          "503": {
+            "description": "Crypto.com Pay is not configured (Crypto.com redelivers)"
+          }
+        }
+      }
     }
   },
   "tags": [
@@ -2624,7 +2667,7 @@
           "expiresAt": 1718236800,
           "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
           "isFinal": false,
-          "paymentId": "pay_57a2ecc101M71707F4MWYTA02FBP94D8T3",
+          "paymentId": "pay_23a2ecc101M7W4JSEM0EW14VJJTN3H1DW6",
           "pollInMs": 1000,
           "status": "requires_action"
         }
@@ -2771,7 +2814,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_03a2ecc101M71707F8FT842EAWD0SH951C",
+          "paymentId": "pay_34a2ecc101M7W4JSEP1H78P1HT49GMNMTT",
           "status": "cancelled"
         }
       },
@@ -3671,7 +3714,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_3aa2ecc101M71707F5CTTRHGJBJV47WKAS",
+          "paymentId": "pay_88a2ecc101M7W4JSEMEY9C69PYKACFTAXB",
           "status": "cancelled"
         }
       },
