@@ -12,5 +12,8 @@ export async function APIPage({
   ...props
 }: Omit<OpenAPIPageProps, 'preloaded' | 'payload'> & { document: string }) {
   const schema = await openapi.getSchema(document);
-  return <OpenAPIPage {...props} document={document} preloaded={{ docs: { [document]: schema.bundled } }} />;
+  // `showDescription` renders each operation's description from the spec, which is off by default.
+  return (
+    <OpenAPIPage showDescription {...props} document={document} preloaded={{ docs: { [document]: schema.bundled } }} />
+  );
 }
