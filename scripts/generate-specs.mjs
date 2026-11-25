@@ -21,10 +21,54 @@ const SERVICES = [
   {
     name: 'Merchant',
     baseUrl: 'https://api.merchant.pay.walletconnect.com',
+    // Hand copy of the gateway's routes to the merchant service in WalletConnect/pay-core
+    // (terraform/pay-core/api-gateway/routes.tf). When the gateway starts forwarding another route
+    // (payouts, for example), add it here too, or the docs won't pick it up.
     isForwarded: (method, path) =>
       /^\/v1\/(merchants|refunds)(\/|$)/.test(path) || (method === 'get' && path === '/v1/payments'),
   },
 ];
+
+// Titles and descriptions for operations whose spec has none: a page without a summary is titled
+// with its method and path. Applied only while the spec still lacks them; once pay-core adds its
+// own, it wins and the script logs that the entry here can go.
+const OPERATION_TEXT = {
+  'post /v1/gateway/payment/{id}/fetch': {
+    description:
+      'Builds the actions the wallet must complete to pay with the selected payment option (`optionId`). Select each action by its `type`, not by its position in `actions`.',
+  },
+  'post /v1/gateway/payment/{id}/cancel': {
+    summary: 'Cancel a payment',
+    description:
+      'Cancels a payment from the wallet, on behalf of the user. The payment moves to `cancelled`, and the response includes the cancellation reason and time.',
+  },
+  'post /v1/gateway/payment/{id}/transition': {
+    summary: 'Simulate a status transition',
+    description:
+      'Test mode only. Moves a test payment to the `status` in the request body. This is the wallet-authenticated version of `POST /v1/payments/{id}/transition`: the wallet comes from the request credentials, so the `processing` transition takes no `wallet_id`. See [allowed status transitions](/payments/test-mode#allowed-status-transitions).',
+  },
+  'post /v1/payments/{id}/cancel': {
+    summary: 'Cancel a payment',
+    description:
+      'Cancels a payment as the merchant. The payment moves to `cancelled`, and the response includes the cancellation reason and time.',
+  },
+  'post /v1/payments/{id}/transition': {
+    summary: 'Simulate a status transition',
+    description:
+      "Test mode only. Moves a test payment to the `status` in the request body, as the dashboard's simulation actions do. Returns `400` for a live payment or a transition that isn't allowed. See [allowed status transitions](/payments/test-mode#allowed-status-transitions).",
+  },
+};
+
+function withOperationText(method, path, op) {
+  const text = OPERATION_TEXT[`${method} ${path}`];
+  if (!text) return op;
+  const missing = Object.fromEntries(Object.entries(text).filter(([field]) => !op[field]));
+  for (const field of Object.keys(text)) {
+    if (!(field in missing))
+      console.log(`${method.toUpperCase()} ${path} now has a ${field} in its spec; remove it from OPERATION_TEXT`);
+  }
+  return { ...op, ...missing };
+}
 
 const VERSION_RE = /^\d{4}-\d{2}-\d{2}(\.preview)?$/;
 
@@ -51,36 +95,53 @@ function mergeSpecs(specs, version) {
     security: [],
   };
 
-  const seenTags = new Set();
+  // Tags in the order operations first use them. Only tags used by a documented operation are kept.
+  const tags = new Map();
 
   for (const [i, spec] of specs.entries()) {
     const { isForwarded } = SERVICES[i];
+
+    // A scheme for the same credential as one from an earlier spec (the merchant spec's `apiKey` and
+    // Core's `API Key` are both the `Api-Key` header) reuses that scheme, so the reference shows one
+    // auth input per credential rather than one per spec. Only earlier specs count: Core's own
+    // schemes stay as they are, even where two of them share a header.
+    const earlierSchemes = Object.entries(merged.components.securitySchemes);
+    const schemeNames = {};
+    for (const [name, scheme] of Object.entries(spec.components?.securitySchemes || {})) {
+      const same = earlierSchemes.find(
+        ([, s]) => s.type === scheme.type && s.in === scheme.in && s.name?.toLowerCase() === scheme.name?.toLowerCase(),
+      );
+      schemeNames[name] = same ? same[0] : name;
+      if (!same) merged.components.securitySchemes[name] = scheme;
+    }
+    const renameSchemes = (security) =>
+      security.map((requirement) =>
+        Object.fromEntries(Object.entries(requirement).map(([name, scopes]) => [schemeNames[name] ?? name, scopes])),
+      );
+
     for (const [path, allMethods] of Object.entries(spec.paths || {})) {
       const methods = {};
       for (const [method, op] of Object.entries(allMethods)) {
         if (isForwarded && !isForwarded(method, path)) continue;
         if (merged.paths[path]?.[method]) throw new Error(`${method.toUpperCase()} ${path} is in more than one spec`);
         // Only the first spec's top-level security survives the merge, so each operation keeps its own.
-        methods[method] = op.security || !spec.security ? op : { ...op, security: spec.security };
+        const security = op.security ?? spec.security;
+        const documented = withOperationText(method, path, op);
+        methods[method] = security ? { ...documented, security: renameSchemes(security) } : documented;
       }
       if (Object.keys(methods).length === 0) continue;
       merged.paths[path] = { ...(merged.paths[path] || {}), ...methods };
       for (const op of Object.values(methods)) {
         for (const tagName of op.tags || []) {
-          if (!seenTags.has(tagName)) {
-            seenTags.add(tagName);
-            merged.tags.push({ name: tagName });
-          }
+          if (!tags.has(tagName)) tags.set(tagName, { name: tagName });
         }
       }
     }
 
+    // Operations only name their tags; the descriptions live in `spec.tags`. When two specs define
+    // the same tag, the first definition wins.
     for (const tag of spec.tags || []) {
-      // A filtered spec's other tags belong to operations that were left out.
-      if (!seenTags.has(tag.name) && !isForwarded) {
-        seenTags.add(tag.name);
-        merged.tags.push(tag);
-      }
+      if (tags.has(tag.name) && !tags.get(tag.name).description) tags.set(tag.name, tag);
     }
 
     for (const [name, schema] of Object.entries(spec.components?.schemas || {})) {
@@ -89,12 +150,9 @@ function mergeSpecs(specs, version) {
       }
       merged.components.schemas[name] = schema;
     }
-
-    for (const [name, scheme] of Object.entries(spec.components?.securitySchemes || {})) {
-      merged.components.securitySchemes[name] = scheme;
-    }
   }
 
+  merged.tags = [...tags.values()];
   merged.security = specs[0]?.security || [];
   return merged;
 }
