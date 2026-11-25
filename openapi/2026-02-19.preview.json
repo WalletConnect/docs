@@ -316,6 +316,8 @@
             }
           }
         },
+        "summary": "Cancel a payment",
+        "description": "Cancels a payment from the wallet, on behalf of the user. The payment moves to `cancelled`, and the response includes the cancellation reason and time.",
         "security": [
           {
             "API Key": []
@@ -681,6 +683,7 @@
             }
           }
         },
+        "description": "Builds the actions the wallet must complete to pay with the selected payment option (`optionId`). Select each action by its `type`, not by its position in `actions`.",
         "security": [
           {
             "API Key": []
@@ -1208,6 +1211,8 @@
             }
           }
         },
+        "summary": "Simulate a status transition",
+        "description": "Test mode only. Moves a test payment to the `status` in the request body. This is the wallet-authenticated version of `POST /v1/payments/{id}/transition`: the wallet comes from the request credentials, so the `processing` transition takes no `wallet_id`. See [allowed status transitions](/payments/test-mode#allowed-status-transitions).",
         "security": [
           {
             "API Key": []
@@ -1853,7 +1858,7 @@
         "description": "Retrieve paginated payments with optional filters.",
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -2152,6 +2157,8 @@
             }
           }
         },
+        "summary": "Cancel a payment",
+        "description": "Cancels a payment as the merchant. The payment moves to `cancelled`, and the response includes the cancellation reason and time.",
         "security": [
           {
             "API Key": []
@@ -2484,6 +2491,8 @@
             }
           }
         },
+        "summary": "Simulate a status transition",
+        "description": "Test mode only. Moves a test payment to the `status` in the request body, as the dashboard's simulation actions do. Returns `400` for a live payment or a transition that isn't allowed. See [allowed status transitions](/payments/test-mode#allowed-status-transitions).",
         "security": [
           {
             "API Key": []
@@ -2571,16 +2580,13 @@
             "description": "Missing headers"
           },
           "401": {
-            "description": "Signature verification failed"
+            "description": "Signature verification failed, or webhook verification is not configured or its key is unusable (Binance redelivers)"
           },
           "403": {
             "description": "Webhook addressed to another partner"
           },
           "500": {
-            "description": "Verification key/client unavailable or transient failure (Binance redelivers)"
-          },
-          "503": {
-            "description": "Webhook verification is not configured (Binance redelivers)"
+            "description": "Client unavailable or transient failure (Binance redelivers)"
           }
         },
         "security": [
@@ -2622,7 +2628,7 @@
             "description": "Missing `timestamp` or `signature` header"
           },
           "401": {
-            "description": "Signature verification failed, or the timestamp is outside the accepted window"
+            "description": "Signature verification failed, the timestamp is outside the accepted window, or webhook verification is not configured or its key is unusable (Bybit redelivers)"
           },
           "500": {
             "description": "Storage failure, write contention, or an internal invariant violation (Bybit redelivers)"
@@ -2631,7 +2637,7 @@
             "description": "The order re-query to Bybit failed (Bybit redelivers)"
           },
           "503": {
-            "description": "Webhook verification or the Bybit client is not configured, or the configured key is unusable (Bybit redelivers)"
+            "description": "The Bybit client is not configured (Bybit redelivers)"
           }
         },
         "security": [
@@ -3118,7 +3124,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -3610,7 +3616,7 @@
         "description": "Retrieve paginated payments with optional filters.",
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -4099,7 +4105,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -4608,7 +4614,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       },
@@ -4930,7 +4936,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -5294,7 +5300,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       },
@@ -5706,7 +5712,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       },
@@ -5853,7 +5859,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -6311,7 +6317,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -6631,7 +6637,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -7079,7 +7085,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -7396,7 +7402,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       },
@@ -7547,7 +7553,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -8119,7 +8125,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -8544,7 +8550,7 @@
         },
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       },
@@ -8837,7 +8843,7 @@
         ],
         "security": [
           {
-            "apiKey": []
+            "API Key": []
           }
         ]
       }
@@ -8845,16 +8851,20 @@
   },
   "tags": [
     {
-      "name": "Gateway"
+      "name": "Gateway",
+      "description": "Gateway API for wallets to fulfill payments"
     },
     {
-      "name": "Payments"
+      "name": "Payments",
+      "description": "Payment operations"
     },
     {
-      "name": "Webhooks"
+      "name": "Webhooks",
+      "description": "Inbound provider webhooks (no API key; verified per-provider)."
     },
     {
-      "name": "Refunds"
+      "name": "Refunds",
+      "description": "Refund operations for partners."
     },
     {
       "name": "Merchant Management"
@@ -9537,7 +9547,7 @@
           "expiresAt": 1718236800,
           "gatewayUrl": "https://api.pay.walletconnect.com/pay_123",
           "isFinal": false,
-          "paymentId": "pay_a0a2ecc101M7WG0ACBEX6FY72RC8M480J5",
+          "paymentId": "pay_dea2ecc101M89WVMNPFRKE36MF5RPS89MS",
           "pollInMs": 1000,
           "status": "requires_action"
         }
@@ -9684,7 +9694,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_user",
-          "paymentId": "pay_7aa2ecc101M7WG0ACDV5MZVKK7T80HRG8W",
+          "paymentId": "pay_d3a2ecc101M89WVMNQ2Z3Z16YQ43DV3T07",
           "status": "cancelled"
         }
       },
@@ -10584,7 +10594,7 @@
         "example": {
           "cancelledAt": "2025-01-14T10:30:00Z",
           "cancelledReason": "cancelled_by_merchant",
-          "paymentId": "pay_75a2ecc101M7WG0ACBSBVDW3QGXZ2QKMGK",
+          "paymentId": "pay_ffa2ecc101M89WVMNPM484PCJX5XD6652T",
           "status": "cancelled"
         }
       },
@@ -11668,12 +11678,6 @@
         "in": "header",
         "name": "App-Id",
         "description": "Public App ID for wallet authentication. When using this auth mode, the Client-Id header is also required."
-      },
-      "apiKey": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Api-Key",
-        "description": "Partner API key."
       }
     }
   },
