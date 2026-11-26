@@ -17,8 +17,8 @@ The MCP runs on **mainnet with real funds**. Every transfer and swap moves real 
 
 ## What you can do
 
-- **Check your portfolio.** "What's in my wallet on Base? Give me the USD total." Every token the wallet holds, with USD prices and values. Reads never reach your wallet, so there is nothing to approve.
-- **Send money.** "Send 10 USDC to `0x…` on Arbitrum." The server builds the transfer, the agent restates it, and you approve it in your wallet.
+- **Check your portfolio.** "What's in my wallet on Base? Give me the USD total." Every token the wallet holds, with USD prices and values, on one chain or [every chain](#read-only-chains) the wallet shared. Reads never reach your wallet, so there is nothing to approve.
+- **Send money.** "Send 10 USDC to `0x…` on BNB Chain." The server builds the transfer, the agent restates it, and you approve it in your wallet.
 - **Swap tokens.** "How much ETH would I get for 25 USDC?" then "Do it." A live Uniswap V3 quote, then an exact-amount approval and the swap, prepared as one action.
 - **Build agents that pay.** Backends and agent frameworks call the [HTTP API](#http-api) with the same tools, so an agent can propose a payment and the user signs it on their phone.
 
@@ -133,7 +133,7 @@ Two layers protect you. The server's policy blocks anything outside its limits b
 
 | Guardrail | Value |
 | --- | --- |
-| Max per transaction | 0.05 ETH · 50 USDC · 0.0005 WBTC · 0.5 SPCXON |
+| Max per transaction | 0.05 ETH · 0.1 BNB · 50 USDC · 0.0005 WBTC · 0.5 SPCXON |
 | Tokens | Only the listed assets below. A token without a cap can't be moved. |
 | Approvals | Exact amount only, and only to contracts in the protocol's manifest (the Uniswap router). Never unlimited. |
 | Swap slippage | 0.5% by default, 1% at most |
@@ -149,7 +149,7 @@ The server runs these checks in code on every transaction. Each one refuses the 
 | Check | What the server does |
 | --- | --- |
 | Input validation | Addresses must be valid `0x` addresses and are checksummed. Amounts must be positive decimal strings in whole units, parsed with the token's own decimals. Every argument is checked against the tool's schema. |
-| Chain and session | The chain must be one of the enabled chains, and a wallet must be connected on that chain. |
+| Chain and session | The chain must be one of the action chains, and a wallet must be connected on that chain. A [read-only chain](#read-only-chains) is refused with the chains that do work. |
 | Listed tokens only | A transfer, approval or swap must use a token listed for that chain. An unlisted token address is refused. |
 | Per-transaction caps | Native value and token amounts are checked against the caps, in base units. A token with no configured cap can't be moved at all. |
 | Approval spender | An approval can only name a contract from the protocol's manifest for that chain as the spender, and only for the exact amount of the trade. |
@@ -182,14 +182,35 @@ Each user has an audit log on the server. It records every action prepared, conf
 
 ## Supported chains and assets
 
-| Chain | CAIP-2 | Swaps (Uniswap V3) |
-| --- | --- | --- |
-| Base (default) | `eip155:8453` | ETH, USDC |
-| Ethereum | `eip155:1` | ETH, USDC, WBTC, SPCXON |
-| Optimism | `eip155:10` | ETH, USDC, WBTC |
-| Arbitrum | `eip155:42161` | ETH, USDC, WBTC |
+### Action chains
+
+Transfers, swaps and balances work on these chains.
+
+| Chain | CAIP-2 | Native asset | Transfers and swaps (Uniswap V3) |
+| --- | --- | --- | --- |
+| Base (default) | `eip155:8453` | ETH | ETH, USDC |
+| Ethereum | `eip155:1` | ETH | ETH, USDC, WBTC, SPCXON |
+| Optimism | `eip155:10` | ETH | ETH, USDC, WBTC |
+| Arbitrum | `eip155:42161` | ETH | ETH, USDC, WBTC |
+| BNB Chain | `eip155:56` | BNB | BNB, USDC |
 
 Tools called without a `chain` use Base. SPCXON is Ondo's tokenized SpaceX, available on Ethereum only. Swaps quote all four Uniswap fee tiers and use the best one for each trade.
+
+<Callout type="info">
+USDC on BNB Chain is Binance-Peg USDC (`0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d`), which uses **18 decimals**, not the 6 of Circle's USDC on the other chains. Amounts are always whole units, so "5 USDC" means the same on every chain; the server applies each token's own decimals.
+</Callout>
+
+### Read-only chains [#read-only-chains]
+
+`get_portfolio` also reads balances on these chains. Transfers and swaps are refused there with a message naming the chains that work.
+
+| Family | Chains |
+| --- | --- |
+| EVM | Gnosis, Unichain, Polygon, Monad, Sonic, MegaETH, Robinhood Chain, Mantle, Celo, Avalanche, Linea, Berachain, Scroll, Zora, Aurora |
+| Solana | Solana mainnet |
+| Tron | Tron mainnet: the TRX balance only, with no TRC-20 tokens (such as USDT) or USD prices yet |
+
+Your wallet shares an account for each chain it supports when you connect. Ask for your portfolio on "all" chains to read every chain the wallet shared.
 
 Any WalletConnect-compatible wallet works. Balances, prices and quotes come from the WalletConnect Blockchain API; your wallet is only ever asked to sign.
 
@@ -200,8 +221,8 @@ Any WalletConnect-compatible wallet works. Balances, prices and quotes come from
 | `wallet_connect` | Connected accounts, or a connect link with a QR code when no wallet is connected | No |
 | `wallet_status` | Accounts, wallet name, session expiry and open actions. Waits while a pairing is pending. | No |
 | `wallet_disconnect` | Ends the session and cancels queued steps | No |
-| `get_portfolio` | Every token the wallet holds on a chain, with USD prices and values | No |
-| `send_transfer` | Prepares a native or ERC-20 transfer | Yes |
+| `get_portfolio` | Every token the wallet holds on a chain, or on `all` of them, with USD prices and values | No |
+| `send_transfer` | Prepares a native (ETH, or BNB on BNB Chain) or ERC-20 transfer | Yes |
 | `swap_assets` | Which assets can be swapped on which chains | No |
 | `swap_quote` | Uniswap V3 quote between two listed assets | No |
 | `swap_execute` | Prepares an exact-amount approval and the swap as one action, checked against the chain first | Yes |
@@ -289,7 +310,7 @@ Errors are `{ error: { code, message, issues? } }`.
 
 ## Not supported yet
 
-Lending, sign-in with Ethereum (SIWE), per-user enablement of protocols, limits in USD, bridging, a local stdio server, and Solana.
+Lending, sign-in with Ethereum (SIWE), per-user enablement of protocols, limits in USD, bridging, a local stdio server, and transfers or swaps on the read-only chains, including Solana and Tron.
 
 ## FAQ
 
